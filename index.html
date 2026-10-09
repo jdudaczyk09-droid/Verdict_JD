@@ -389,7 +389,7 @@ footer{
 .sched-form{min-width:0;padding:34px;background:var(--gray-6);border-left:1px solid var(--gray-5);display:flex;flex-direction:column;gap:14px}
 .sched-label{font-size:13px;font-weight:600;color:var(--gray-3);margin-bottom:12px}
 .sched-tz{font-weight:400;color:var(--gray-4)}
-.sched-days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin-bottom:24px}
+.sched-days{display:flex;flex-wrap:wrap;gap:8px;padding:2px 2px 8px;margin-bottom:24px}
 .sched-day{flex:0 0 auto;min-width:76px;padding:10px 12px;border:1px solid var(--gray-5);border-radius:16px;background:var(--white);text-align:center;cursor:pointer;font:inherit;color:var(--black);line-height:1.2}
 .sched-day b{display:block;font-size:12px;font-weight:600;color:var(--gray-3)}
 .sched-day span{display:block;margin-top:3px;font-family:var(--font-display);font-size:19px;font-weight:700;letter-spacing:-.3px}
@@ -432,7 +432,6 @@ footer{
   .sched{grid-template-columns:minmax(0,1fr)}
   .sched-form{border-left:0;border-top:1px solid var(--gray-5)}
   .sched-pick,.sched-form,.sched-done{padding:24px 20px}
-  .sched-days{flex-wrap:wrap;overflow:visible}
 }
 </style>
 </head>
@@ -742,11 +741,15 @@ footer{
     tz: "America/New_York",      // availability below is expressed in this zone
     tzLabel: "ET",
     durationMin: 30,
-    weekdays: [1, 2, 3, 4, 5],   // 0 = Sunday ... 6 = Saturday
-    startMinutes: 12 * 60,       // first slot starts 12:00 PM
-    endMinutes: 17 * 60,         // last slot ends 5:00 PM
-    daysAhead: 21,               // how far ahead to look
-    maxDays: 7,                  // how many day buttons to show
+    // Hours he can take calls, per day of week (0 = Sunday ... 6 = Saturday),
+    // as [start, end] in minutes after midnight Eastern. Days not listed are
+    // closed. School runs weekdays, so it's weekends only.
+    hours: {
+      6: [12 * 60, 17 * 60],     // Saturday 12:00 PM - 5:00 PM ET
+      0: [11 * 60, 19 * 60]      // Sunday   11:00 AM - 7:00 PM ET
+    },
+    daysAhead: 35,               // how far ahead to look
+    maxDays: 6,                  // how many day buttons to show (three weekends)
     minNoticeHours: 24,          // no bookings sooner than this
     bookingUrl: ""               // optional instant-booking link
   };
@@ -817,10 +820,11 @@ footer{
     var days = [];
     for (var off = 0; off <= CFG.daysAhead && days.length < CFG.maxDays; off++) {
       var base = new Date(Date.UTC(today.year, today.month - 1, today.day + off));
-      if (CFG.weekdays.indexOf(base.getUTCDay()) === -1) continue;
+      var window_ = CFG.hours[base.getUTCDay()];
+      if (!window_) continue;
       var y = base.getUTCFullYear(), mo = base.getUTCMonth() + 1, d = base.getUTCDate();
       var slots = [];
-      for (var m = CFG.startMinutes; m + CFG.durationMin <= CFG.endMinutes; m += CFG.durationMin) {
+      for (var m = window_[0]; m + CFG.durationMin <= window_[1]; m += CFG.durationMin) {
         var t = zonedToUtc(y, mo, d, Math.floor(m / 60), m % 60, CFG.tz);
         if (t >= now + CFG.minNoticeHours * 3600000) slots.push(t);
       }
