@@ -23,6 +23,7 @@
      you can press or lift.
      ===================================================================== */
   :root {
+    --brand: #FFE95C;
     --paper: #FFE95C;
     --paper-deep: #F6D637;
     --paper-pale: #FFF4A8;
@@ -82,12 +83,45 @@
   }
 
   body {
+    /* Paper-derived tokens live here (not on :root) so a page can swap its sheet. */
+    --bg: var(--paper);
+    --surface-2: var(--paper-pale);
+    --surface-3: var(--paper-deep);
+    --text-dim: var(--ink-2);
+    --text-faint: var(--ink-3);
+
     min-height: 100vh;
     font-size: 16px;
     line-height: 1.5;
     background-color: var(--paper);
     background-image: linear-gradient(to bottom, transparent 31px, var(--rule) 31px);
     background-size: 100% 32px;
+    transition: background-color 0.25s;
+  }
+
+  /* ---------- Sticky-note sheets: each kind of work gets its own paper ----------
+     yellow = the round (setup, debate)   pink  = outcomes (results, progress)
+     sky    = other people (online, league)   mint = learning (learn, how it works)
+     lilac  = prep (case builder, checker)    peach = upload                        */
+  body:has(#screen-results.active), body:has(#screen-progress.active) {
+    --paper: #FFA6CB; --paper-deep: #FF86B7; --paper-pale: #FFD3E5;
+    --ink-2: #5B1A3C; --ink-3: #7D2E55; --rule: rgba(40, 70, 190, 0.3);
+  }
+  body:has(#screen-online.active), body:has(#screen-league.active) {
+    --paper: #93D5FF; --paper-deep: #62BDF7; --paper-pale: #C6E8FF;
+    --ink-2: #0C3A66; --ink-3: #1E558A; --rule: rgba(20, 60, 160, 0.34);
+  }
+  body:has(#screen-learn.active), body:has(#screen-how.active) {
+    --paper: #8EEFB4; --paper-deep: #62E297; --paper-pale: #C9F7DB;
+    --ink-2: #0F4A2A; --ink-3: #1F5F3C; --rule: rgba(20, 90, 140, 0.32);
+  }
+  body:has(#screen-casebuilder.active), body:has(#screen-casecheck.active) {
+    --paper: #CDB8FF; --paper-deep: #B197FA; --paper-pale: #E4D9FF;
+    --ink-2: #3E2575; --ink-3: #53388F; --rule: rgba(60, 40, 170, 0.3);
+  }
+  body:has(#screen-upload.active) {
+    --paper: #FFBF8A; --paper-deep: #FFA45C; --paper-pale: #FFDDBC;
+    --ink-2: #5E2D00; --ink-3: #6E3C0A; --rule: rgba(30, 80, 190, 0.3);
   }
 
   ::selection { background: var(--ink); color: var(--paper); }
@@ -104,14 +138,14 @@
   [style*="text-transform"] { text-transform: none !important; letter-spacing: normal !important; }
 
   :focus-visible { outline: 4px solid var(--pen); outline-offset: 3px; }
-  .topbar :focus-visible, .app-footer :focus-visible { outline-color: var(--paper); }
+  .topbar :focus-visible, .app-footer :focus-visible { outline-color: var(--brand); }
 
   .app { min-height: 100vh; display: flex; flex-direction: column; }
 
   /* ---------- Header: black bar, trapezoid folder tabs ---------- */
   header.topbar {
     background: #000;
-    color: var(--paper);
+    color: var(--brand);
     padding: 14px 28px 0;
     display: flex;
     flex-direction: column;
@@ -138,7 +172,7 @@
     background:
       linear-gradient(45deg, transparent 41%, var(--margin) 41% 59%, transparent 59%),
       linear-gradient(-45deg, transparent 41%, var(--margin) 41% 59%, transparent 59%),
-      var(--paper);
+      var(--brand);
     transform: rotate(-6deg);
   }
   .logo-mark::before { content: none; }
@@ -148,7 +182,7 @@
     font-variation-settings: "wdth" 88;
     font-size: 24px;
     letter-spacing: -0.01em;
-    color: var(--paper);
+    color: var(--brand);
   }
 
   .tagline { display: none; }
@@ -157,14 +191,14 @@
   #header-meta > * + * { padding-left: 18px; border-left: 2px solid rgba(255, 233, 92, 0.35); }
 
   .account-area { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; }
-  .account-name { color: var(--paper); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+  .account-name { color: var(--brand); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
   .account-name:hover { text-decoration: underline; }
-  .account-avatar { width: 28px; height: 28px; object-fit: cover; border: 2px solid var(--paper); cursor: pointer; flex-shrink: 0; background: #000; }
-  .account-avatar-fallback { display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: var(--paper); }
+  .account-avatar { width: 28px; height: 28px; object-fit: cover; border: 2px solid var(--brand); cursor: pointer; flex-shrink: 0; background: #000; }
+  .account-avatar-fallback { display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: var(--brand); }
 
   .topbar .btn {
-    background: var(--paper);
-    border-color: var(--paper);
+    background: var(--brand);
+    border-color: var(--brand);
     color: #000;
     box-shadow: 3px 3px 0 var(--margin);
     padding: 7px 14px;
@@ -181,9 +215,9 @@
     font-family: var(--font-body);
     font-size: 14px;
     font-weight: 800;
-    color: var(--paper);
+    color: var(--brand);
     padding: 6px 10px;
-    border: 2px solid var(--paper);
+    border: 2px solid var(--brand);
     background: #000;
   }
   .whisper-pill .wp-dot { display: none; }
@@ -200,9 +234,9 @@
     color: rgba(255, 233, 92, 0.6);
   }
   .afc-toggle-chip .afc-dot { display: inline-block; width: 10px; height: 10px; background: currentColor; }
-  .afc-toggle-chip.live { color: var(--paper); }
+  .afc-toggle-chip.live { color: var(--brand); }
   .afc-toggle-chip.live .afc-dot { background: var(--hl-green); }
-  .afc-toggle-chip.busy { color: var(--paper); animation: afcPulse 1s steps(2, end) infinite; }
+  .afc-toggle-chip.busy { color: var(--brand); animation: afcPulse 1s steps(2, end) infinite; }
   @keyframes afcPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
   .topnav {
@@ -1181,11 +1215,11 @@
   .mode-table td b { color: #000; }
 
   /* ---------- Footer ---------- */
-  .app-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 32px 26px; background: #000; color: var(--paper); }
-  .footer-mark { font-size: 20px; font-weight: 900; font-variation-settings: "wdth" 88; color: var(--paper); }
+  .app-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 32px 26px; background: #000; color: var(--brand); }
+  .footer-mark { font-size: 20px; font-weight: 900; font-variation-settings: "wdth" 88; color: var(--brand); }
   .footer-links { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 14px; font-weight: 600; color: rgba(255, 233, 92, 0.75); }
-  .footer-links a { color: var(--paper); text-decoration: underline; text-underline-offset: 3px; }
-  .footer-links a:hover { background: var(--paper); color: #000; text-decoration: none; }
+  .footer-links a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+  .footer-links a:hover { background: var(--brand); color: #000; text-decoration: none; }
   .footer-sep { color: rgba(255, 233, 92, 0.4); }
 
   .icon { width: 14px; height: 14px; display: inline-block; vertical-align: middle; }
