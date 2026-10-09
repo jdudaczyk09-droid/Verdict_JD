@@ -1176,6 +1176,8 @@
 
   .results-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 36px; padding-top: 28px; border-top: var(--bw) solid var(--ink); flex-wrap: wrap; }
 
+  .adv-opts { margin: 10px 0 4px; }
+  .adv-opts > summary { cursor: pointer; font-weight: 800; font-size: 14px; color: var(--ink-2); padding: 4px 0; }
   .ai-config { display: none; margin-top: 16px; padding: 16px; background: var(--paper-pale); border: 2px dashed var(--ink); }
   .ai-config.visible { display: block; }
 
@@ -1532,8 +1534,8 @@
         <span id="afc-chip" class="afc-toggle-chip" title="Auto fact-check status" style="display:none;">
           <span class="afc-dot"></span><span id="afc-chip-text">auto fact-check</span>
         </span>
-        <span id="whisper-pill" class="whisper-pill" title="Whisper transcription status" style="display:none;">
-          <span class="wp-dot"></span><span id="whisper-pill-text">whisper</span>
+        <span id="whisper-pill" class="whisper-pill" title="High-accuracy listening status" style="display:none;">
+          <span class="wp-dot"></span><span id="whisper-pill-text">high-accuracy</span>
         </span>
       </div>
     </div>
@@ -1713,6 +1715,8 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
+          <details class="adv-opts">
+          <summary data-i18n="setup.advanced">Advanced options</summary>
           <div class="field" style="margin-top:8px;">
             <label data-i18n="setup.ai.fcengine">Fact-check engine</label>
             <select id="fc-provider" onchange="onFcProviderChange()">
@@ -1727,6 +1731,7 @@
             <button class="btn" type="button" onclick="testFcConnection()" data-i18n="setup.ai.testconn">Test connection</button>
             <span id="fc-test-result" style="font-size:12px; color:var(--text-dim);"></span>
           </div>
+          </details>
           <div class="toggle-row">
             <div class="t-info">
               <div class="t-name" data-i18n="setup.ai.whisper">High-accuracy transcription</div>
@@ -2155,7 +2160,7 @@
             <div class="upload-drop-inner">
               <div class="upload-icon">⏏</div>
               <div class="upload-cta" data-i18n="upload.dropcta">Click to choose a file or drop one here</div>
-              <div class="upload-hint" data-i18n="upload.drophint">Most video and audio formats supported. We extract the audio in your browser, then send it in chunks through our server to Groq for transcription. We don't keep the audio.</div>
+              <div class="upload-hint" data-i18n="upload.drophint">Most video and audio formats supported. We pull the audio out in your browser, then send it to our transcription service. We don't keep the audio.</div>
             </div>
           </div>
           <div id="upload-file-meta" class="upload-meta" style="display:none;"></div>
@@ -2197,7 +2202,7 @@
 
         <div class="card upload-card">
           <h3 data-i18n="upload.step3">3. Run the analysis</h3>
-          <p class="upload-note" data-i18n="upload.step3note">Transcribing takes roughly 60–90 seconds per 30 minutes of audio. Scoring is paced to stay within free-tier API rate limits — roughly 20 seconds per speaker turn, so a debate with many turns can take several minutes to fully score.</p>
+          <p class="upload-note" data-i18n="upload.step3note">Transcribing takes roughly 60–90 seconds per 30 minutes of audio. Claims are checked carefully, about 20 seconds per speaker turn, so a debate with many turns can take several minutes to fully score.</p>
           <button id="upload-go" class="btn btn-primary" onclick="runUploadAnalysis()" disabled data-i18n="upload.analyse">Analyse debate</button>
           <div id="upload-progress" class="upload-progress" style="display:none;"></div>
           <div id="upload-error" class="upload-error" style="display:none;"></div>
@@ -2302,7 +2307,7 @@
       <div class="upload-wrap">
         <div class="eyebrow" data-i18n="league.eyebrow">League Dashboard</div>
         <h1 data-i18n="league.title">See how your whole league is doing.</h1>
-        <p class="upload-lead" data-i18n="league.lead">For coaches and tournament directors. Enter a league code to see aggregate stats across everyone submitting under it. Needs a Postgres database attached to this deployment — see the README.</p>
+        <p class="upload-lead" data-i18n="league.lead">For coaches and tournament directors. Enter a league code to see aggregate stats across everyone submitting under it.</p>
 
         <div class="card upload-card">
           <div class="form-grid two-col">
@@ -2439,7 +2444,7 @@
         <div class="how-section">
           <h3><span data-i18n="how.privacy.title">Privacy</span></h3>
           <p data-i18n="how.privacy.p">
-            Speech is turned into text first. By default your browser's own speech recognition does that — in Chrome and Edge it is run by Google or Microsoft, not by us. In High-accuracy mode, in Upload mode, and if your browser can't listen, short audio clips go through our server to Groq for transcription, and we don't keep them. The live checks then send only a few recent sentences and the topic to Groq — no audio and no names — and claims that look recent are looked up on Wikipedia from your browser. The AI judge and analysis do send the round's transcript and the names you entered. Nothing about a round is stored on our servers unless you sign in, enter a League code, or play an online room. If the AI service is busy, checks slow down or pause and the app keeps working in manual mode. The Privacy Policy has the full list.
+            Speech is turned into text first. By default your browser does that itself — in Chrome and Edge it's done by Google or Microsoft, not by us. In high-accuracy mode, and for uploaded files, short audio clips are sent to our transcription service, and we don't keep them. For fact-checks, only a few recent sentences and the topic go to our AI service — no audio and no names — and claims about recent events are looked up on Wikipedia. The AI judge and analysis also send the round's transcript and the names you entered. Nothing about a round is saved on our servers unless you sign in, enter a league code, or play an online room. If the AI service is busy, checks slow down or pause and you can keep scoring by hand. The Privacy Policy has every detail.
           </p>
         </div>
 
@@ -2518,7 +2523,7 @@
       <p>Fact-checks, statement labels, fallacy flags, the Respect Filter, AI judge verdicts, argument analysis, Case Checker and Case Builder output, and everything else the Service generates is produced automatically by artificial-intelligence models and <b>can be wrong, biased, incomplete, out of date, or entirely fabricated</b>. Nothing generated by the Service constitutes fact, professional advice, or an authoritative ruling of any kind. You are solely responsible for independently verifying anything before relying on it — for a real competition, for a grade, or for any other purpose. You, your coach, and your actual judges are always the final word, never the Service.</p>
       <p><b>Labels.</b> The Service sorts what is said into labels such as true, mostly true, misleading, false, inconclusive, opinion, value claim, prediction, hypothetical, case claim (Mock Trial), unverifiable, and to verify. These are an AI's best guess, not a finding. "Opinion," "unverifiable," and "inconclusive" mean the tool did not or could not decide — they are not a judgment that anything is right or wrong. The AI's knowledge ends before today's date, so it can mislabel recent events; for claims that look recent it may consult Wikipedia, which can itself be wrong, incomplete, or out of date.</p>
       <p><b>Automatic scoring.</b> While a turn is live, a confident true, mostly true, misleading, or false label can add or remove points for the speaker automatically (partial points for "mostly true" and "misleading"). Claims marked "to verify" are held back and checked at turn changes and after the round, so points can change — and the winner shown on the results page can change — after a turn has ended. In Online Debate, fallacy flags that meet the confidence threshold are also scored automatically; in a local round they are suggestions that a person accepts or ignores. Opinions, predictions, hypotheticals, case claims, and unverifiable statements are never scored. Automatic scores are tagged and can be reversed ("Wrong call?" or the undo tray). A limit on automatic checks applies to each round.</p>
-      <p><b>Availability.</b> The Service depends on third-party AI services used under free usage limits. When a limit is reached, checks may slow down, be retried, fall back to a different AI model (whose accuracy may differ), be skipped, or pause, and transcription may switch to a different method. We do not guarantee that any check will run, or run on time.</p>
+      <p><b>Availability.</b> The Service depends on outside AI services that limit how much they can be used. When they are busy, checks may slow down, be retried, switch to a backup AI (whose accuracy may differ), be skipped, or pause, and listening may switch to a different method. We do not guarantee that any check will run, or run on time.</p>
 
       <h4>4. Microphone access &amp; data collection consent</h4>
       <p>Live-transcription features request access to your device's microphone. By granting that permission and using those features, you consent to your speech being processed for the sole purpose of generating a transcript and running the fact-check, fallacy-detection, and judging features you've enabled. That processing is done by your browser's built-in speech recognition (which in many browsers, including Chrome and Edge, is run by the browser's maker and may send audio to its servers under its own policy) or — in High-accuracy mode, in Upload mode, and automatically if your browser's speech recognition is unavailable or stops working — by short audio clips sent through our server to Groq for transcription. The resulting text is then sent to Groq (and, where described in the Privacy Policy, looked up on Wikipedia) to produce fact-checks, labels, and judging. Details are in the Privacy Policy. You are responsible for what you say while the microphone is active and for obtaining any consent required from other people present or recorded. Don't use the Service to capture or process anyone's speech without their knowledge where that's required by law.</p>
@@ -2581,15 +2586,15 @@
       <h4>2. What happens to your speech and text, feature by feature</h4>
       <p><b>Live subtitles (default).</b> Your browser's built-in speech recognition listens through the microphone you allowed. In Chrome and Edge that recognition is normally performed on servers run by Google or Microsoft, under their own privacy policies; the audio does not come to us. If your browser has no speech recognition, blocks it, or it stops returning words, the app automatically switches to the High-accuracy method below and tells you.</p>
       <p><b>High-accuracy transcription, and Upload mode.</b> The app records short clips from the microphone (about 3½ seconds each; longer if the service is busy; clips with no sound are skipped), or, in Upload mode, extracts the audio from the file you choose inside your browser and cuts it into chunks of up to about 2 minutes. Each clip or chunk is sent to our server, which forwards it to Groq's speech-to-text service and returns the text. Our server does not save the audio. Your browser may apply echo cancellation, noise suppression, and automatic gain to the microphone before capture; that happens on your device.</p>
-      <p><b>Live fact-checks, labels, and fallacy flags.</b> The transcribed text is sent, through our server, to Groq: up to the 4 most recent sentences from the current speaker, up to 2 earlier sentences from the same speaker as context, and the debate topic. It does not include audio and does not include debater names. Groq returns a kind and verdict for each statement and any fallacies. If Groq's main model is at its limit, our server retries the same request with another Groq model and, if every Groq key is limited, the check fails and is retried later.</p>
+      <p><b>Live fact-checks, labels, and fallacy flags.</b> The transcribed text is sent, through our server, to Groq: up to the 4 most recent sentences from the current speaker, up to 2 earlier sentences from the same speaker as context, and the debate topic. It does not include audio and does not include debater names. Groq returns a kind and verdict for each statement and any fallacies. If the main AI is busy, our server tries a backup AI from the same provider, and if that is busy too, the check is retried a little later.</p>
       <p><b>Wikipedia lookups.</b> For claims that look recent (for example they mention 2024 or later, or "recently" or "last year"), and for claims held back for the after-round check, your browser sends the claim text directly to Wikipedia's search (run by the Wikimedia Foundation), which can see your IP address and that text. The first Wikipedia excerpts that come back are added to the request sent to Groq.</p>
       <p><b>Held-back claims.</b> Claims that need a real lookup are kept in your browser's memory during the round, verified at turn changes and after the round, and are not saved anywhere when you leave the page.</p>
-      <p><b>AI judge, argument analysis, Case Checker, Case Builder, Respect Filter (when you turn it on), and the manual fact-check box.</b> The text you type, or the transcript of your round, plus the debater names and topic you entered where the feature uses them, is sent to Groq through our server. If in Setup you choose Anthropic or OpenAI and enter your own API key, those requests go from your browser straight to that company under its terms instead; your key is kept in your browser's memory for that session and is not saved by us.</p>
+      <p><b>AI judge, argument analysis, Case Checker, Case Builder, Respect Filter (when you turn it on), and the manual fact-check box.</b> The text you type, or the transcript of your round, plus the debater names and topic you entered where the feature uses them, is sent to Groq through our server. If in Setup you choose Anthropic or OpenAI and enter your own key for that account, those requests go from your browser straight to that company under its terms instead; your key is kept in your browser's memory for that session and is not saved by us.</p>
       <p><b>What you can switch off.</b> The microphone features only run after your browser's permission prompt. You can turn off Auto fact-check in Setup, leave the Respect Filter off (its default), and not enable High-accuracy transcription. If you do, text is sent only for the features you use.</p>
 
       <h4>3. What we store, and where</h4>
       <p><b>In your browser (local storage), on your device only:</b> your language choice; that you dismissed the cookie notice; a login token, if you sign in (valid for 30 days); the code of an online room you are in, so you can rejoin; a progress log of up to 200 finished-round summaries (date, mode, topic, scores, fallacy names, judge persona); and practice history of up to 20 attempts per topic (score, counts, word count). Transcripts, claim logs, and held-back claims are not saved there. You can clear all of this in your browser settings.</p>
-      <p><b>On our servers</b> (a Postgres database hosted through Vercel, powered by Neon), only if you use these features:</p>
+      <p><b>On our servers</b> (a database hosted through Vercel and provided by Neon), only if you use these features:</p>
       <ul>
         <li><b>Account:</b> email address, a bcrypt-hashed password (never the plain password), display name, optional bio (up to 500 characters) and profile picture (a small image your browser resizes), and sign-up date. If you are signed in, each finished round's summary (date, mode, topic, scores, judge persona, fallacy names) is also stored.</li>
         <li><b>League code:</b> if you enter one in Setup, each finished round sends the code, the name of Debater A as typed, mode, topic, practice flag, judge persona, scores, and fallacy names. Anyone who has the code can see that league's data.</li>
@@ -2603,7 +2608,7 @@
       <h4>5. Services that handle your data</h4>
       <p>Each of these handles data under its own terms and privacy policy, which we don't control — including how long it keeps data.</p>
       <ul>
-        <li><b>Groq</b> (AI and speech-to-text): receives the audio clips, text, topic, and (for the judge, analysis, and similar features) names and transcripts described in section 2. We use Groq through our own account keys; the keys are never sent to your browser.</li>
+        <li><b>Groq</b> (AI and speech-to-text): receives the audio clips, text, topic, and (for the judge, analysis, and similar features) names and transcripts described in section 2. We use Groq through our own account; its access keys stay on our server and are never sent to your browser.</li>
         <li><b>Wikipedia / Wikimedia Foundation:</b> receives claim text and your IP address for the lookups in section 2.</li>
         <li><b>Your browser's speech service</b> (for example Google in Chrome, Microsoft in Edge): may receive microphone audio during default live subtitles.</li>
         <li><b>Anthropic or OpenAI:</b> only if you choose them in Setup and enter your own key.</li>
@@ -2622,7 +2627,7 @@
       <p>Local browser data can be cleared at any time through your browser settings. Account data, League submissions, and Online Debate rooms (including their transcripts) are kept until you ask us to delete them, because we do not yet delete them automatically. Email us (section 11) and we will delete your account and its round summaries, and any room or League entry you point us to. Data held by the services in section 5 follows their own retention rules.</p>
 
       <h4>9. Security</h4>
-      <p>Passwords are stored only as one-way bcrypt hashes. The site is served over HTTPS. Our Groq keys stay on the server. No online service is perfectly secure, and a League code is not a password.</p>
+      <p>Passwords are stored only as one-way bcrypt hashes. The site is served over HTTPS. Our AI service keys stay on the server. No online service is perfectly secure, and a League code is not a password.</p>
 
       <h4>10. Your choices and rights</h4>
       <p>You can request access to, correction of, or deletion of any account data we hold about you at any time. You can use the app without an account, without a League code, and without Online Debate, and you can decline the microphone permission and use the manual features.</p>
@@ -2699,7 +2704,7 @@
 
 <div id="cookie-banner" class="cookie-banner" style="display:none;">
   <div class="cookie-text" data-i18n-html="cookie.text">
-    Verdict Debate AI uses your browser's local storage — and, if you sign in, a login token — instead of ad-tracking cookies. It also loads Vercel's analytics script and Google Fonts.
+    Verdict Debate AI uses your browser's local storage — and, if you sign in, a login token — instead of ad-tracking cookies. It also uses basic site analytics and Google Fonts.
     <a href="javascript:void(0)" onclick="openPrivacyModal()">Privacy Policy</a>
   </div>
   <button class="btn btn-sm btn-primary" onclick="acceptCookieNotice()" data-i18n="cookie.gotit">Got it</button>
@@ -3047,11 +3052,11 @@ const TRANSLATIONS = {
     "header.tagline": "structured debate · live fact-check",
     "header.home": "Home", "header.homelink": "Back to the Verdict Debate AI site", "footer.home": "Home",
     "debate.engine.browser": "Listening with your browser",
-    "debate.engine.whisper": "Listening with Groq Whisper",
-    "debate.engine.fallback": "This browser can't transcribe speech on its own, so Groq Whisper is listening instead.",
-    "debate.engine.whisperfailed": "High-accuracy transcription isn't working, so your browser's speech recognition took over.",
-    "debate.engine.busy": "The speech service is busy. A few words may be missed.",
-    "debate.engine.stalled": "Your browser stopped hearing you, so Groq Whisper took over.",
+    "debate.engine.whisper": "Listening in high-accuracy mode",
+    "debate.engine.fallback": "This browser can't write down speech on its own, so we switched to high-accuracy listening.",
+    "debate.engine.whisperfailed": "High-accuracy listening isn't working right now, so we switched back to your browser's speech recognition.",
+    "debate.engine.busy": "Listening is a little slow right now. A few words may be missed.",
+    "debate.engine.stalled": "Your browser stopped hearing you, so we switched to high-accuracy listening.",
     "verdict.true": "TRUE", "verdict.mostly_true": "MOSTLY TRUE", "verdict.misleading": "MISLEADING", "verdict.false": "FALSE",
     "verdict.inconclusive": "INCONCLUSIVE", "verdict.opinion": "OPINION", "verdict.value": "VALUE CLAIM", "verdict.prediction": "PREDICTION",
     "verdict.hypothetical": "HYPOTHETICAL", "verdict.testimony": "CASE CLAIM", "verdict.unverifiable": "UNVERIFIABLE", "verdict.pending": "TO VERIFY",
@@ -3093,7 +3098,7 @@ const TRANSLATIONS = {
     "progress.lead": "Every debate you finish (live or practice) gets logged locally in this browser — no account needed. See which fallacies you keep running into and how different judge personas have scored you.",
     "league.eyebrow": "League Dashboard",
     "league.title": "See how your whole league is doing.",
-    "league.lead": "For coaches and tournament directors. Enter a league code to see aggregate stats across everyone submitting under it. Needs a Postgres database attached to this deployment — see the README.",
+    "league.lead": "For coaches and tournament directors. Enter a league code to see aggregate stats across everyone submitting under it.",
     "online.eyebrow": "Online Debate",
     "online.title": "Debate someone on another device.",
     "online.lead": "Two accounts, two devices, one shared round. There's no shared audio channel between devices yet — for crossfire or discussion phases, coordinate by call or in person; Verdict Debate AI syncs the turns, transcript, and scores between you.",
@@ -3125,8 +3130,9 @@ const TRANSLATIONS = {
     "setup.ai.autofcdesc": "Listen to each speaker in real time. The moment a factual claim comes out of someone's mouth, the screen flashes green (+fact) if it checks out or red (−wrong) if it doesn't.",
     "setup.ai.fcengine": "Fact-check engine",
     "setup.ai.fcstandard": "Standard (fast)",
-    "setup.ai.model": "Model",
-    "setup.ai.testconn": "Test connection",
+    "setup.ai.model": "Fact-checker style",
+    "setup.ai.testconn": "Check that it works",
+    "setup.advanced": "Advanced options",
     "setup.ai.whisper": "High-accuracy transcription",
     "setup.ai.whisperdesc": "A sharper listening mode for accents, technical terms, and noisy rooms — captures audio in short bursts instead of relying on your browser's built-in speech recognition.",
     "setup.ai.autofallacy": "Auto fallacy detection",
@@ -3142,9 +3148,9 @@ const TRANSLATIONS = {
     "setup.ai.engine": "AI judge engine",
     "setup.ai.enginestandard": "Standard (recommended)", "setup.ai.engineclaude": "Claude", "setup.ai.enginegpt": "GPT",
     "setup.ai.enginenone": "None — basic scoring only",
-    "setup.ai.apikey": "API key (leave blank to use the default)",
-    "setup.ai.apikeyph": "Leave blank unless you're running your own key",
-    "setup.ai.apikeynote": "Most setups never need this — the app already comes wired up. Only fill this in if you're self-hosting with your own key.",
+    "setup.ai.apikey": "Your own AI key (optional)",
+    "setup.ai.apikeyph": "Leave blank to use ours",
+    "setup.ai.apikeynote": "Most people never need this. Only add a key if you want to use your own AI account.",
 
     "debate.startturn": "Start turn", "debate.pause": "Pause", "debate.skip": "Skip turn", "debate.end": "End debate",
     "debate.undolabel": "Click any mark to undo it", "debate.clearall": "Clear all",
@@ -3184,7 +3190,7 @@ const TRANSLATIONS = {
     "upload.lead": "Drop in a video or audio file of a debate and we'll transcribe it, attribute each turn to a side, fact-check every claim, flag fallacies, and produce the same per-side breakdown the live mode gives you.",
     "upload.step1": "1. Pick a file",
     "upload.dropcta": "Click to choose a file or drop one here",
-    "upload.drophint": "Most video and audio formats supported. We extract the audio in your browser, then send it in chunks through our server to Groq for transcription. We don't keep the audio.",
+    "upload.drophint": "Most video and audio formats supported. We pull the audio out in your browser, then send it to our transcription service. We don't keep the audio.",
     "upload.step2": "2. Tell us about the debate",
     "upload.sidea": "Side A name", "upload.sideaph": "e.g. Alice",
     "upload.sideb": "Side B name", "upload.sidebph": "e.g. Bob",
@@ -3193,7 +3199,7 @@ const TRANSLATIONS = {
     "upload.lang.pt": "Portuguese", "upload.lang.nl": "Dutch", "upload.lang.ko": "Korean",
     "upload.lang.zh": "Chinese", "upload.lang.auto": "Auto-detect",
     "upload.step3": "3. Run the analysis",
-    "upload.step3note": "Transcribing takes roughly 60–90 seconds per 30 minutes of audio. Scoring is paced to stay within free-tier API rate limits — roughly 20 seconds per speaker turn, so a debate with many turns can take several minutes to fully score.",
+    "upload.step3note": "Transcribing takes roughly 60–90 seconds per 30 minutes of audio. Claims are checked carefully, about 20 seconds per speaker turn, so a debate with many turns can take several minutes to fully score.",
     "upload.analyse": "Analyse debate",
 
     "casebuilder.topic": "Topic / resolution",
@@ -3247,7 +3253,7 @@ const TRANSLATIONS = {
     "how.table.r5.f": "<b>Parliamentary</b>", "how.table.r5.s": "Government vs Opposition", "how.table.r5.st": "PMC · LOC · MG · MO · LOR · PMR. Points of information expected.",
     "how.table.r6.f": "<b>Mock Trial</b>", "how.table.r6.s": "Prosecution vs Defense", "how.table.r6.st": "Openings · direct & cross exams per witness · closings · rebuttal.",
     "how.privacy.title": "Privacy",
-    "how.privacy.p": "Speech is turned into text first. By default your browser's own speech recognition does that — in Chrome and Edge it is run by Google or Microsoft, not by us. In High-accuracy mode, in Upload mode, and if your browser can't listen, short audio clips go through our server to Groq for transcription, and we don't keep them. The live checks then send only a few recent sentences and the topic to Groq — no audio and no names — and claims that look recent are looked up on Wikipedia from your browser. The AI judge and analysis do send the round's transcript and the names you entered. Nothing about a round is stored on our servers unless you sign in, enter a League code, or play an online room. If the AI service is busy, checks slow down or pause and the app keeps working in manual mode. The Privacy Policy has the full list.",
+    "how.privacy.p": "Speech is turned into text first. By default your browser does that itself — in Chrome and Edge it's done by Google or Microsoft, not by us. In high-accuracy mode, and for uploaded files, short audio clips are sent to our transcription service, and we don't keep them. For fact-checks, only a few recent sentences and the topic go to our AI service — no audio and no names — and claims about recent events are looked up on Wikipedia. The AI judge and analysis also send the round's transcript and the names you entered. Nothing about a round is saved on our servers unless you sign in, enter a league code, or play an online room. If the AI service is busy, checks slow down or pause and you can keep scoring by hand. The Privacy Policy has every detail.",
     "how.overrule.title": "When to overrule the AI",
     "how.overrule.p": "It will get things wrong sometimes — statistics, very recent events, and anything that hinges on exact wording are where it stumbles. It's tuned to stay quiet unless it's genuinely confident, but \"genuinely confident\" still isn't \"certain.\" Watch the banner. If a call looks off, it probably is — <b>undo</b> is one click away in the tray, every time.",
     "how.backtosetup": "Back to setup",
@@ -3276,7 +3282,7 @@ const TRANSLATIONS = {
     "profile.bio": "Bio", "profile.bioph": "A sentence or two — your events, your league, whatever you want.",
     "profile.save": "Save",
 
-    "cookie.text": "Verdict Debate AI uses your browser's local storage — and, if you sign in, a login token — instead of ad-tracking cookies. It also loads Vercel's analytics script and Google Fonts.\n    <a href=\"javascript:void(0)\" onclick=\"openPrivacyModal()\">Privacy Policy</a>",
+    "cookie.text": "Verdict Debate AI uses your browser's local storage — and, if you sign in, a login token — instead of ad-tracking cookies. It also uses basic site analytics and Google Fonts.\n    <a href=\"javascript:void(0)\" onclick=\"openPrivacyModal()\">Privacy Policy</a>",
     "cookie.gotit": "Got it",
   },
   es: {
@@ -3286,11 +3292,11 @@ const TRANSLATIONS = {
     "header.tagline": "debate estructurado · verificación en vivo",
     "header.home": "Inicio", "header.homelink": "Volver al sitio de Verdict Debate AI", "footer.home": "Inicio",
     "debate.engine.browser": "Escuchando con tu navegador",
-    "debate.engine.whisper": "Escuchando con Groq Whisper",
-    "debate.engine.fallback": "Este navegador no puede transcribir voz por sí solo, así que Groq Whisper escucha en su lugar.",
-    "debate.engine.whisperfailed": "La transcripción de alta precisión no funciona, así que tomó el control el reconocimiento de voz de tu navegador.",
-    "debate.engine.busy": "El servicio de voz está ocupado. Puede que se pierdan algunas palabras.",
-    "debate.engine.stalled": "Tu navegador dejó de escucharte, así que Groq Whisper tomó el control.",
+    "debate.engine.whisper": "Escuchando en modo de alta precisión",
+    "debate.engine.fallback": "Este navegador no puede transcribir voz por sí solo, así que cambiamos a la escucha de alta precisión.",
+    "debate.engine.whisperfailed": "La escucha de alta precisión no funciona ahora mismo, así que volvimos al reconocimiento de voz de tu navegador.",
+    "debate.engine.busy": "La escucha va un poco lenta ahora. Puede que se pierdan algunas palabras.",
+    "debate.engine.stalled": "Tu navegador dejó de escucharte, así que cambiamos a la escucha de alta precisión.",
     "verdict.true": "VERDADERO", "verdict.mostly_true": "CASI CIERTO", "verdict.misleading": "ENGAÑOSO", "verdict.false": "FALSO",
     "verdict.inconclusive": "NO CONCLUYENTE", "verdict.opinion": "OPINIÓN", "verdict.value": "JUICIO DE VALOR", "verdict.prediction": "PREDICCIÓN",
     "verdict.hypothetical": "HIPOTÉTICO", "verdict.testimony": "HECHO DEL CASO", "verdict.unverifiable": "NO VERIFICABLE", "verdict.pending": "POR VERIFICAR",
@@ -3332,7 +3338,7 @@ const TRANSLATIONS = {
     "progress.lead": "Cada debate que termines (en vivo o práctica) se registra localmente en este navegador — sin necesidad de cuenta. Mira qué falacias sigues cometiendo y cómo te han calificado los distintos perfiles de juez.",
     "league.eyebrow": "Panel de liga",
     "league.title": "Mira cómo le va a toda tu liga.",
-    "league.lead": "Para entrenadores y directores de torneo. Ingresa un código de liga para ver estadísticas agregadas de todos los que envían resultados con ese código. Requiere una base de datos Postgres conectada a este despliegue — consulta el README.",
+    "league.lead": "Para entrenadores y directores de torneo. Ingresa un código de liga para ver estadísticas agregadas de todos los que envían resultados con ese código.",
     "online.eyebrow": "Debate en línea",
     "online.title": "Debate con alguien en otro dispositivo.",
     "online.lead": "Dos cuentas, dos dispositivos, una ronda compartida. Todavía no hay un canal de audio compartido entre dispositivos — para las fases de crossfire o discusión, coordínense por llamada o en persona; Verdict Debate AI sincroniza los turnos, la transcripción y los puntajes entre ustedes.",
@@ -3364,8 +3370,9 @@ const TRANSLATIONS = {
     "setup.ai.autofcdesc": "Escucha a cada orador en tiempo real. En el momento en que sale una afirmación fáctica de la boca de alguien, la pantalla destella en verde (+fact) si es correcta o en rojo (−wrong) si no lo es.",
     "setup.ai.fcengine": "Motor de verificación de datos",
     "setup.ai.fcstandard": "Estándar (rápido)",
-    "setup.ai.model": "Modelo",
-    "setup.ai.testconn": "Probar conexión",
+    "setup.ai.model": "Estilo del verificador",
+    "setup.ai.testconn": "Comprobar que funciona",
+    "setup.advanced": "Opciones avanzadas",
     "setup.ai.whisper": "Transcripción de alta precisión",
     "setup.ai.whisperdesc": "Un modo de escucha más preciso para acentos, términos técnicos y salas ruidosas — captura audio en ráfagas cortas en lugar de depender del reconocimiento de voz integrado de tu navegador.",
     "setup.ai.autofallacy": "Detección automática de falacias",
@@ -3381,9 +3388,9 @@ const TRANSLATIONS = {
     "setup.ai.engine": "Motor del juez de IA",
     "setup.ai.enginestandard": "Estándar (recomendado)", "setup.ai.engineclaude": "Claude", "setup.ai.enginegpt": "GPT",
     "setup.ai.enginenone": "Ninguno — solo puntuación básica",
-    "setup.ai.apikey": "Clave de API (déjalo en blanco para usar la predeterminada)",
-    "setup.ai.apikeyph": "Déjalo en blanco a menos que uses tu propia clave",
-    "setup.ai.apikeynote": "La mayoría de las configuraciones nunca necesitan esto — la app ya viene lista para usar. Complétalo solo si estás autoalojando la app con tu propia clave.",
+    "setup.ai.apikey": "Tu propia clave de IA (opcional)",
+    "setup.ai.apikeyph": "Déjalo en blanco para usar la nuestra",
+    "setup.ai.apikeynote": "La mayoría de las personas no lo necesita. Añade una clave solo si quieres usar tu propia cuenta de IA.",
 
     "debate.startturn": "Iniciar turno", "debate.pause": "Pausar", "debate.skip": "Saltar turno", "debate.end": "Terminar debate",
     "debate.undolabel": "Haz clic en una marca para deshacerla", "debate.clearall": "Borrar todo",
@@ -3423,7 +3430,7 @@ const TRANSLATIONS = {
     "upload.lead": "Sube un archivo de video o audio de un debate y lo transcribiremos, atribuiremos cada turno a un lado, verificaremos cada afirmación, marcaremos falacias y produciremos el mismo desglose por lado que ofrece el modo en vivo.",
     "upload.step1": "1. Elige un archivo",
     "upload.dropcta": "Haz clic para elegir un archivo o suéltalo aquí",
-    "upload.drophint": "Se admiten la mayoría de formatos de video y audio. Extraemos el audio en tu navegador y lo enviamos por partes, a través de nuestro servidor, a Groq para transcribirlo. No conservamos el audio.",
+    "upload.drophint": "Se admiten la mayoría de formatos de video y audio. Sacamos el audio en tu navegador y lo enviamos a nuestro servicio de transcripción. No conservamos el audio.",
     "upload.step2": "2. Cuéntanos sobre el debate",
     "upload.sidea": "Nombre del lado A", "upload.sideaph": "p. ej. Alicia",
     "upload.sideb": "Nombre del lado B", "upload.sidebph": "p. ej. Roberto",
@@ -3432,7 +3439,7 @@ const TRANSLATIONS = {
     "upload.lang.pt": "Portugués", "upload.lang.nl": "Neerlandés", "upload.lang.ko": "Coreano",
     "upload.lang.zh": "Chino", "upload.lang.auto": "Detección automática",
     "upload.step3": "3. Ejecuta el análisis",
-    "upload.step3note": "La transcripción tarda entre 60 y 90 segundos por cada 30 minutos de audio. La puntuación se ajusta para respetar los límites de la API gratuita — unos 20 segundos por turno de intervención, así que un debate con muchos turnos puede tardar varios minutos en puntuarse por completo.",
+    "upload.step3note": "La transcripción tarda entre 60 y 90 segundos por cada 30 minutos de audio. Las afirmaciones se revisan con cuidado, unos 20 segundos por turno de orador, así que un debate con muchos turnos puede tardar varios minutos en puntuarse por completo.",
     "upload.analyse": "Analizar debate",
 
     "casebuilder.topic": "Tema / resolución",
@@ -3486,7 +3493,7 @@ const TRANSLATIONS = {
     "how.table.r5.f": "<b>Parliamentary</b>", "how.table.r5.s": "Gobierno vs Oposición", "how.table.r5.st": "PMC · LOC · MG · MO · LOR · PMR. Se esperan puntos de información.",
     "how.table.r6.f": "<b>Mock Trial</b>", "how.table.r6.s": "Fiscalía vs Defensa", "how.table.r6.st": "Aperturas · interrogatorio directo y contrainterrogatorio por testigo · cierres · réplica.",
     "how.privacy.title": "Privacidad",
-    "how.privacy.p": "Primero el habla se convierte en texto. Por defecto lo hace el reconocimiento de voz de tu propio navegador — en Chrome y Edge lo ejecuta Google o Microsoft, no nosotros. En el modo de alta precisión, en el modo de carga y si tu navegador no puede escuchar, breves clips de audio pasan por nuestro servidor hacia Groq para transcribirse, y no los conservamos. Las verificaciones en vivo envían a Groq solo unas pocas frases recientes y el tema — sin audio ni nombres — y las afirmaciones que parecen recientes se consultan en Wikipedia desde tu navegador. El juez de IA y el análisis sí envían la transcripción de la ronda y los nombres que escribiste. Nada de una ronda se guarda en nuestros servidores a menos que inicies sesión, uses un código de liga o juegues una sala en línea. Si el servicio de IA está ocupado, las verificaciones se vuelven más lentas o se pausan y la app sigue funcionando en modo manual. La Política de privacidad tiene la lista completa.",
+    "how.privacy.p": "Primero el habla se convierte en texto. Por defecto lo hace tu propio navegador — en Chrome y Edge lo hace Google o Microsoft, no nosotros. En el modo de alta precisión, y con los archivos que subes, se envían clips cortos de audio a nuestro servicio de transcripción, y no los conservamos. Para verificar datos, solo unas pocas frases recientes y el tema van a nuestro servicio de IA — sin audio ni nombres — y las afirmaciones sobre hechos recientes se consultan en Wikipedia. El juez de IA y el análisis también envían la transcripción de la ronda y los nombres que escribiste. Nada de una ronda se guarda en nuestros servidores a menos que inicies sesión, uses un código de liga o juegues una sala en línea. Si el servicio de IA está ocupado, las verificaciones se vuelven más lentas o se pausan y puedes seguir puntuando a mano. La Política de privacidad tiene todos los detalles.",
     "how.overrule.title": "Cuándo anular a la IA",
     "how.overrule.p": "A veces se equivocará — las estadísticas, los eventos muy recientes y todo lo que dependa de la redacción exacta son donde más tropieza. Está calibrado para quedarse callado a menos que esté genuinamente seguro, pero \"genuinamente seguro\" todavía no es \"certeza\". Presta atención al banner. Si una decisión parece incorrecta, probablemente lo sea — <b>deshacer</b> está a un clic de distancia en la bandeja, siempre.",
     "how.backtosetup": "Volver a configuración",
@@ -3515,7 +3522,7 @@ const TRANSLATIONS = {
     "profile.bio": "Biografía", "profile.bioph": "Una o dos frases — tus eventos, tu liga, lo que quieras.",
     "profile.save": "Guardar",
 
-    "cookie.text": "Verdict Debate AI usa el almacenamiento local de tu navegador — y, si inicias sesión, un token de acceso — en lugar de cookies de rastreo publicitario. También carga el script de analíticas de Vercel y Google Fonts.\n    <a href=\"javascript:void(0)\" onclick=\"openPrivacyModal()\">Política de privacidad</a>",
+    "cookie.text": "Verdict Debate AI usa el almacenamiento local de tu navegador — y, si inicias sesión, un token de acceso — en lugar de cookies de rastreo publicitario. También usa analíticas básicas del sitio y Google Fonts.\n    <a href=\"javascript:void(0)\" onclick=\"openPrivacyModal()\">Política de privacidad</a>",
     "cookie.gotit": "Entendido",
   },
 };
@@ -3781,7 +3788,7 @@ function init() {
     const note = document.createElement("div");
     note.className = "note";
     note.style.color = "var(--yellow)";
-    note.textContent = "No API key configured locally and proxy mode is off — auto fact-check disabled.";
+    note.textContent = "Auto fact-check isn't available right now.";
     toggleEl?.closest(".toggle-row")?.appendChild(note);
   }
 
@@ -3798,7 +3805,7 @@ function init() {
       const note = document.createElement("div");
       note.className = "note";
       note.style.color = "var(--yellow)";
-      note.textContent = "No GROQ_API_KEY locally and proxy mode is off — Whisper disabled.";
+      note.textContent = "High-accuracy listening isn't available right now.";
       whisperEl.closest(".toggle-row")?.appendChild(note);
     }
   }
@@ -4604,7 +4611,7 @@ async function runCaseCheck() {
   }
   const cfg = window.APP_CONFIG || {};
   if (!fcKey() && !cfg.PROXY_MODE) {
-    errEl.textContent = "Case Checker needs GROQ_API_KEY in config.js/config.local.js, or a deployed Vercel proxy.";
+    errEl.textContent = "The Case Checker isn't available right now. Please try again later.";
     errEl.style.display = "";
     return;
   }
@@ -4616,7 +4623,7 @@ async function runCaseCheck() {
     renderCaseCheckResults(raw);
   } catch (e) {
     resEl.innerHTML = "";
-    errEl.textContent = "Check failed: " + (e.message || e);
+    errEl.textContent = "Couldn't check your case. " + friendlyError(e);
     errEl.style.display = "";
   } finally {
     btn.disabled = false;
@@ -4729,7 +4736,7 @@ async function runCaseBuilder() {
   }
   const cfg = window.APP_CONFIG || {};
   if (!fcKey() && !cfg.PROXY_MODE) {
-    errEl.textContent = "Case Builder needs GROQ_API_KEY in config.js/config.local.js, or a deployed Vercel proxy.";
+    errEl.textContent = "The Case Builder isn't available right now. Please try again later.";
     errEl.style.display = "";
     return;
   }
@@ -4746,7 +4753,7 @@ async function runCaseBuilder() {
     renderCaseBuilderResults(raw, topic);
   } catch (e) {
     resEl.innerHTML = "";
-    errEl.textContent = "Build failed: " + (e.message || e);
+    errEl.textContent = "Couldn't build that case. " + friendlyError(e);
     errEl.style.display = "";
   } finally {
     btn.disabled = false;
@@ -4892,7 +4899,7 @@ async function submitAuth() {
     document.getElementById("auth-password").value = "";
     document.getElementById("auth-name").value = "";
   } catch (e) {
-    errEl.textContent = e.message || String(e);
+    errEl.textContent = friendlyError(e);
     errEl.style.display = "";
   } finally {
     btn.disabled = false;
@@ -5014,7 +5021,7 @@ async function saveProfile() {
     closeProfileModal();
     toast("Profile updated.", "success");
   } catch (e) {
-    errEl.textContent = e.message || String(e);
+    errEl.textContent = friendlyError(e);
     errEl.style.display = "";
   } finally {
     btn.disabled = false;
@@ -5089,7 +5096,7 @@ async function hostOnlineRoom() {
     startOnlinePolling();
     renderOnlineScreen();
   } catch (e) {
-    errEl.textContent = e.message || String(e);
+    errEl.textContent = friendlyError(e);
     errEl.style.display = "";
   }
 }
@@ -5119,7 +5126,7 @@ async function joinOnlineRoom() {
     startOnlinePolling();
     renderOnlineScreen();
   } catch (e) {
-    errEl.textContent = e.message || String(e);
+    errEl.textContent = friendlyError(e);
     errEl.style.display = "";
   }
 }
@@ -5226,7 +5233,7 @@ async function startOnlineTurn() {
     await onlineRoomAction({ action: "start_turn" });
     startOnlineMic();
   } catch (e) {
-    toast("Couldn't start turn: " + (e.message || e), "error");
+    toast("Couldn't start the turn. " + friendlyError(e), "error");
   }
 }
 
@@ -5342,7 +5349,7 @@ async function runOnlineJudge() {
     container.innerHTML = "";
     container.appendChild(renderVerdictCard("substance", verdict.winner, verdict.text, persona?.name));
   } catch (e) {
-    container.innerHTML = `<div class="verdict-card"><div class="verdict-text">Judge failed: ${escapeHtml(e.message || String(e))}</div></div>`;
+    container.innerHTML = `<div class="verdict-card"><div class="verdict-text">The AI judge couldn't finish. ${escapeHtml(friendlyError(e))}</div></div>`;
   }
 }
 
@@ -5410,7 +5417,7 @@ async function pauseOnlineTurn() {
     await onlineRoomAction({ action: "pause_turn" });
     stopOnlineMic();
   } catch (e) {
-    toast("Couldn't pause: " + (e.message || e), "error");
+    toast("Couldn't pause. " + friendlyError(e), "error");
   }
 }
 
@@ -5433,7 +5440,7 @@ async function endOnlineTurn() {
     });
     if (next.ended) toast("Debate complete.", "success");
   } catch (e) {
-    toast("Couldn't advance the turn: " + (e.message || e), "error");
+    toast("Couldn't move to the next turn. " + friendlyError(e), "error");
   }
 }
 
@@ -5449,7 +5456,7 @@ async function scoreOnline(side, type, delta, label) {
   try {
     await onlineRoomAction({ action: "score", side, delta, label: label || type });
   } catch (e) {
-    toast("Couldn't score that: " + (e.message || e), "error");
+    toast("Couldn't score that. " + friendlyError(e), "error");
   }
 }
 
@@ -5460,7 +5467,7 @@ async function endOnlineDebateNow() {
     await onlineRoomAction({ action: "end" });
     toast("Debate ended.", "warn");
   } catch (e) {
-    toast("Couldn't end debate: " + (e.message || e), "error");
+    toast("Couldn't end the debate. " + friendlyError(e), "error");
   }
 }
 
@@ -5671,7 +5678,7 @@ async function loadAccountStats() {
         <div class="ph-list">${recentRows}</div>
       </div>`;
   } catch (e) {
-    wrap.innerHTML = `<div class="fc-empty">Couldn't load your account stats: ${escapeHtml(e.message || String(e))}</div>`;
+    wrap.innerHTML = `<div class="fc-empty">Couldn't load your account stats. ${escapeHtml(friendlyError(e))}</div>`;
   }
 }
 
@@ -5818,7 +5825,7 @@ async function loadLeagueDashboard() {
     renderLeagueDashboard(data);
   } catch (e) {
     resEl.innerHTML = "";
-    errEl.textContent = "Couldn't load dashboard: " + (e.message || e);
+    errEl.textContent = "Couldn't load the dashboard. " + friendlyError(e);
     errEl.style.display = "";
   } finally {
     btn.disabled = false;
@@ -5912,7 +5919,8 @@ function initSpeechRecognition() {
       state.recog = null;
       if (state.timerRunning) startWhisper();
     }
-    else if (e.error !== "no-speech" && e.error !== "aborted") toast("Speech error: " + e.error, "error");
+    else if (e.error === "audio-capture") toast("We can't find a working microphone.", "error");
+    else if (e.error !== "no-speech" && e.error !== "aborted") toast("Your browser had trouble listening. Try starting the turn again.", "error");
   };
   r.onend = () => {
     // Chrome ends a session after a silence gap; restart it, and retry if the
@@ -6015,12 +6023,12 @@ function setWhisperPill(stateName) {
   const txt = document.getElementById("whisper-pill-text");
   if (stateName === "recording") {
     pill.classList.add("recording");
-    if (txt) txt.textContent = "whisper · listening";
+    if (txt) txt.textContent = "high-accuracy · listening";
   } else if (stateName === "uploading") {
     pill.classList.add("uploading");
-    if (txt) txt.textContent = "whisper · transcribing";
+    if (txt) txt.textContent = "high-accuracy · writing it down";
   } else if (txt) {
-    txt.textContent = "whisper";
+    txt.textContent = "high-accuracy";
   }
 }
 
@@ -6095,11 +6103,11 @@ async function startWhisper() {
   if (state.whisperActive || state.whisperStarting) return;
   const cfg = window.APP_CONFIG || {};
   if (!cfg.GROQ_API_KEY && !cfg.PROXY_MODE) {
-    toast("Whisper needs GROQ_API_KEY in config.js or a deployed Vercel proxy.", "error");
+    toast("High-accuracy listening isn't available right now.", "error");
     return;
   }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined") {
-    toast("Browser doesn't support MediaRecorder. Falling back to webkit speech.", "warn");
+    toast("This browser can't record audio, so we're using its built-in speech recognition instead.", "warn");
     state.useWhisper = false;
     startSpeech();
     return;
@@ -6128,7 +6136,7 @@ async function startWhisper() {
     if (/permission|denied|not allowed/i.test(msg)) {
       toast("Microphone access denied.", "error");
     } else {
-      toast("Couldn't start Whisper: " + msg, "error");
+      toast("Couldn't start high-accuracy listening. Using your browser's speech recognition instead.", "error");
     }
     state.useWhisper = false;
     const cb = document.getElementById("use-whisper");
@@ -6147,7 +6155,7 @@ function startWhisperSegment() {
   try {
     rec = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
   } catch (e) {
-    toast("Recorder error: " + (e.message || e), "error");
+    toast("Something went wrong with the microphone. Try starting the turn again.", "error");
     stopWhisper();
     return;
   }
@@ -6159,7 +6167,7 @@ function startWhisperSegment() {
   state.whisperSegLoud = !state.whisperMeter; // no meter -> can't tell silence, so send everything
   rec.onerror = (e) => {
     console.warn("Whisper recorder error:", e);
-    toast("Recorder error: " + (e?.error?.name || "unknown"), "error");
+    toast("Something went wrong with the microphone. Try starting the turn again.", "error");
     stopWhisper();
   };
   rec.start();
@@ -6826,7 +6834,7 @@ async function runUploadAnalysis() {
     if (typeof recordDebateSummary === "function") recordDebateSummary();
     if (typeof maybeRunAIJudges === "function") maybeRunAIJudges();
   } catch (e) {
-    showUploadError(`Analysis failed: ${e.message || e}`);
+    showUploadError(`We couldn't finish analysing that file. ${friendlyError(e)}`);
     console.warn("Upload analysis failed:", e);
   } finally {
     goBtn.disabled = false;
@@ -6892,8 +6900,8 @@ function copyTranscript() {
 
 const FC_MODELS = {
   groq: [
-    { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B (recommended)" },
-    { id: "openai/gpt-oss-20b",  label: "GPT-OSS 20B (fastest)" }
+    { id: "openai/gpt-oss-120b", label: "Most accurate (recommended)" },
+    { id: "openai/gpt-oss-20b",  label: "Fastest" }
   ]
 };
 
@@ -6938,18 +6946,16 @@ function onFcProviderChange() {
    can tell whether it's an auth problem, a model problem, or a network one. */
 async function testFcConnection() {
   const out = document.getElementById("fc-test-result");
-  const provider = fcProvider();
   const key = fcKey();
-  const model = fcModel();
   const cfg = window.APP_CONFIG || {};
   const useProxy = !key && !!cfg.PROXY_MODE;
   if (!key && !useProxy) {
     out.style.color = "var(--red)";
-    out.textContent = `No ${provider.toUpperCase()} API key found — paste one in the API key field, or deploy with the Vercel proxy enabled.`;
+    out.textContent = "Fact-checking isn't set up here.";
     return;
   }
   out.style.color = "var(--text-dim)";
-  out.textContent = `Calling ${provider} · ${model}${useProxy ? " (via proxy)" : ""}…`;
+  out.textContent = "Checking…";
   try {
     const url = useProxy ? "/api/groq-chat" : "https://api.groq.com/openai/v1/chat/completions";
     const headers = useProxy
@@ -6959,7 +6965,7 @@ async function testFcConnection() {
       method: "POST",
       headers,
       body: JSON.stringify({
-        model,
+        model: fcModel(),
         messages: [{ role: "user", content: "Reply with the single word: ok" }],
         temperature: 0,
         max_tokens: 8
@@ -6968,35 +6974,15 @@ async function testFcConnection() {
     const text = await resp.text();
     if (resp.ok) {
       out.style.color = "var(--green)";
-      out.textContent = `✓ ${provider} · ${model} is working. You're all set.`;
+      out.textContent = "✓ Fact-checking is working. You're all set.";
       return;
     }
-    let parsed;
-    try { parsed = JSON.parse(text); } catch (_) {}
-    const detail = parsed?.error?.message || text.slice(0, 400) || "(no body)";
-    const statusName = parsed?.error?.status || parsed?.error?.type || "";
     out.style.color = "var(--red)";
-    out.innerHTML =
-      `✗ ${resp.status} ${statusName || ""} — ${escapeHtml(detail)}` +
-      fcFixHint(provider, resp.status, detail);
+    out.textContent = "✗ " + friendlyError(new Error(`${resp.status}: ${text.slice(0, 200)}`));
   } catch (e) {
     out.style.color = "var(--red)";
-    out.textContent = "✗ Network error: " + (e.message || e);
+    out.textContent = "✗ " + friendlyError(e);
   }
-}
-
-function fcFixHint(provider, status, detail) {
-  const d = (detail || "").toLowerCase();
-  if (status === 401) {
-    return `<br><span style="color:var(--text-dim)">→ That key was rejected. If you're self-hosting, generate a fresh one at <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> and update your local config.</span>`;
-  }
-  if (status === 404 || d.includes("model")) {
-    return `<br><span style="color:var(--text-dim)">→ That model isn't available right now. Try a different one from the dropdown.</span>`;
-  }
-  if (status === 429) {
-    return `<br><span style="color:var(--text-dim)">→ Too many checks too fast — wait a moment and try again, or pick a faster model from the dropdown.</span>`;
-  }
-  return "";
 }
 
 function updateAfcChip() {
@@ -7083,6 +7069,24 @@ function resetFactCheckBatch(batch) {
   batch.timer = null;
   batch.pending = [];
   batch.extra = Math.min(batch.extra || 0, 6000); // keep some back-off memory across turns, don't punish forever
+}
+
+/* Turn any raw error (HTTP codes, JSON parse failures, provider names) into one
+   plain sentence for people. The raw text still goes to the console. Messages
+   our own server already wrote in plain language pass through unchanged. */
+function friendlyError(e) {
+  const raw = String((e && e.message) || e || "");
+  console.warn("[error]", raw);
+  const m = raw.toLowerCase();
+  if (/budget|reached its limit/.test(m)) return "Auto fact-check has reached its limit for this round. You can keep scoring by hand.";
+  if (/\b429\b|rate limit|too many requests|busy/.test(m)) return "The AI helper is really busy right now. Give it a few seconds and try again.";
+  if (/\b(401|403)\b|api key|invalid key|no groq key|not configured|isn't available|needs groq|proxy/.test(m)) return "The AI helper isn't available right now. Please try again later.";
+  if (/failed to fetch|networkerror|load failed|network error|offline|aborted/.test(m)) return "Couldn't connect. Check your internet and try again.";
+  if (/no json|json|unexpected (end|token)|max completion|truncat|parse/.test(m)) return "The AI's answer came back garbled. Please try again.";
+  if (/\b(500|502|503|504)\b|upstream|timed? ?out|database|deployment/.test(m)) return "Something went wrong on our side. Please try again in a moment.";
+  // already plain? (our own server messages are short sentences)
+  if (raw && raw.length <= 140 && !/[{}<>]|error:|exception|status|\bhttp/i.test(raw)) return raw;
+  return "Something went wrong. Please try again.";
 }
 
 /* A hiccup worth retrying (busy, timeout, bad output) vs. a real problem
@@ -8030,29 +8034,21 @@ async function runOneFactCheck(sentence, side, opts) {
     const msg = String(e.message || e);
     console.warn("Auto fact-check failed:", msg);
     if (isTransientCheckError(msg)) return "retry"; // stay on, back off, try again
-    // Surface the REAL error in the banner so the user can diagnose.
-    const m = msg.match(/(Groq) (\d{3}):\s*(.*)/s);
-    const providerName = "AI check";
-    const status = m ? m[2] : "";
-    const body = m ? m[3] : msg;
-    let detail = body;
-    try {
-      const j = JSON.parse(body);
-      detail = j?.error?.message || j?.error?.type || body;
-    } catch (_) {}
+    // Only a real problem reaches here (a busy service is retried above). Say so in plain words.
+    const plain = friendlyError(e);
     const banner = document.getElementById("afc-banner");
     if (banner) {
       banner.className = banner.className.replace(/\bverdict-\S+/g, "").trim();
-      banner.classList.add("verdict-false");
-      document.getElementById("afc-verdict").textContent = status ? "error " + status : "error";
-      document.getElementById("afc-claim").textContent = `${providerName} call failed`;
-      document.getElementById("afc-exp").textContent = (detail || "").slice(0, 300);
+      banner.classList.add("verdict-inconclusive");
+      document.getElementById("afc-verdict").textContent = "paused";
+      document.getElementById("afc-claim").textContent = "Auto fact-check paused";
+      document.getElementById("afc-exp").textContent = plain + " You can keep scoring by hand.";
       document.getElementById("afc-side").textContent = "";
       banner.classList.add("visible");
       clearTimeout(showAfcBanner._t);
       showAfcBanner._t = setTimeout(() => banner.classList.remove("visible"), 7000);
     }
-    toast(`${providerName} error — see banner for details. Hit 'Test connection' on setup.`, "error");
+    toast("Auto fact-check paused. You can keep scoring by hand.", "warn");
     // Pause auto-FC so we don't spam errors every sentence
     state.autoFactCheck = false;
     updateAfcChip();
@@ -8464,7 +8460,7 @@ async function factCheckQuery(q) {
           { auto: true, source: providerName + " (search)", claim: top.claim, explanation: top.explanation, citation: top.citation, fraction });
       }
     } catch (e) {
-      html += `<div class="fc-empty" style="margin-bottom:10px;">${providerName} lookup failed: ${escapeHtml(e.message || "unknown error")}</div>`;
+      html += `<div class="fc-empty" style="margin-bottom:10px;">Couldn't look that up. ${escapeHtml(friendlyError(e))}</div>`;
     }
   }
 
@@ -8707,7 +8703,7 @@ async function maybeRunAIJudges() {
       const verdict = await runSubstanceJudge(state.judgePersona);
       card.replaceWith(renderVerdictCard("substance", verdict.winner, verdict.text, persona?.name));
     } catch (e) {
-      card.replaceWith(renderVerdictCard("substance", "Error", "Analysis failed: " + (e.message || e), persona?.name));
+      card.replaceWith(renderVerdictCard("substance", "Error", "We couldn't finish the analysis. " + friendlyError(e), persona?.name));
     }
   }
 }
@@ -8933,7 +8929,7 @@ async function runComparisonJudge(personaKey) {
     const verdict = await runSubstanceJudge(personaKey);
     card.replaceWith(renderVerdictCard("substance", verdict.winner, verdict.text, persona.name));
   } catch (e) {
-    card.replaceWith(renderVerdictCard("substance", "Error", "Analysis failed: " + (e.message || e), persona.name));
+    card.replaceWith(renderVerdictCard("substance", "Error", "We couldn't finish the analysis. " + friendlyError(e), persona.name));
   }
 }
 
@@ -9009,7 +9005,7 @@ async function runArgumentAnalysis() {
     const raw = await groqArgumentAnalysis(transcriptText, state.nameA, state.nameB);
     renderArgumentAnalysis(raw);
   } catch (e) {
-    container.innerHTML = `<div class="verdict-card"><div class="verdict-text">Analysis failed: ${escapeHtml(e.message || String(e))}</div></div>`;
+    container.innerHTML = `<div class="verdict-card"><div class="verdict-text">We couldn't finish the analysis. ${escapeHtml(friendlyError(e))}</div></div>`;
   }
 }
 

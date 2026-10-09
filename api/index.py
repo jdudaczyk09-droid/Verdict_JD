@@ -56,9 +56,14 @@ GROQ_WHISPER_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
 TOKEN_TTL_DAYS = 30
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
-DB_ERROR = {"error": "Couldn't reach the database. Make sure a Postgres database is attached in Vercel's Storage tab — if it already is, it may just be waking up from being idle; try again in a few seconds."}
-NO_KEY_ERROR = {"error": "No Groq API key configured on the server. Add GROQ_API_KEY (or GROQ_API_KEYS for a rotating pool) in Vercel → Settings → Environment Variables."}
-NO_JWT_ERROR = {"error": "JWT_SECRET env var is not set on the server. Add a long random string in Vercel → Settings → Environment Variables."}
+# User-facing messages are plain language; the technical reason travels in "detail"
+# (not shown in the app) so whoever runs the deployment can still diagnose it.
+DB_ERROR = {"error": "We couldn't load your account data just now. Please try again in a few seconds.",
+            "detail": "Couldn't reach the database. Make sure a Postgres database is attached in Vercel's Storage tab; if it already is, it may be waking up from being idle."}
+NO_KEY_ERROR = {"error": "The AI helper isn't available right now. Please try again later.",
+                "detail": "No Groq API key configured on the server. Add Verdict_1.. (or GROQ_API_KEYS / GROQ_API_KEY) in Vercel -> Settings -> Environment Variables."}
+NO_JWT_ERROR = {"error": "Signing in isn't available right now. Please try again later.",
+                "detail": "JWT_SECRET env var is not set on the server. Add a long random string in Vercel -> Settings -> Environment Variables."}
 NOT_SIGNED_IN = {"error": "Not signed in."}
 
 
@@ -256,7 +261,7 @@ def groq_chat():
         models = [requested] + (FALLBACK_CHAT_MODELS if requested == DEFAULT_CHAT_MODEL else [])
         upstream = groq_post(GROQ_CHAT_URL, keys, body, content_type, 40, models)
     except Exception as e:
-        return jsonify({"error": "Upstream error: " + str(e)}), 502
+        return jsonify({"error": "The AI service didn't respond. Please try again.", "detail": "Upstream error: " + str(e)}), 502
 
     return Response(
         upstream.content,
@@ -283,7 +288,7 @@ def groq_whisper():
     try:
         upstream = groq_post(GROQ_WHISPER_URL, keys, body, content_type, 120)
     except Exception as e:
-        return jsonify({"error": "Upstream error: " + str(e)}), 502
+        return jsonify({"error": "The AI service didn't respond. Please try again.", "detail": "Upstream error: " + str(e)}), 502
 
     return Response(
         upstream.content,
@@ -352,7 +357,7 @@ def league_submit():
             """, (league_code, student_name, mode, topic, practice_mode, judge_persona, score_a, score_b, json.dumps(fallacy_names)))
         return jsonify({"ok": True})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -415,7 +420,7 @@ def league_stats():
             "recent": recent,
         })
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -497,7 +502,7 @@ def auth_signup():
         token = sign_token(row[0], row[1])
         return jsonify({"token": token, "user": public_user(row)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -533,7 +538,7 @@ def auth_login():
         user_row = (row[0], row[1], row[3], row[4], row[5])  # drop password_hash before returning
         return jsonify({"token": token, "user": public_user(user_row)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -561,7 +566,7 @@ def auth_me():
             return jsonify({"error": "Account no longer exists."}), 401
         return jsonify({"user": public_user(row)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -620,7 +625,7 @@ def account_profile():
             return jsonify({"error": "Account no longer exists."}), 401
         return jsonify({"user": public_user(row)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -665,7 +670,7 @@ def account_save_debate():
             """, (payload.get("uid"), mode, topic, practice_mode, judge_persona, score_a, score_b, json.dumps(fallacy_names)))
         return jsonify({"ok": True})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -726,7 +731,7 @@ def account_stats():
             "recent": recent,
         })
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -856,7 +861,7 @@ def room_create():
             row = cur.fetchone()
         return jsonify({"room": room_public_state(row, payload.get("uid"))})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -903,7 +908,7 @@ def room_join():
             row = cur.fetchone()
         return jsonify({"room": room_public_state(row, uid)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -933,7 +938,7 @@ def room_state():
             return jsonify({"error": "Room not found, or you're not a participant in it."}), 404
         return jsonify({"room": room_public_state(row, payload.get("uid"))})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -1027,7 +1032,7 @@ def room_action():
             row = cur.fetchone()
         return jsonify({"room": room_public_state(row, uid)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
