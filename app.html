@@ -5155,6 +5155,7 @@ async function runOneOnlineFactCheck(sentence, side, opts) {
     });
   } catch (e) {
     console.warn("Online fact-check failed:", e.message || e);
+    if (isTransientCheckError(e.message || e)) return "retry";
   }
 }
 
@@ -6880,25 +6881,45 @@ function splitIntoClaims(text) {
    AUTO_FACTCHECK_INTERVAL_MS, covering at most AUTO_FACTCHECK_MAX_BATCH of the
    most recent sentences (older ones are dropped rather than queued up). */
 function scheduleBatchedFactCheck(batch, item, runFn) {
+  item.at = Date.now();
   batch.pending.push(item);
-  if (batch.timer) return;
+  armFactCheckBatch(batch, runFn);
+}
+
+/* Sends the next batch. A busy service (429, timeout...) no longer ends the
+   checking for the whole debate: the sentences go back in the queue, the gap
+   between checks stretches (up to +15s) and shrinks again as calls succeed,
+   so a crowded server slows everyone down a little instead of cutting people off. */
+function armFactCheckBatch(batch, runFn) {
+  if (batch.timer || !batch.pending.length) return;
   const cfg = window.APP_CONFIG || {};
-  const interval = Math.max(0, Number(cfg.AUTO_FACTCHECK_INTERVAL_MS ?? 12000));
-  const maxBatch = Math.max(1, Number(cfg.AUTO_FACTCHECK_MAX_BATCH ?? 3));
-  const wait = Math.max(0, batch.lastAt + interval - Date.now());
+  const interval = Math.max(0, Number(cfg.AUTO_FACTCHECK_INTERVAL_MS ?? 6000)) + (batch.extra || 0);
+  const maxBatch = Math.max(1, Number(cfg.AUTO_FACTCHECK_MAX_BATCH ?? 4));
+  // a short collection window so a burst of sentences leaves as ONE call
+  const wait = Math.max(1200, batch.lastAt + interval - Date.now());
   batch.timer = setTimeout(async () => {
     batch.timer = null;
-    const items = batch.pending.splice(0);
+    const items = batch.pending.splice(0).filter(i => Date.now() - i.at < 45000);
     if (!items.length) return;
     const side = items[items.length - 1].side;
     const mine = items.filter(i => i.side === side).slice(-maxBatch);
     batch.lastAt = Date.now();
+    let res;
     try {
-      await runFn(mine.map(i => i.sentence).join(" "), side, mine[0].context || []);
+      res = await runFn(mine.map(i => i.sentence).join(" "), side, mine[0].context || []);
     } catch (e) {
       console.warn("[AFC] batched check failed:", e.message || e);
+      res = "retry";
     }
     batch.lastAt = Date.now();
+    if (res === "retry") {
+      batch.extra = Math.min(15000, Math.round((batch.extra || 0) * 1.5 + 3000));
+      const again = mine.filter(i => (i.tries = (i.tries || 0) + 1) <= 2);
+      batch.pending = again.concat(batch.pending);
+    } else {
+      batch.extra = Math.max(0, (batch.extra || 0) - 2000);
+    }
+    armFactCheckBatch(batch, runFn);
   }, wait);
 }
 
@@ -6907,6 +6928,13 @@ function resetFactCheckBatch(batch) {
   if (batch.timer) clearTimeout(batch.timer);
   batch.timer = null;
   batch.pending = [];
+  batch.extra = Math.min(batch.extra || 0, 6000); // keep some back-off memory across turns, don't punish forever
+}
+
+/* A hiccup worth retrying (busy, timeout, bad output) vs. a real problem
+   (bad key, budget used up) that should pause checking. */
+function isTransientCheckError(msg) {
+  return /\b(429|500|502|503|504)\b|rate limit|failed to fetch|networkerror|load failed|timed? ?out|no json|max completion|unexpected (end|token)|upstream error/i.test(String(msg || ""));
 }
 
 /* Public: enqueue a fresh speech chunk for claim detection + fact-check. */
@@ -7829,6 +7857,7 @@ async function runOneFactCheck(sentence, side, opts) {
   } catch (e) {
     const msg = String(e.message || e);
     console.warn("Auto fact-check failed:", msg);
+    if (isTransientCheckError(msg)) return "retry"; // stay on, back off, try again
     // Surface the REAL error in the banner so the user can diagnose.
     const m = msg.match(/(Groq) (\d{3}):\s*(.*)/s);
     const providerName = "AI check";

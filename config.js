@@ -31,15 +31,15 @@
     AUTO_FACTCHECK_MIN_CHARS: 15,
     AUTO_FACTCHECK_MIN_WORDS: 4,
     AUTO_FACTCHECK_COOLDOWN_MS: 1000,   // legacy; superseded by INTERVAL_MS below
-    AUTO_FACTCHECK_INTERVAL_MS: 12000,  // at most one live check per this long
-    AUTO_FACTCHECK_MAX_BATCH: 5,        // most recent N sentences per check (~35 tokens each vs ~600 fixed per call)
+    AUTO_FACTCHECK_INTERVAL_MS: 6000,   // at most one live check per this long (stretches automatically when Groq is busy)
+    AUTO_FACTCHECK_MAX_BATCH: 4,        // most recent N sentences per check (~35 tokens each vs ~600 fixed per call)
     AUTO_FACTCHECK_CONFIDENCE: 0.7,
 
     // --- Accuracy boosters ---
     // Wikipedia snippets add ~250 prompt tokens to every check; off to save budget.
     USE_WIKIPEDIA_GROUNDING: false,
     USE_CONTEXT_WINDOW: true,
-    CONTEXT_SENTENCES: 1,
+    CONTEXT_SENTENCES: 2,
     REQUIRE_CITATIONS: true,
     MULTI_CLAIM_EXTRACTION: true,
     CONSENSUS_BORDERLINE_LOW: 0.6,
@@ -50,9 +50,9 @@
     // --- Reliability ---
     // Retries on a 429 just burn more of the same quota; one is plenty.
     MAX_RETRIES: 1,
-    // Hard cap on Groq calls per debate (~800 tokens each => ~48K tokens max).
-    // At 12s/check that is ~12 minutes of continuous checking per debate.
-    PER_DEBATE_BUDGET: 60,
+    // Hard cap on Groq calls per debate (~700 tokens each => ~70K tokens max).
+    // At 6s/check that is ~10 minutes of continuous checking per debate.
+    PER_DEBATE_BUDGET: 100,
     // Upload/batch scoring fires one claim-check + one fallacy-check per
     // transcript segment. Firing those back-to-back for every segment blows
     // through Groq's free-tier 8000 TPM cap on anything longer than a couple
@@ -69,6 +69,8 @@
     TTS_VOLUME: 0.7,
     TTS_RATE: 1.05,
     AUTO_FALLACY_DETECTION: true,
+    AUTO_FALLACY_MIN_CONF: 0.6,        // lowered from 0.65: tested at 17/18 recall with no false alarms
+    AUTO_FALLACY_TTL_MS: 25000,        // suggestions stay on screen long enough to read and click
     SHOW_CLAIM_LOG: true,
 
     // --- Whisper (live mode) ---
