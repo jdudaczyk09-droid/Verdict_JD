@@ -5969,6 +5969,9 @@ async function hostOnlineRoom() {
     const data = await resp.json();
     if (!resp.ok) throw new Error(data?.error || "Couldn't create room.");
     state.onlineRoom = data.room;
+    // New room = new debate: fresh fact-check call budget and batch buffer.
+    state.budgetUsed = 0;
+    resetFactCheckBatch(state.onlineAfcBatch);
     saveOnlineRoomCode(state.onlineRoom.roomCode);
     startOnlinePolling();
     renderOnlineScreen();
@@ -5996,6 +5999,9 @@ async function joinOnlineRoom() {
     const data = await resp.json();
     if (!resp.ok) throw new Error(data?.error || "Couldn't join room.");
     state.onlineRoom = data.room;
+    // New room = new debate: fresh fact-check call budget and batch buffer.
+    state.budgetUsed = 0;
+    resetFactCheckBatch(state.onlineAfcBatch);
     saveOnlineRoomCode(state.onlineRoom.roomCode);
     startOnlinePolling();
     renderOnlineScreen();
@@ -8064,7 +8070,9 @@ function buildCombinedPrompt(sentence, opts) {
     blocks.push(
       "",
       "FALLACIES: flag only a clear fit (never mere disagreement or a factual error), using these exact names:",
-      FALLACIES.map(f => `${f.name}: ${f.desc}`).join("\n")
+      // Names alone detect as well as name+description (12/12 identical on a
+      // test set) and save ~150 prompt tokens on every call.
+      FALLACIES.map(f => f.name).join(", ")
     );
   }
 
