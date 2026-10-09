@@ -2772,7 +2772,7 @@
               <div class="t-desc" data-i18n="setup.ai.respectdesc">A third AI pass watches for slurs, discriminatory language, or personal attacks — never for legitimate discussion of sensitive topics. In Practice Mode it privately coaches you on rephrasing; in a live round it discreetly alerts the moderator panel (bottom-right) instead of interrupting or auto-penalizing.</div>
             </div>
             <label class="toggle">
-              <input type="checkbox" id="respect-filter" checked />
+              <input type="checkbox" id="respect-filter" />
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -4537,6 +4537,7 @@ const state = {
   autoFactCheck: true,
   afcQueue: Promise.resolve(),
   afcLastAt: 0,
+  afcBatch: { pending: [], timer: null, lastAt: 0 },
   afcBusy: false,
   afcSeen: new Set(),
 
@@ -4557,7 +4558,7 @@ const state = {
 
   // Respect filter — on: privately coaches in Practice Mode; discreetly
   // alerts the moderator panel (not the debaters) in live rounds.
-  respectFilter: true,
+  respectFilter: false,
   respectFlags: [],
 
   // Judge Simulator — which paradigm the AI substance judge grades from
@@ -4585,6 +4586,7 @@ const state = {
   onlineAfcSeen: new Set(),
   onlineAfcQueue: Promise.resolve(),
   onlineAfcLastAt: 0,
+  onlineAfcBatch: { pending: [], timer: null, lastAt: 0 },
 
   // Whisper transcription state (opt-in)
   useWhisper: false,
@@ -4955,6 +4957,7 @@ function startDebate() {
   state.recentSentences = { a: [], b: [] };
   state.budgetUsed = 0;
   state.afcSeen = new Set();
+  resetFactCheckBatch(state.afcBatch);
   state.fallacySuggestions = [];
   state.respectFlags = [];
   if (typeof renderClaimLog === "function") renderClaimLog();
@@ -5128,6 +5131,7 @@ function toggleTurn() {
       clearSubs();
       // fresh turn → fresh dedupe memory for auto fact-check
       state.afcSeen = new Set();
+      resetFactCheckBatch(state.afcBatch);
     }
     state.timerRunning = true;
     startTimerTick();
@@ -6138,15 +6142,9 @@ function queueOnlineFactCheck(chunk) {
     if (state.onlineAfcSeen.has(hash)) return;
     state.onlineAfcSeen.add(hash);
 
-    state.onlineAfcQueue = state.onlineAfcQueue.then(async () => {
-      const now = Date.now();
-      const wait = Math.max(0, state.onlineAfcLastAt + cooldown - now);
-      if (wait) await new Promise(r => setTimeout(r, wait));
-      // Claim-check and fallacy-check happen together in one Groq call
-      // inside runOneOnlineFactCheck now (see runCombinedCheck).
-      await runOneOnlineFactCheck(sentence, side, { topic });
-      state.onlineAfcLastAt = Date.now();
-    });
+    // One combined call per interval (see scheduleBatchedFactCheck).
+    scheduleBatchedFactCheck(state.onlineAfcBatch, { sentence, side, context: [] },
+      (text, s) => runOneOnlineFactCheck(text, s, { topic }));
 
     if (state.respectFilter) {
       runRespectCheck(sentence, { topic }).then(r => {
@@ -7451,6 +7449,7 @@ async function runUploadAnalysis() {
   if (!state.pts) state.pts = { fact: 1, wrong: 1, fallacy: 2 };
   state.budgetUsed = 0;
   state.afcSeen = new Set();
+  resetFactCheckBatch(state.afcBatch);
   state.claimLog = [];
 
   goBtn.disabled = true;
@@ -7718,6 +7717,42 @@ function splitIntoClaims(text) {
   return parts.length ? parts : [text.trim()];
 }
 
+/* Live fact-checking used to fire one API call per sentence, back to back, so
+   a talkative debater could burn ~25K tokens/min — on the free tier (8K TPM,
+   200K tokens/day per model) one debate starved everyone else. Sentences now
+   collect in a buffer and go out as ONE combined call at most every
+   AUTO_FACTCHECK_INTERVAL_MS, covering at most AUTO_FACTCHECK_MAX_BATCH of the
+   most recent sentences (older ones are dropped rather than queued up). */
+function scheduleBatchedFactCheck(batch, item, runFn) {
+  batch.pending.push(item);
+  if (batch.timer) return;
+  const cfg = window.APP_CONFIG || {};
+  const interval = Math.max(0, Number(cfg.AUTO_FACTCHECK_INTERVAL_MS ?? 12000));
+  const maxBatch = Math.max(1, Number(cfg.AUTO_FACTCHECK_MAX_BATCH ?? 3));
+  const wait = Math.max(0, batch.lastAt + interval - Date.now());
+  batch.timer = setTimeout(async () => {
+    batch.timer = null;
+    const items = batch.pending.splice(0);
+    if (!items.length) return;
+    const side = items[items.length - 1].side;
+    const mine = items.filter(i => i.side === side).slice(-maxBatch);
+    batch.lastAt = Date.now();
+    try {
+      await runFn(mine.map(i => i.sentence).join(" "), side, mine[0].context || []);
+    } catch (e) {
+      console.warn("[AFC] batched check failed:", e.message || e);
+    }
+    batch.lastAt = Date.now();
+  }, wait);
+}
+
+function resetFactCheckBatch(batch) {
+  if (!batch) return;
+  if (batch.timer) clearTimeout(batch.timer);
+  batch.timer = null;
+  batch.pending = [];
+}
+
 /* Public: enqueue a fresh speech chunk for claim detection + fact-check. */
 function queueAutoFactCheck(chunk) {
   // Diagnostic: log every gate so you can see in DevTools console why a chunk got dropped.
@@ -7766,21 +7801,15 @@ function queueAutoFactCheck(chunk) {
       }
     }
 
-    state.afcQueue = state.afcQueue.then(async () => {
-      const now = Date.now();
-      const wait = Math.max(0, state.afcLastAt + cooldown - now);
-      if (wait) await new Promise(r => setTimeout(r, wait));
-      // Claim-check and fallacy-check now happen together in ONE Groq call
-      // inside runOneFactCheck (see runCombinedCheck) instead of two
-      // separate requests — fallacy suggestions used to fire on their own
-      // fire-and-forget pass outside this cooldown-gated queue.
-      await runOneFactCheck(sentence, side, { context: priorContext, topic });
-      state.afcLastAt = Date.now();
-    });
-
-    // Respect check stays a separate, independent pass — different concern,
-    // fire-and-forget so it never blocks scoring.
     const topic = state.topic || (document.getElementById("custom-topic")?.value || "").trim();
+
+    // Claim-check and fallacy-check share ONE Groq call (runCombinedCheck),
+    // and sentences are batched into at most one call per interval.
+    scheduleBatchedFactCheck(state.afcBatch, { sentence, side, context: priorContext },
+      (text, s, ctx) => runOneFactCheck(text, s, { context: ctx, topic }));
+
+    // Respect check is off by default (it costs a whole extra call per
+    // sentence); when enabled it stays a separate, fire-and-forget pass.
     if (state.respectFilter) {
       runRespectCheck(sentence, { topic, context: priorContext }).then(r => {
         if (!state.timerRunning) return;
