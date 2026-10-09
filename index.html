@@ -743,13 +743,18 @@ footer{
     durationMin: 30,
     // Hours he can take calls, per day of week (0 = Sunday ... 6 = Saturday),
     // as [start, end] in minutes after midnight Eastern. Days not listed are
-    // closed. School runs weekdays, so it's weekends only.
+    // closed. School runs weekdays, so weekdays are after school only.
     hours: {
+      1: [16 * 60, 19 * 60],     // Monday    4:00 PM - 7:00 PM ET
+      2: [16 * 60, 19 * 60],     // Tuesday   4:00 PM - 7:00 PM ET
+      3: [16 * 60, 19 * 60],     // Wednesday 4:00 PM - 7:00 PM ET
+      4: [16 * 60, 19 * 60],     // Thursday  4:00 PM - 7:00 PM ET
+      5: [16 * 60, 19 * 60],     // Friday    4:00 PM - 7:00 PM ET
       6: [12 * 60, 17 * 60],     // Saturday 12:00 PM - 5:00 PM ET
-      0: [11 * 60, 19 * 60]      // Sunday   11:00 AM - 7:00 PM ET
+      0: [12 * 60, 17 * 60]      // Sunday   12:00 PM - 5:00 PM ET
     },
-    daysAhead: 35,               // how far ahead to look
-    maxDays: 6,                  // how many day buttons to show (three weekends)
+    daysAhead: 28,               // how far ahead to look
+    maxDays: 10,                 // how many day buttons to show (about two weeks)
     minNoticeHours: 24,          // no bookings sooner than this
     bookingUrl: ""               // optional instant-booking link
   };
