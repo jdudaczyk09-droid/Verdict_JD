@@ -37,6 +37,7 @@ import json
 import os
 import random
 import re
+import time
 
 import bcrypt
 import jwt
@@ -94,7 +95,44 @@ def get_groq_keys():
 
     keys = list(dict.fromkeys(keys))  # de-dupe, keep it simple
     random.shuffle(keys)
-    return keys
+    # Load balancing: keys that were just rate-limited (or rejected) rest for a
+    # short while instead of being retried first on every request. If every key
+    # is resting we still try them all, so a request never fails for that alone.
+    now = time.time()
+    ready = [k for k in keys if KEY_REST_UNTIL.get(k, 0) <= now]
+    resting = [k for k in keys if KEY_REST_UNTIL.get(k, 0) > now]
+    return ready + resting
+
+
+# key -> unix time until which it is tried last. Per serverless instance, which
+# is still enough to stop one busy key being hammered during a burst.
+KEY_REST_UNTIL = {}
+RATE_LIMIT_REST_SECONDS = 15
+BAD_KEY_REST_SECONDS = 600
+
+
+def rest_key(key, status):
+    if status == 429:
+        KEY_REST_UNTIL[key] = time.time() + RATE_LIMIT_REST_SECONDS
+    elif status in (401, 403):
+        KEY_REST_UNTIL[key] = time.time() + BAD_KEY_REST_SECONDS
+
+
+def groq_post(url, keys, body, content_type, timeout):
+    """POST to Groq, moving on to the next key when one is rate limited (429)
+    or rejected (401/403). Returns the last upstream response."""
+    upstream = None
+    for key in keys:
+        upstream = requests.post(
+            url,
+            data=body,
+            headers={"Authorization": "Bearer " + key, "Content-Type": content_type},
+            timeout=timeout,
+        )
+        if upstream.status_code not in (429, 401, 403):
+            break  # success, or an error another key can't fix
+        rest_key(key, upstream.status_code)
+    return upstream
 
 
 def get_conn():
@@ -188,19 +226,10 @@ def groq_chat():
     body = request.get_data()
     content_type = request.headers.get("Content-Type", "application/json")
 
-    upstream = None
-    for key in keys:
-        try:
-            upstream = requests.post(
-                GROQ_CHAT_URL,
-                data=body,
-                headers={"Authorization": "Bearer " + key, "Content-Type": content_type},
-                timeout=60,
-            )
-        except Exception as e:
-            return jsonify({"error": "Upstream error: " + str(e)}), 502
-        if upstream.status_code != 429:
-            break  # success, or a non-rate-limit error — no point trying another key
+    try:
+        upstream = groq_post(GROQ_CHAT_URL, keys, body, content_type, 60)
+    except Exception as e:
+        return jsonify({"error": "Upstream error: " + str(e)}), 502
 
     return Response(
         upstream.content,
@@ -224,19 +253,10 @@ def groq_whisper():
 
     body = request.get_data()
 
-    upstream = None
-    for key in keys:
-        try:
-            upstream = requests.post(
-                GROQ_WHISPER_URL,
-                data=body,
-                headers={"Authorization": "Bearer " + key, "Content-Type": content_type},
-                timeout=120,
-            )
-        except Exception as e:
-            return jsonify({"error": "Upstream error: " + str(e)}), 502
-        if upstream.status_code != 429:
-            break
+    try:
+        upstream = groq_post(GROQ_WHISPER_URL, keys, body, content_type, 120)
+    except Exception as e:
+        return jsonify({"error": "Upstream error: " + str(e)}), 502
 
     return Response(
         upstream.content,

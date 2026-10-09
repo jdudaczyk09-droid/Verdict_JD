@@ -796,6 +796,7 @@
   .sub-head-left h3 { font-size: 30px; font-variation-settings: "wdth" 78; }
   .mic-indicator { width: 16px; height: 16px; background: var(--ink-3); border: 2px solid #000; }
   .mic-indicator.active { background: var(--margin); animation: miclive 1s steps(2, end) infinite; }
+  .mic-indicator.active.hearing { background: var(--pen, #1d3fbf); animation: none; }
   @keyframes miclive { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
   .subtitles {
@@ -2946,6 +2947,7 @@ const TRANSLATIONS = {
     "debate.engine.fallback": "This browser can't transcribe speech on its own, so Groq Whisper is listening instead.",
     "debate.engine.whisperfailed": "High-accuracy transcription isn't working, so your browser's speech recognition took over.",
     "debate.engine.busy": "The speech service is busy. A few words may be missed.",
+    "debate.engine.stalled": "Your browser stopped hearing you, so Groq Whisper took over.",
     "setup.hero.title": "Call out the claims that don't hold up.",
     "setup.hero.lead": "Live speech-to-text, real-time fact checks, and authentic competition formats — from casual to Mock Trial.",
     "setup.specimen.said": "Sample call, Debater B at 0:42", "setup.specimen.claim": "Germany charges high tuition.", "setup.specimen.verdict": "false", "setup.specimen.note": "Germany abolished tuition at public universities in 2014.",
@@ -3170,6 +3172,7 @@ const TRANSLATIONS = {
     "debate.engine.fallback": "Este navegador no puede transcribir voz por sí solo, así que Groq Whisper escucha en su lugar.",
     "debate.engine.whisperfailed": "La transcripción de alta precisión no funciona, así que tomó el control el reconocimiento de voz de tu navegador.",
     "debate.engine.busy": "El servicio de voz está ocupado. Puede que se pierdan algunas palabras.",
+    "debate.engine.stalled": "Tu navegador dejó de escucharte, así que Groq Whisper tomó el control.",
     "setup.hero.title": "Señala las afirmaciones que no se sostienen.",
     "setup.hero.lead": "Transcripción en vivo, verificación de datos en tiempo real y formatos de competencia auténticos — de casual a Mock Trial.",
     "setup.specimen.said": "Ejemplo de decisión, Debater B en 0:42", "setup.specimen.claim": "Alemania cobra matrículas altas.", "setup.specimen.verdict": "falso", "setup.specimen.note": "Alemania abolió las matrículas en las universidades públicas en 2014.",
@@ -5735,7 +5738,10 @@ function initSpeechRecognition() {
   r.lang = state.lang;
   r.interimResults = true;
   r.continuous = true;
+  r.onaudiostart = () => { state.srAudio = true; };
+  r.onspeechstart = () => { state.srHeard = Date.now(); };
   r.onresult = (e) => {
+    state.srLastResult = Date.now();
     let interim = "";
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const res = e.results[i];
@@ -5756,9 +5762,53 @@ function initSpeechRecognition() {
     else if (e.error !== "no-speech" && e.error !== "aborted") toast("Speech error: " + e.error, "error");
   };
   r.onend = () => {
-    if (state.timerRunning && !state.useWhisper) { try { r.start(); } catch (e) {} }
+    // Chrome ends a session after a silence gap; restart it, and retry if the
+    // browser isn't ready yet (an instant restart often throws).
+    if (!state.timerRunning || state.useWhisper || state.recog !== r) return;
+    let tries = 0;
+    const again = () => {
+      if (!state.timerRunning || state.useWhisper || state.recog !== r) return;
+      try { r.start(); } catch (e) { if (++tries < 8) setTimeout(again, 250); }
+    };
+    again();
   };
   state.recog = r;
+}
+
+/* The browser's recogniser can fail without an error: the speech service
+   stalls, or the mic never opens. Watch for it and let Groq Whisper take over
+   so the debater is never left talking to a blank box. */
+function startSrWatchdog() {
+  stopSrWatchdog();
+  const began = Date.now();
+  state.srAudio = false;
+  state.srHeard = 0;
+  state.srLastResult = 0;
+  let kicked = false;
+  state.srWatch = setInterval(() => {
+    if (!state.timerRunning || state.useWhisper || state.noAutoWhisper) return stopSrWatchdog();
+    const now = Date.now();
+    const deaf = state.srHeard && now - state.srHeard > 10000 && state.srLastResult < state.srHeard;
+    const noMic = !state.srAudio && now - began > (kicked ? 12000 : 6000);
+    if (noMic && !kicked) {
+      kicked = true; // first try a plain restart of the recogniser
+      try { state.recog && state.recog.abort(); } catch (_) {}
+      return;
+    }
+    if (deaf || noMic) {
+      stopSrWatchdog();
+      if (enableWhisperFallback("debate.engine.stalled")) {
+        try { state.recog && state.recog.abort(); } catch (_) {}
+        state.recog = null;
+        startWhisper();
+      }
+    }
+  }, 1000);
+}
+
+function stopSrWatchdog() {
+  clearInterval(state.srWatch);
+  state.srWatch = null;
 }
 
 function startSpeech() {
@@ -5771,9 +5821,11 @@ function startSpeech() {
   if (!state.recog) return;
   try { state.recog.start(); } catch (e) {}
   setMicEngine("browser");
+  startSrWatchdog();
 }
 
 function stopSpeech() {
+  stopSrWatchdog();
   if (state.useWhisper) {
     stopWhisper();
     return;
@@ -5872,12 +5924,12 @@ function whisperAvailable() {
 /* The browser's own speech recognition is missing or broken here (Firefox, Brave,
    blocked speech service...). Switch the turn over to Groq Whisper instead of
    leaving the debater talking to nothing. Returns true if it switched. */
-function enableWhisperFallback() {
+function enableWhisperFallback(msgKey) {
   if (state.useWhisper || !whisperAvailable()) return false;
   state.useWhisper = true;
   const cb = document.getElementById("use-whisper");
   if (cb) cb.checked = true;
-  toast(t("debate.engine.fallback"), "warn");
+  toast(t(msgKey || "debate.engine.fallback"), "warn");
   return true;
 }
 
@@ -5909,7 +5961,10 @@ async function startWhisper() {
     state.whisperPending = 0;
     state.whisperLastWord = "";
     state.whisperQueue = Promise.resolve();
-    state.whisperChunkMs = Math.max(2500, cfg.WHISPER_CHUNK_MS ?? 4000);
+    state.whisperBaseMs = Math.max(2500, cfg.WHISPER_CHUNK_MS ?? 3500);
+    state.whisperChunkMs = state.whisperBaseMs;
+    state.whisperOk = 0;
+    startWhisperMeter(stream);
     startWhisperSegment();
     setWhisperPill("recording");
     setMicEngine("whisper");
@@ -5944,8 +5999,9 @@ function startWhisperSegment() {
   const parts = [];
   rec.ondataavailable = (ev) => { if (ev.data && ev.data.size) parts.push(ev.data); };
   rec.onstop = () => {
-    handleWhisperChunk(new Blob(parts, { type: rec.mimeType || mime || "audio/webm" }));
+    handleWhisperChunk(new Blob(parts, { type: rec.mimeType || mime || "audio/webm" }), rec._loud);
   };
+  state.whisperSegLoud = !state.whisperMeter; // no meter -> can't tell silence, so send everything
   rec.onerror = (e) => {
     console.warn("Whisper recorder error:", e);
     toast("Recorder error: " + (e?.error?.name || "unknown"), "error");
@@ -5957,9 +6013,45 @@ function startWhisperSegment() {
   state.whisperTimer = setTimeout(rotateWhisperSegment, state.whisperChunkMs);
 }
 
+/* Watches the mic level. It lights the dot the moment you are heard (before any
+   words come back) and lets us skip silent segments, which saves quota and
+   stops Whisper from inventing "Thank you." for a quiet room. */
+function startWhisperMeter(stream) {
+  stopWhisperMeter();
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC();
+    const an = ctx.createAnalyser();
+    an.fftSize = 1024;
+    ctx.createMediaStreamSource(stream).connect(an);
+    const buf = new Uint8Array(an.fftSize);
+    const dot = document.getElementById("mic-dot");
+    state.whisperAudioCtx = ctx;
+    state.whisperLoud = 0;
+    state.whisperMeter = setInterval(() => {
+      an.getByteTimeDomainData(buf);
+      let peak = 0;
+      for (let i = 0; i < buf.length; i++) { const v = Math.abs(buf[i] - 128); if (v > peak) peak = v; }
+      if (peak >= 7) { state.whisperLoud = Date.now(); state.whisperSegLoud = true; }
+      if (dot) dot.classList.toggle("hearing", Date.now() - state.whisperLoud < 350);
+    }, 80);
+  } catch (_) {
+    state.whisperMeter = null;
+  }
+}
+
+function stopWhisperMeter() {
+  clearInterval(state.whisperMeter);
+  state.whisperMeter = null;
+  const dot = document.getElementById("mic-dot");
+  if (dot) dot.classList.remove("hearing");
+  if (state.whisperAudioCtx) { try { state.whisperAudioCtx.close(); } catch (_) {} state.whisperAudioCtx = null; }
+}
+
 function rotateWhisperSegment() {
   const old = state.whisperRecorder;
   if (!state.whisperActive || !old) return;
+  old._loud = state.whisperSegLoud;
   startWhisperSegment();
   try { if (old.state !== "inactive") old.stop(); } catch (_) {}
 }
@@ -5973,9 +6065,9 @@ function trimBoundaryRepeat(text) {
   return words.join(" ");
 }
 
-function handleWhisperChunk(blob) {
-  // Tiny blobs are silence — skip them to save quota
-  if (!blob || blob.size < 1500) return;
+function handleWhisperChunk(blob, loud) {
+  // Tiny or silent segments are skipped to save quota
+  if (!blob || blob.size < 1500 || loud === false) return;
   // If Whisper falls well behind, drop the oldest backlog rather than lag forever
   if ((state.whisperPending || 0) >= 3) return;
   state.whisperPending = (state.whisperPending || 0) + 1;
@@ -5984,7 +6076,9 @@ function handleWhisperChunk(blob) {
     try {
       const text = await transcribeWhisperChunk(blob);
       state.whisperFails = 0;
-      if (text) appendFinalText(trimBoundaryRepeat(text));
+      // calm down while the service is busy, speed back up once it recovers
+      if (++state.whisperOk >= 5) { state.whisperOk = 0; state.whisperChunkMs = Math.max(state.whisperBaseMs, Math.round(state.whisperChunkMs * 0.75)); }
+      if (text && !/^(thank you|thanks for watching|you|bye)[.! ]*$/i.test(text)) appendFinalText(trimBoundaryRepeat(text));
     } catch (e) {
       handleWhisperError(e);
     } finally {
@@ -6004,11 +6098,15 @@ function handleWhisperError(e) {
     toast(t("debate.engine.whisperfailed"), "error");
     stopWhisper();
     state.useWhisper = false;
+    state.noAutoWhisper = true;
     const cb = document.getElementById("use-whisper");
     if (cb) cb.checked = false;
     startSpeech();
-  } else if (rateLimited && state.whisperFails === 1) {
-    toast(t("debate.engine.busy"), "warn");
+  } else if (rateLimited) {
+    // longer segments = fewer requests per minute
+    state.whisperOk = 0;
+    state.whisperChunkMs = Math.min(8000, Math.round(state.whisperChunkMs * 1.5));
+    if (state.whisperFails === 1) toast(t("debate.engine.busy"), "warn");
   }
 }
 
@@ -6017,6 +6115,8 @@ function stopWhisper() {
   clearTimeout(state.whisperTimer);
   const rec = state.whisperRecorder;
   state.whisperRecorder = null;
+  if (rec) rec._loud = state.whisperSegLoud;
+  stopWhisperMeter();
   // stop() flushes the last partial segment, which still gets transcribed
   if (rec) { try { if (rec.state !== "inactive") rec.stop(); } catch (_) {} }
   const stream = state.whisperStream;
@@ -6031,6 +6131,7 @@ function stopWhisper() {
 function onWhisperToggle() {
   const el = document.getElementById("use-whisper");
   state.useWhisper = !!(el && el.checked);
+  state.noAutoWhisper = false;
   // If the timer is currently running, hot-swap engines
   if (state.timerRunning) {
     if (state.useWhisper) {
