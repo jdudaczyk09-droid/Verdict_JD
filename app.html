@@ -1736,6 +1736,7 @@
           <div class="sub-head-left">
             <span class="mic-indicator" id="mic-dot"></span>
             <h3 data-i18n="debate.livesubtitles">Live Subtitles</h3>
+            <span class="mic-engine" id="mic-engine"></span>
           </div>
           <div style="display:flex; gap:6px;">
             <button class="btn btn-sm" onclick="copyTranscript()" data-i18n="debate.copy">Copy</button>
@@ -2810,6 +2811,11 @@ const TRANSLATIONS = {
     "nav.progress": "Progress", "nav.league": "League", "nav.how": "How it works",
     "header.tagline": "structured debate · live fact-check",
     "header.home": "Home", "header.homelink": "Back to the Verdict Debate AI site", "footer.home": "Home",
+    "debate.engine.browser": "Listening with your browser",
+    "debate.engine.whisper": "Listening with Groq Whisper",
+    "debate.engine.fallback": "This browser can't transcribe speech on its own, so Groq Whisper is listening instead.",
+    "debate.engine.whisperfailed": "High-accuracy transcription isn't working, so your browser's speech recognition took over.",
+    "debate.engine.busy": "The speech service is busy. A few words may be missed.",
     "setup.hero.title": "Call out the claims that don't hold up.",
     "setup.hero.lead": "Live speech-to-text, real-time fact checks, and authentic competition formats — from casual to Mock Trial.",
     "setup.specimen.said": "Sample call, Debater B at 0:42", "setup.specimen.claim": "Germany charges high tuition.", "setup.specimen.verdict": "false", "setup.specimen.note": "Germany abolished tuition at public universities in 2014.",
@@ -3029,6 +3035,11 @@ const TRANSLATIONS = {
     "nav.progress": "Progreso", "nav.league": "Liga", "nav.how": "Cómo funciona",
     "header.tagline": "debate estructurado · verificación en vivo",
     "header.home": "Inicio", "header.homelink": "Volver al sitio de Verdict Debate AI", "footer.home": "Inicio",
+    "debate.engine.browser": "Escuchando con tu navegador",
+    "debate.engine.whisper": "Escuchando con Groq Whisper",
+    "debate.engine.fallback": "Este navegador no puede transcribir voz por sí solo, así que Groq Whisper escucha en su lugar.",
+    "debate.engine.whisperfailed": "La transcripción de alta precisión no funciona, así que tomó el control el reconocimiento de voz de tu navegador.",
+    "debate.engine.busy": "El servicio de voz está ocupado. Puede que se pierdan algunas palabras.",
     "setup.hero.title": "Señala las afirmaciones que no se sostienen.",
     "setup.hero.lead": "Transcripción en vivo, verificación de datos en tiempo real y formatos de competencia auténticos — de casual a Mock Trial.",
     "setup.specimen.said": "Ejemplo de decisión, Debater B en 0:42", "setup.specimen.claim": "Alemania cobra matrículas altas.", "setup.specimen.verdict": "falso", "setup.specimen.note": "Alemania abolió las matrículas en las universidades públicas en 2014.",
@@ -5586,7 +5597,8 @@ function renderLeagueDashboard(data) {
 function initSpeechRecognition() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    toast("Speech recognition isn't supported here. Try Chrome or Edge.", "error");
+    // No built-in speech recognition (Firefox, some in-app browsers): let Groq Whisper listen instead.
+    if (!enableWhisperFallback()) toast("Speech recognition isn't supported here. Try Chrome or Edge.", "error");
     return;
   }
   const r = new SR();
@@ -5605,10 +5617,16 @@ function initSpeechRecognition() {
   };
   r.onerror = (e) => {
     if (e.error === "not-allowed") toast("Microphone access denied.", "error");
+    else if ((e.error === "network" || e.error === "service-not-allowed") && enableWhisperFallback()) {
+      // The browser's speech service is unreachable or blocked (Brave, offline, corporate network): hand over to Groq Whisper.
+      try { r.abort(); } catch (_) {}
+      state.recog = null;
+      if (state.timerRunning) startWhisper();
+    }
     else if (e.error !== "no-speech" && e.error !== "aborted") toast("Speech error: " + e.error, "error");
   };
   r.onend = () => {
-    if (state.timerRunning) { try { r.start(); } catch (e) {} }
+    if (state.timerRunning && !state.useWhisper) { try { r.start(); } catch (e) {} }
   };
   state.recog = r;
 }
@@ -5619,8 +5637,10 @@ function startSpeech() {
     return;
   }
   if (!state.recog) initSpeechRecognition();
+  if (state.useWhisper) { startWhisper(); return; }
   if (!state.recog) return;
   try { state.recog.start(); } catch (e) {}
+  setMicEngine("browser");
 }
 
 function stopSpeech() {
@@ -5629,6 +5649,7 @@ function stopSpeech() {
     return;
   }
   if (state.recog) { try { state.recog.stop(); } catch (e) {} }
+  setMicEngine("");
 }
 
 /* =========================================================================
@@ -5703,8 +5724,40 @@ async function transcribeWhisperChunk(blob) {
   return (data && (data.text || data.transcript) || "").trim();
 }
 
+/* Speech-engine status shown above the subtitles, so it is always clear who is listening. */
+function setMicEngine(kind) {
+  const el = document.getElementById("mic-engine");
+  if (!el) return;
+  el.textContent = kind === "whisper" ? t("debate.engine.whisper")
+                 : kind === "browser" ? t("debate.engine.browser") : "";
+}
+
+/* Can this browser record audio and reach Groq Whisper? */
+function whisperAvailable() {
+  const cfg = window.APP_CONFIG || {};
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof MediaRecorder !== "undefined"
+    && (cfg.PROXY_MODE || cfg.GROQ_API_KEY));
+}
+
+/* The browser's own speech recognition is missing or broken here (Firefox, Brave,
+   blocked speech service...). Switch the turn over to Groq Whisper instead of
+   leaving the debater talking to nothing. Returns true if it switched. */
+function enableWhisperFallback() {
+  if (state.useWhisper || !whisperAvailable()) return false;
+  state.useWhisper = true;
+  const cb = document.getElementById("use-whisper");
+  if (cb) cb.checked = true;
+  toast(t("debate.engine.fallback"), "warn");
+  return true;
+}
+
+/* Groq Whisper needs every upload to be a complete audio file. A single
+   MediaRecorder cut into timeslices only puts the file header in the first
+   piece, so every later piece is rejected as "not a valid media file". Instead,
+   record in short back-to-back segments, each its own complete file, and start
+   the next segment before closing the last so no audio falls in the gap. */
 async function startWhisper() {
-  if (state.whisperRecorder) return;
+  if (state.whisperActive || state.whisperStarting) return;
   const cfg = window.APP_CONFIG || {};
   if (!cfg.GROQ_API_KEY && !cfg.PROXY_MODE) {
     toast("Whisper needs GROQ_API_KEY in config.js or a deployed Vercel proxy.", "error");
@@ -5716,58 +5769,20 @@ async function startWhisper() {
     startSpeech();
     return;
   }
+  state.whisperStarting = true;
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     state.whisperStream = stream;
-    const mime = whisperPickMimeType();
-    const opts = mime ? { mimeType: mime } : {};
-    const rec = new MediaRecorder(stream, opts);
-    state.whisperRecorder = rec;
-
-    rec.ondataavailable = async (ev) => {
-      if (!ev.data || !ev.data.size) return;
-      // Don't stack uploads — drop a chunk if one is already in flight
-      if (state.whisperBusy) return;
-      state.whisperBusy = true;
-      setWhisperPill("uploading");
-      try {
-        const text = await transcribeWhisperChunk(ev.data);
-        if (text) appendFinalText(text);
-      } catch (e) {
-        const msg = String(e.message || e);
-        console.warn("Whisper transcription failed:", msg);
-        toast("Whisper error — see console. Click the mic toggle off to retry.", "error");
-        // Auto-fall-back to webkit on auth failure
-        if (/401|403|invalid|api key/i.test(msg)) {
-          stopWhisper();
-          state.useWhisper = false;
-          const t = document.getElementById("use-whisper");
-          if (t) t.checked = false;
-          startSpeech();
-          return;
-        }
-      } finally {
-        state.whisperBusy = false;
-        setWhisperPill(state.whisperRecorder ? "recording" : "");
-      }
-    };
-    rec.onstop = () => {
-      // Releasing the mic stops the indicator
-      if (state.whisperStream) {
-        state.whisperStream.getTracks().forEach(t => t.stop());
-        state.whisperStream = null;
-      }
-      setWhisperPill("");
-    };
-    rec.onerror = (e) => {
-      console.warn("Whisper recorder error:", e);
-      toast("Recorder error: " + (e?.error?.name || "unknown"), "error");
-      stopWhisper();
-    };
-
-    const chunkMs = Math.max(1500, cfg.WHISPER_CHUNK_MS ?? 4000);
-    rec.start(chunkMs); // emit a chunk every WHISPER_CHUNK_MS
+    state.whisperMime = whisperPickMimeType();
+    state.whisperActive = true;
+    state.whisperFails = 0;
+    state.whisperPending = 0;
+    state.whisperLastWord = "";
+    state.whisperQueue = Promise.resolve();
+    state.whisperChunkMs = Math.max(2500, cfg.WHISPER_CHUNK_MS ?? 4000);
+    startWhisperSegment();
     setWhisperPill("recording");
+    setMicEngine("whisper");
   } catch (e) {
     const msg = String(e.message || e);
     if (/permission|denied|not allowed/i.test(msg)) {
@@ -5776,25 +5791,110 @@ async function startWhisper() {
       toast("Couldn't start Whisper: " + msg, "error");
     }
     state.useWhisper = false;
-    const t = document.getElementById("use-whisper");
-    if (t) t.checked = false;
-    // Try the native fallback
+    const cb = document.getElementById("use-whisper");
+    if (cb) cb.checked = false;
     setTimeout(() => startSpeech(), 100);
+  } finally {
+    state.whisperStarting = false;
+  }
+}
+
+function startWhisperSegment() {
+  const stream = state.whisperStream;
+  if (!stream || !state.whisperActive) return;
+  const mime = state.whisperMime;
+  let rec;
+  try {
+    rec = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+  } catch (e) {
+    toast("Recorder error: " + (e.message || e), "error");
+    stopWhisper();
+    return;
+  }
+  const parts = [];
+  rec.ondataavailable = (ev) => { if (ev.data && ev.data.size) parts.push(ev.data); };
+  rec.onstop = () => {
+    handleWhisperChunk(new Blob(parts, { type: rec.mimeType || mime || "audio/webm" }));
+  };
+  rec.onerror = (e) => {
+    console.warn("Whisper recorder error:", e);
+    toast("Recorder error: " + (e?.error?.name || "unknown"), "error");
+    stopWhisper();
+  };
+  rec.start();
+  state.whisperRecorder = rec;
+  clearTimeout(state.whisperTimer);
+  state.whisperTimer = setTimeout(rotateWhisperSegment, state.whisperChunkMs);
+}
+
+function rotateWhisperSegment() {
+  const old = state.whisperRecorder;
+  if (!state.whisperActive || !old) return;
+  startWhisperSegment();
+  try { if (old.state !== "inactive") old.stop(); } catch (_) {}
+}
+
+/* Adjacent segments can both catch the word spoken across the join; drop the repeat. */
+function trimBoundaryRepeat(text) {
+  const norm = (w) => (w || "").toLowerCase().replace(/[^a-z0-9']/g, "");
+  const words = text.split(" ").filter(Boolean);
+  if (state.whisperLastWord && words.length > 1 && norm(words[0]) === state.whisperLastWord) words.shift();
+  state.whisperLastWord = norm(words[words.length - 1]);
+  return words.join(" ");
+}
+
+function handleWhisperChunk(blob) {
+  // Tiny blobs are silence — skip them to save quota
+  if (!blob || blob.size < 1500) return;
+  // If Whisper falls well behind, drop the oldest backlog rather than lag forever
+  if ((state.whisperPending || 0) >= 3) return;
+  state.whisperPending = (state.whisperPending || 0) + 1;
+  state.whisperQueue = state.whisperQueue.then(async () => {
+    setWhisperPill("uploading");
+    try {
+      const text = await transcribeWhisperChunk(blob);
+      state.whisperFails = 0;
+      if (text) appendFinalText(trimBoundaryRepeat(text));
+    } catch (e) {
+      handleWhisperError(e);
+    } finally {
+      state.whisperPending = Math.max(0, (state.whisperPending || 1) - 1);
+      setWhisperPill(state.whisperActive ? "recording" : "");
+    }
+  });
+}
+
+function handleWhisperError(e) {
+  const msg = String(e.message || e);
+  console.warn("Whisper transcription failed:", msg);
+  state.whisperFails = (state.whisperFails || 0) + 1;
+  const authProblem = /\b(401|403)\b|invalid api key/i.test(msg);
+  const rateLimited = /\b429\b|rate limit/i.test(msg);
+  if (authProblem || state.whisperFails >= 3) {
+    toast(t("debate.engine.whisperfailed"), "error");
+    stopWhisper();
+    state.useWhisper = false;
+    const cb = document.getElementById("use-whisper");
+    if (cb) cb.checked = false;
+    startSpeech();
+  } else if (rateLimited && state.whisperFails === 1) {
+    toast(t("debate.engine.busy"), "warn");
   }
 }
 
 function stopWhisper() {
+  state.whisperActive = false;
+  clearTimeout(state.whisperTimer);
   const rec = state.whisperRecorder;
-  if (rec) {
-    try { if (rec.state !== "inactive") rec.stop(); } catch (_) {}
-  }
   state.whisperRecorder = null;
-  if (state.whisperStream) {
-    try { state.whisperStream.getTracks().forEach(t => t.stop()); } catch (_) {}
-    state.whisperStream = null;
-  }
+  // stop() flushes the last partial segment, which still gets transcribed
+  if (rec) { try { if (rec.state !== "inactive") rec.stop(); } catch (_) {} }
+  const stream = state.whisperStream;
+  state.whisperStream = null;
+  if (stream) setTimeout(() => { try { stream.getTracks().forEach(tr => tr.stop()); } catch (_) {} }, 400);
   state.whisperBusy = false;
   setWhisperPill("");
+  setMicEngine("");
 }
 
 /* Called when the user flips the Whisper checkbox in setup. */
@@ -6356,6 +6456,7 @@ function appendFinalText(txt) {
   const clean = (txt || "").trim();
   if (!clean) return;
   finalBuffer += (finalBuffer ? " " : "") + clean;
+  renderSubs();
   // Kick off live claim detection on each final chunk
   queueAutoFactCheck(clean);
 }
