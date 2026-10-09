@@ -73,7 +73,7 @@
 
     // --- Whisper (live mode) ---
     USE_WHISPER: false,
-    WHISPER_CHUNK_MS: 4000,
+    WHISPER_CHUNK_MS: 3500,
 
     // --- Upload mode ---
     // 2-minute chunks fit Vercel Hobby's 4.5 MB body cap (~3.8 MB at 16 kHz mono).
