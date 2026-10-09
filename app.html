@@ -947,6 +947,50 @@
   .cl-item.verdict-false .cl-claim { background-image: linear-gradient(transparent 52%, #FF6A5E 52%, #FF6A5E 94%, transparent 94%); animation: mark 0.5s steps(8, end) both; }
   .cl-item.verdict-uncertain .cl-claim { background-image: linear-gradient(transparent 52%, var(--hl-grey) 52%, var(--hl-grey) 94%, transparent 94%); }
   @keyframes mark { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+
+  /* statement kinds: one colour token per verdict, used by the banner, log and report */
+  .verdict-true { --vc: var(--hl-green); }
+  .verdict-mostly_true { --vc: #A8E86B; }
+  .verdict-misleading { --vc: var(--hl-orange); }
+  .verdict-false { --vc: #FF6A5E; }
+  .verdict-inconclusive, .verdict-uncertain { --vc: var(--hl-grey); }
+  .verdict-opinion { --vc: #8FB0FF; }
+  .verdict-value { --vc: #C7A4FF; }
+  .verdict-prediction { --vc: #7FD6D6; }
+  .verdict-hypothetical { --vc: #D5D5D5; }
+  .verdict-testimony { --vc: #F3A6C8; }
+  .verdict-unverifiable { --vc: #B8B8B8; }
+  .verdict-pending { --vc: #FFE14D; }
+  .cl-item[class*="verdict-"] { border-left-color: var(--vc, var(--hl-grey)); }
+  .cl-item[class*="verdict-"] .cl-claim { background-image: linear-gradient(transparent 52%, var(--vc, var(--hl-grey)) 52%, var(--vc, var(--hl-grey)) 94%, transparent 94%); }
+  .cl-item.verdict-unverifiable .cl-claim, .cl-item.verdict-hypothetical .cl-claim { animation: none; }
+  .cl-item.verdict-pending, .cl-item.verdict-unverifiable { border-style: dashed; border-left-style: solid; }
+  .cl-item.verdict-pending .cl-claim { animation: none; }
+  .cl-verdict { background: var(--vc, #000); color: #000; }
+  .cl-item.verdict-false .cl-verdict { color: #000; }
+  .afc-banner[class*="verdict-"] .afc-verdict { background: var(--vc, var(--hl-grey)); color: #000; }
+  .afc-banner.verdict-false .afc-verdict { background: var(--margin); color: #fff; }
+  .cl-kind, .cl-late { font-size: 12px; font-weight: 800; padding: 0 5px; border: 1.5px solid var(--ink); background: #fff; }
+  .cl-late { border-style: dashed; }
+
+  .cl-filters { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .cl-filters:empty { display: none; }
+  .cl-filter, .cl-verify { font: 800 12px var(--font-body); padding: 2px 8px; border: 2px solid var(--ink); background: #fff; color: #000; cursor: pointer; }
+  .cl-filter.on { background: #000; color: var(--paper); }
+  .cl-verify { margin-left: auto; background: #FFE14D; }
+  .cl-verify:disabled { opacity: 0.6; cursor: default; }
+
+  .claim-report { margin: 0 0 30px; }
+  .claim-report:empty { display: none; }
+  .rep-title { font-size: 26px; margin: 0 0 10px; font-variation-settings: "wdth" 86; }
+  .rep-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .rep-chip { padding: 2px 9px; font-size: 13px; font-weight: 800; background: var(--vc, var(--hl-grey)); color: #000; border: 2px solid var(--ink); }
+  .rep-chip b { margin-left: 3px; }
+  .rep-status { font-family: var(--font-hand); font-size: 24px; color: var(--pen); margin: 4px 0 10px; }
+  .rep-verify { margin-bottom: 10px; }
+  .rep-h { margin: 18px 0 8px; font-size: 18px; font-variation-settings: "wdth" 88; }
+  .rep-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .rep-list .cl-item { margin-bottom: 0; }
   .cl-exp { display: block; margin-top: 6px; font-size: 14px; color: var(--ink-2); font-weight: 500; }
   .cl-cite { display: inline-block; margin-top: 5px; font-size: 13px; font-style: italic; color: var(--ink-3); }
 
@@ -1447,6 +1491,7 @@
     <span class="cl-toggle">▾</span>
   </div>
   <div class="claim-log-body">
+    <div id="claim-log-filters" class="cl-filters"></div>
     <div id="claim-log-list">
       <div class="claim-log-empty">No claims checked yet.</div>
     </div>
@@ -1913,6 +1958,7 @@
       </div>
 
       <div class="results-scores" id="results-scores"></div>
+      <div class="claim-report" id="claim-report"></div>
 
       <div id="ai-verdicts"></div>
       <div style="margin: -6px 0 14px; display:flex; gap:8px; flex-wrap:wrap;">
@@ -2924,6 +2970,30 @@ const FALLACIES = [
   { name: "Burden of Proof", desc: "Making opponent disprove instead of proving your claim.",
     example: "\"Prove that this policy won't cause harm\" — asked without first offering any positive case that it will.",
     counter: "Remind the room that the burden sits with whoever is making the affirmative claim — you don't have to disprove an unsupported assertion." },
+  { name: "Appeal to Tradition", desc: "Old or customary, so it must be right.",
+    example: "\"We've always done it this way, so there's no reason to change.\"",
+    counter: "Ask whether the practice was ever shown to work, and what has changed since it started." },
+  { name: "False Equivalence", desc: "Treating two very different things as the same.",
+    example: "\"Taxing carbon is the same as banning cars — it's all government control.\"",
+    counter: "List the differences in scale, intent, and consequence that the comparison skips." },
+  { name: "Cherry Picking", desc: "Citing only the evidence that fits.",
+    example: "\"One study found a benefit, so the research is clear.\" — with ten others ignored.",
+    counter: "Ask for the whole body of evidence, and why the unfavourable results were left out." },
+  { name: "Guilt by Association", desc: "Discrediting an idea by who else holds it.",
+    example: "\"That plan was praised by a dictator, so it must be bad.\"",
+    counter: "Separate the idea from its supporters: judge it on its merits, not on who agrees with it." },
+  { name: "Poisoning the Well", desc: "Discrediting a source in advance so nothing it says counts.",
+    example: "\"Don't listen to what she's about to say — she always twists the facts.\"",
+    counter: "Ask them to answer the argument when it is made, rather than ruling it out beforehand." },
+  { name: "Loaded Question", desc: "A question with an unproven assumption built in.",
+    example: "\"Have you stopped wasting taxpayer money yet?\"",
+    counter: "Refuse the premise out loud, then answer the question you would actually accept." },
+  { name: "Non Sequitur", desc: "The conclusion does not follow from the reasons.",
+    example: "\"The team has great fans, so it will win the championship.\"",
+    counter: "Ask how the reason leads to the conclusion — what is the missing step?" },
+  { name: "Moving the Goalposts", desc: "Changing the standard after it has been met.",
+    example: "\"Fine, it cut costs — but it still isn't a success until it also cuts them in half again.\"",
+    counter: "Point back to the standard that was originally set and note it has been met." },
   { name: "Equivocation", desc: "Using a word with shifting meanings to mislead.",
     example: "\"The theory is 'just a theory'\" — sliding between the colloquial sense (a guess) and the scientific sense (a well-tested model).",
     counter: "Pin down a single definition of the key term up front, and hold the other side to using it consistently." },
@@ -2948,6 +3018,19 @@ const TRANSLATIONS = {
     "debate.engine.whisperfailed": "High-accuracy transcription isn't working, so your browser's speech recognition took over.",
     "debate.engine.busy": "The speech service is busy. A few words may be missed.",
     "debate.engine.stalled": "Your browser stopped hearing you, so Groq Whisper took over.",
+    "verdict.true": "TRUE", "verdict.mostly_true": "MOSTLY TRUE", "verdict.misleading": "MISLEADING", "verdict.false": "FALSE",
+    "verdict.inconclusive": "INCONCLUSIVE", "verdict.opinion": "OPINION", "verdict.value": "VALUE CLAIM", "verdict.prediction": "PREDICTION",
+    "verdict.hypothetical": "HYPOTHETICAL", "verdict.testimony": "CASE CLAIM", "verdict.unverifiable": "UNVERIFIABLE", "verdict.pending": "TO VERIFY",
+    "verdict.d.true": "Accurate.", "verdict.d.mostly_true": "Right in substance, but rounded or imprecise.",
+    "verdict.d.misleading": "Technically true, but missing context that changes the picture.", "verdict.d.false": "Contradicts well-established facts.",
+    "verdict.d.inconclusive": "Checked, but the evidence is mixed or missing.", "verdict.d.opinion": "A personal view. It can't be proven true or false.",
+    "verdict.d.value": "A moral or policy judgment, not a fact.", "verdict.d.prediction": "About the future, so it can't be checked yet.",
+    "verdict.d.hypothetical": "A what-if, analogy, or thought experiment.", "verdict.d.testimony": "About what happened in this case. Can't be checked outside it.",
+    "verdict.d.unverifiable": "Sounds factual, but nothing could settle it (private, vague, or unsourced).", "verdict.d.pending": "Needs a lookup. Held until the round is over.",
+    "claims.group.all": "All", "claims.group.facts": "Facts", "claims.group.views": "Opinions", "claims.group.unverifiable": "Unverifiable", "claims.group.pending": "To verify",
+    "claims.verifynow": "Verify now", "claims.verifying": "Verifying…", "claims.report": "Claim check",
+    "claims.report.facts": "Facts checked", "claims.report.views": "Opinions, judgments and case claims", "claims.report.unverifiable": "Could not be verified", "claims.report.pending": "Still unchecked",
+    "claims.report.working": "Verifying the claims held back during the round…",
     "setup.hero.title": "Call out the claims that don't hold up.",
     "setup.hero.lead": "Live speech-to-text, real-time fact checks, and authentic competition formats — from casual to Mock Trial.",
     "setup.specimen.said": "Sample call, Debater B at 0:42", "setup.specimen.claim": "Germany charges high tuition.", "setup.specimen.verdict": "false", "setup.specimen.note": "Germany abolished tuition at public universities in 2014.",
@@ -3173,6 +3256,19 @@ const TRANSLATIONS = {
     "debate.engine.whisperfailed": "La transcripción de alta precisión no funciona, así que tomó el control el reconocimiento de voz de tu navegador.",
     "debate.engine.busy": "El servicio de voz está ocupado. Puede que se pierdan algunas palabras.",
     "debate.engine.stalled": "Tu navegador dejó de escucharte, así que Groq Whisper tomó el control.",
+    "verdict.true": "VERDADERO", "verdict.mostly_true": "CASI CIERTO", "verdict.misleading": "ENGAÑOSO", "verdict.false": "FALSO",
+    "verdict.inconclusive": "NO CONCLUYENTE", "verdict.opinion": "OPINIÓN", "verdict.value": "JUICIO DE VALOR", "verdict.prediction": "PREDICCIÓN",
+    "verdict.hypothetical": "HIPOTÉTICO", "verdict.testimony": "HECHO DEL CASO", "verdict.unverifiable": "NO VERIFICABLE", "verdict.pending": "POR VERIFICAR",
+    "verdict.d.true": "Es exacto.", "verdict.d.mostly_true": "Correcto en lo esencial, pero redondeado o impreciso.",
+    "verdict.d.misleading": "Técnicamente cierto, pero le falta contexto que cambia el panorama.", "verdict.d.false": "Contradice hechos bien establecidos.",
+    "verdict.d.inconclusive": "Revisado, pero la evidencia es mixta o falta.", "verdict.d.opinion": "Una opinión personal. No se puede probar como verdadera o falsa.",
+    "verdict.d.value": "Un juicio moral o de política, no un hecho.", "verdict.d.prediction": "Sobre el futuro, así que aún no se puede comprobar.",
+    "verdict.d.hypothetical": "Un supuesto, analogía o experimento mental.", "verdict.d.testimony": "Sobre lo ocurrido en este caso. No se puede comprobar fuera de él.",
+    "verdict.d.unverifiable": "Suena a hecho, pero nada podría confirmarlo (privado, vago o sin fuente).", "verdict.d.pending": "Necesita una búsqueda. Se guarda hasta que termine la ronda.",
+    "claims.group.all": "Todo", "claims.group.facts": "Hechos", "claims.group.views": "Opiniones", "claims.group.unverifiable": "No verificable", "claims.group.pending": "Por verificar",
+    "claims.verifynow": "Verificar ahora", "claims.verifying": "Verificando…", "claims.report": "Revisión de afirmaciones",
+    "claims.report.facts": "Hechos comprobados", "claims.report.views": "Opiniones, juicios y hechos del caso", "claims.report.unverifiable": "No se pudo verificar", "claims.report.pending": "Aún sin comprobar",
+    "claims.report.working": "Verificando las afirmaciones guardadas durante la ronda…",
     "setup.hero.title": "Señala las afirmaciones que no se sostienen.",
     "setup.hero.lead": "Transcripción en vivo, verificación de datos en tiempo real y formatos de competencia auténticos — de casual a Mock Trial.",
     "setup.specimen.said": "Ejemplo de decisión, Debater B en 0:42", "setup.specimen.claim": "Alemania cobra matrículas altas.", "setup.specimen.verdict": "falso", "setup.specimen.note": "Alemania abolió las matrículas en las universidades públicas en 2014.",
@@ -3500,6 +3596,9 @@ const state = {
 
   // Live claim log — every auto check this debate (verdict, claim, side, etc.)
   claimLog: [],
+  backlog: [],          // claims held for the after-round check (same objects as in claimLog)
+  backlogBusy: null,
+  claimFilter: "all",
 
   // Sliding context window — last few sentences per side, for grounding the LLM
   recentSentences: { a: [], b: [] },
@@ -3911,6 +4010,8 @@ function startDebate() {
   state.scoreHistory = [];
   // Reset auto-fact-check bookkeeping for the new debate
   state.claimLog = [];
+  state.backlog = [];
+  state.claimFilter = "all";
   state.recentSentences = { a: [], b: [] };
   state.budgetUsed = 0;
   state.afcSeen = new Set();
@@ -4132,6 +4233,8 @@ function nextTurn(manual) {
   }
   stopSpeech();
   setMic(false);
+  // A turn change is a natural pause: clear what the live check held back
+  if (pendingClaims().length >= 3) verifyBacklog().catch(() => {});
 
   if (state.phases) {
     state.phaseIndex++;
@@ -4220,7 +4323,7 @@ function addPoint(side, type, fallacyName, meta) {
   const kind = type === "fact" ? "success" : type === "fallacy" ? "warn" : "error";
   const sign = delta > 0 ? `+${delta}` : `${delta}`;
   const suffix = meta?.auto ? ` (${meta.source || "AI"})` : "";
-  toast(`${name}: ${sign} — ${label}${suffix}`, kind);
+  if (!(meta && meta.silent)) toast(`${name}: ${sign} — ${label}${suffix}`, kind);
   return evt;
 }
 
@@ -5955,7 +6058,9 @@ async function startWhisper() {
   }
   state.whisperStarting = true;
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
+    });
     state.whisperStream = stream;
     state.whisperMime = whisperPickMimeType();
     state.whisperActive = true;
@@ -7232,46 +7337,59 @@ function buildCombinedPrompt(sentence, opts) {
   const evidence = Array.isArray(o.evidence) ? o.evidence.filter(Boolean) : [];
   const wantCitations = cfg.REQUIRE_CITATIONS;
   const wantFallacies = o.wantFallacies !== false;
+  const trial = !!o.trial;
 
-  // Kept deliberately compact — every call pays for this prefix in tokens, and
-  // the static part comes first so Groq's prompt caching can reuse it.
-  const claimShape = `{"claim":str,"verdict":"true"|"false"|"uncertain","confidence":0-1,"explanation":str (<=100 chars)${wantCitations ? ',"citation":str (<=60 chars, "" if none)' : ""}}`;
+  // Kept compact — every call pays for this prefix in tokens, and the static
+  // part comes first so Groq's prompt caching can reuse it.
+  const claimShape = `{"claim":str,"kind":str,"verdict":str,"confidence":0-1,"explanation":str (<=90 chars)${wantCitations ? ',"citation":str (<=50 chars, "" if none)' : ""}}`;
   const fallacyShape = `{"fallacy":str,"quote":str (<=80 chars),"explanation":str (<=100 chars),"confidence":0-1}`;
   const shape = `{"claims":[${claimShape}]${wantFallacies ? `,"fallacies":[${fallacyShape}]` : ""}}`;
 
   const blocks = [
-    `${wantFallacies ? "Fact-check and fallacy-check" : "Fact-check"} ONE utterance from a live debate.`,
+    `Analyse a few sentences from a live ${trial ? "mock trial" : "debate"}: classify each statement, fact-check the easy ones, ${wantFallacies ? "and flag reasoning flaws" : "and skip the rest"}.`,
     "",
-    `CLAIMS: extract each distinct verifiable factual assertion (usually 1, up to 3) and judge it true/false/uncertain by well-established public knowledge. Skip opinions, questions, filler, predictions. Be decisive on basic facts (confidence 0.9+); use "uncertain" only for ambiguous, unverifiable, or future claims. Keep "claim" faithful to what was said.${wantCitations ? ' Fill "citation" with a short source attribution.' : ""}`
-  ];
+    'STATEMENTS: list each distinct assertion (up to 5; skip questions, greetings, filler). "kind" is one of:',
+    "fact = checkable claim about events, history, law, science, or how things are",
+    "stat = a number, percentage, ranking, or data point",
+    'opinion = a personal view or evaluation ("I think", "better", "the worst")',
+    'value = a moral or policy judgment ("should", "unfair", "right")',
+    "prediction = what will or might happen",
+    "hypothetical = if/suppose scenarios, analogies, thought experiments",
+    trial ? "testimony = what happened in this case (cannot be checked outside the case)" : null,
+    'unverifiable = sounds factual but nothing could settle it: private matters, vague "many say", unnamed sources, one person\'s anecdote',
+    "If an opinion or value claim rests on a factual premise, also list that premise as its own fact.",
+    "",
+    'VERDICT: for a fact/stat you can settle from well-established knowledge: true | mostly_true (right but rounded or imprecise) | misleading (technically true, missing context) | false. Be decisive (confidence 0.9+) on basic facts. For a fact/stat that needs a lookup (exact figure, recent, niche, depends on a source) use "pending" rather than guess. For every other kind, verdict = the kind.'
+  ].filter(x => x !== null);
 
   if (wantFallacies) {
     blocks.push(
       "",
-      "FALLACIES: flag only a clear fit (never mere disagreement or a factual error), using these exact names:",
-      // Names alone detect as well as name+description (12/12 identical on a
-      // test set) and save ~150 prompt tokens on every call.
-      FALLACIES.map(f => f.name).join(", ")
+      "FALLACIES: flag one when a judge would call it out (not mere disagreement or a factual error). Use these exact names:",
+      // Names alone detect as well as name+description; the one line below only
+      // separates the three most confused.
+      FALLACIES.map(f => f.name).join(", "),
+      "Ad Hominem = attacks the person (character, background, motives, credentials, insults) instead of the point. Tu Quoque = \"you do it too\". Red Herring = changes the subject."
     );
   }
 
   blocks.push(
     "",
-    `Return ONLY compact JSON:\n${shape}\nNo claim -> "claims":[].${wantFallacies ? ' No fallacy -> "fallacies":[].' : ""}`
+    `Return ONLY compact JSON:\n${shape}\nNo statement -> "claims":[].${wantFallacies ? ' No fallacy -> "fallacies":[].' : ""}`
   );
 
   if (topic) blocks.push("", `Debate topic: "${topic.replace(/"/g, '\\"')}"`);
   if (ctx.length) {
-    const joined = ctx.slice(-(cfg.CONTEXT_SENTENCES ?? 3)).map(s => `- ${s.replace(/"/g, '\\"')}`).join("\n");
+    const joined = ctx.slice(-(cfg.CONTEXT_SENTENCES ?? 3)).map(x => `- ${x.replace(/"/g, '\\"')}`).join("\n");
     blocks.push("", "Recent context (same speaker, earlier in this turn):", joined);
   }
   if (evidence.length) {
-    const ev = evidence.slice(0, 3).map((e, i) =>
-      `[${i + 1}] ${e.title ? e.title + " — " : ""}${(e.extract || "").slice(0, 320).replace(/\s+/g, " ")}`
+    const ev = evidence.slice(0, 3).map((e, k) =>
+      `[${k + 1}] ${e.title ? e.title + " — " : ""}${(e.extract || "").slice(0, 320).replace(/\s+/g, " ")}`
     ).join("\n");
     blocks.push("", "Reference snippets (Wikipedia, can be newer than your training data, so trust them over memory when they speak to the claim):", ev);
   }
-  blocks.push("", `Utterance: """${sentence.replace(/"/g, '\\"')}"""`);
+  blocks.push("", `Text: """${sentence.replace(/"/g, '\\"')}"""`);
   return blocks.join("\n");
 }
 
@@ -7291,7 +7409,7 @@ async function groqCombinedCheck(sentence, opts) {
     body: JSON.stringify({
       model,
       temperature: 0.1,
-      max_tokens: 1100,
+      max_tokens: 1500,
       reasoning_effort: "low",
       response_format: { type: "json_object" },
       messages: [
@@ -7700,31 +7818,56 @@ async function fetchWikiContext(sentence) {
   } catch (_) { return []; }
 }
 
+/* Statement kinds and verdict levels.
+   "Unclear" used to be one grey bucket. Now it says WHY a statement has no
+   true/false: it is a view (opinion, value, prediction, hypothetical, case claim),
+   nothing could settle it (unverifiable), the evidence was mixed (inconclusive),
+   or it needs a lookup and was held back for after the round (pending). */
+const FACT_KINDS = new Set(["fact", "stat"]);
+const NONFACT_KINDS = new Set(["opinion", "value", "prediction", "hypothetical", "testimony", "unverifiable"]);
+const FACT_VERDICTS = new Set(["true", "mostly_true", "misleading", "false", "inconclusive", "pending"]);
+// verdicts that move the score: type + share of a full point
+const SCORED_VERDICTS = { true: { type: "fact", f: 1 }, mostly_true: { type: "fact", f: 0.6 }, misleading: { type: "wrong", f: 0.5 }, false: { type: "wrong", f: 1 } };
+const VERDICT_GROUP = { true: "facts", mostly_true: "facts", misleading: "facts", false: "facts", inconclusive: "facts",
+  opinion: "views", value: "views", prediction: "views", hypothetical: "views", testimony: "views", unverifiable: "unverifiable", pending: "pending" };
+
+function vlabel(v) { return t("verdict." + (v === "uncertain" ? "inconclusive" : v)); }
+function vdesc(v) { return t("verdict.d." + (v === "uncertain" ? "inconclusive" : v)); }
+
+function normalizeVerdict(raw, kind, conf) {
+  if (NONFACT_KINDS.has(kind)) return kind;
+  let v = String(raw || "").toLowerCase().replace(/[\s-]+/g, "_");
+  if (v === "uncertain" || v === "unclear") v = "inconclusive";
+  if (!FACT_VERDICTS.has(v)) v = NONFACT_KINDS.has(v) ? v : "pending";
+  // A confident-sounding verdict the model isn't really sure about goes to the backlog instead
+  const lowB = (window.APP_CONFIG || {}).CONSENSUS_BORDERLINE_LOW ?? 0.6;
+  if (SCORED_VERDICTS[v] && conf < lowB) return "pending";
+  return v;
+}
+
 /* Normalize one-claim or multi-claim shapes into a uniform array.
    Old single shape:  {has_claim, claim, verdict, confidence, explanation, citation?}
-   New multi shape:   {claims: [{claim, verdict, confidence, explanation, citation?}]} */
+   New multi shape:   {claims: [{claim, kind, verdict, confidence, explanation, citation?}]} */
 function normalizeClaims(r) {
   if (!r) return [];
-  if (Array.isArray(r.claims)) {
-    return r.claims
-      .filter(c => c && c.claim)
-      .map(c => ({
-        claim: String(c.claim || "").trim(),
-        verdict: String(c.verdict || "uncertain").toLowerCase(),
-        confidence: Math.max(0, Math.min(1, Number(c.confidence) || 0)),
-        explanation: String(c.explanation || ""),
-        citation: String(c.citation || "")
-      }));
-  }
-  if (r.has_claim && r.claim) {
-    return [{
-      claim: String(r.claim).trim(),
-      verdict: String(r.verdict || "uncertain").toLowerCase(),
-      confidence: Math.max(0, Math.min(1, Number(r.confidence) || 0)),
-      explanation: String(r.explanation || ""),
-      citation: String(r.citation || "")
-    }];
-  }
+  const build = (c) => {
+    let kind = String(c.kind || "").toLowerCase();
+    if (!FACT_KINDS.has(kind) && !NONFACT_KINDS.has(kind)) {
+      const gv = String(c.verdict || "").toLowerCase();
+      kind = NONFACT_KINDS.has(gv) ? gv : "fact";
+    }
+    const confidence = Math.max(0, Math.min(1, Number(c.confidence) || 0));
+    return {
+      claim: String(c.claim || "").trim(),
+      kind,
+      verdict: normalizeVerdict(c.verdict, kind, confidence),
+      confidence,
+      explanation: String(c.explanation || ""),
+      citation: String(c.citation || "")
+    };
+  };
+  if (Array.isArray(r.claims)) return r.claims.filter(c => c && c.claim).map(build);
+  if (r.has_claim && r.claim) return [build(r)];
   return [];
 }
 
@@ -7777,7 +7920,8 @@ async function runOneFactCheck(sentence, side, opts) {
       topic: (opts && opts.topic) || state.topic || (document.getElementById("custom-topic")?.value || "").trim(),
       context: (opts && opts.context) || [],
       evidence,
-      wantFallacies: !!cfg.AUTO_FALLACY_DETECTION
+      wantFallacies: !!cfg.AUTO_FALLACY_DETECTION,
+      trial: state.mode === "mockTrial"
     };
     console.log("[AFC] calling runCombinedCheck →", { promptOpts });
     const r = await runCombinedCheck(sentence, promptOpts);
@@ -7790,78 +7934,40 @@ async function runOneFactCheck(sentence, side, opts) {
     }
 
     const claims = normalizeClaims(r);
-    // Recent claim, no source found: the model may simply not know it yet.
-    if (!evidence.length) claims.forEach(c => { if (c.verdict === "false" && RECENT_RE.test(c.claim)) c.verdict = "uncertain"; });
+    // Recent claim, no source found: the model may simply not know it yet, so hold it for the backlog.
+    if (!evidence.length) claims.forEach(c => { if ((c.verdict === "false" || c.verdict === "misleading") && RECENT_RE.test(c.claim)) c.verdict = "pending"; });
     console.log("[AFC] normalized claims:", claims);
-    if (!claims.length) { console.log("[AFC] no claims extracted — banner skipped"); return; }
+    if (!claims.length) { console.log("[AFC] no statements extracted"); return; }
 
-    const minConf = cfg.AUTO_FACTCHECK_CONFIDENCE ?? 0.7;
-    const lowB = cfg.CONSENSUS_BORDERLINE_LOW ?? 0.6;
-    const sourceName = "AI";
-    const weighted = !!cfg.CONFIDENCE_WEIGHTED_SCORING;
+    // The banner shows the strongest scored verdict only. Opinions and the
+    // like go quietly into the claim log: in a fast round most statements are views.
+    const scoredClaims = claims.filter(c => SCORED_VERDICTS[c.verdict]).sort((a, b) => b.confidence - a.confidence);
+    const top = scoredClaims[0] || null;
+    if (top) {
+      showAfcBanner({ claim: top.claim || sentence, explanation: top.explanation || "", verdict: top.verdict, side, confidence: top.confidence, citation: top.citation });
+    }
 
-    // Show only the FIRST/strongest verdict in the banner — but log every claim.
-    // Pick the highest-confidence non-uncertain claim for the banner.
-    const ranked = claims.slice().sort((a, b) => {
-      const aw = (a.verdict !== "uncertain" ? 1 : 0) - (b.verdict !== "uncertain" ? 1 : 0);
-      if (aw) return -aw;
-      return b.confidence - a.confidence;
-    });
-    const top = ranked[0];
-
-    showAfcBanner({
-      claim: top.claim || sentence,
-      explanation: top.explanation || "",
-      verdict: top.verdict,
-      side,
-      confidence: top.confidence,
-      citation: top.citation
-    });
-
-    // Score every claim (multi-claim mode), but cap to 3 to avoid runaways
-    const toScore = claims.slice(0, 3);
     let lastEvtId = null;
-    toScore.forEach(c => {
-      const verdict = c.verdict;
-      const conf = c.confidence || 0;
-      // Need at least minConf to award full points; weighted mode awards
-      // partial points down to the borderline floor.
-      const passFull = conf >= minConf;
-      const passPartial = weighted && conf >= lowB && conf < minConf;
-      const fraction = passFull ? 1 : (passPartial ? +(conf / minConf).toFixed(2) : 0);
-
+    claims.slice(0, 5).forEach(c => {
       const logEntry = {
         id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
         ts: Date.now(),
         side,
         utterance: sentence,
         claim: c.claim,
-        verdict,
-        confidence: conf,
+        kind: c.kind,
+        verdict: c.verdict,
+        confidence: c.confidence,
         explanation: c.explanation,
         citation: c.citation,
-        source: sourceName,
+        source: "AI",
         scoreEvtId: null
       };
-
-      if (state.pointsEnabled && fraction > 0 && verdict === "true") {
-        flashScreen("green");
-        beepTone(880);
-        const evt = addPoint(side, "fact", null, {
-          auto: true, source: sourceName,
-          claim: c.claim, explanation: c.explanation,
-          citation: c.citation, fraction
-        });
-        if (evt && evt.id) { logEntry.scoreEvtId = evt.id; lastEvtId = evt.id; }
-      } else if (state.pointsEnabled && fraction > 0 && verdict === "false") {
-        flashScreen("red");
-        beepTone(220);
-        const evt = addPoint(side, "wrong", null, {
-          auto: true, source: sourceName,
-          claim: c.claim, explanation: c.explanation,
-          citation: c.citation, fraction
-        });
-        if (evt && evt.id) { logEntry.scoreEvtId = evt.id; lastEvtId = evt.id; }
+      if (SCORED_VERDICTS[c.verdict]) {
+        const evt = applyClaimScore(logEntry);
+        if (evt && evt.id) lastEvtId = evt.id;
+      } else if (c.verdict === "pending") {
+        queueBacklog(logEntry);
       }
       state.claimLog.push(logEntry);
     });
@@ -7871,7 +7977,7 @@ async function runOneFactCheck(sentence, side, opts) {
     if (banner) banner.dataset.lastEvt = lastEvtId || "";
 
     renderClaimLog();
-    if (cfg.TTS_VERDICTS) speakVerdict(top);
+    if (cfg.TTS_VERDICTS && top) speakVerdict(top);
   } catch (e) {
     const msg = String(e.message || e);
     console.warn("Auto fact-check failed:", msg);
@@ -7888,7 +7994,7 @@ async function runOneFactCheck(sentence, side, opts) {
     } catch (_) {}
     const banner = document.getElementById("afc-banner");
     if (banner) {
-      banner.classList.remove("verdict-true", "verdict-false", "verdict-uncertain");
+      banner.className = banner.className.replace(/\bverdict-\S+/g, "").trim();
       banner.classList.add("verdict-false");
       document.getElementById("afc-verdict").textContent = status ? "error " + status : "error";
       document.getElementById("afc-claim").textContent = `${providerName} call failed`;
@@ -7907,6 +8013,172 @@ async function runOneFactCheck(sentence, side, opts) {
   }
 }
 
+/* Score one logged claim by its verdict. Shared by the live check and the backlog. */
+function applyClaimScore(entry, meta) {
+  const sc = SCORED_VERDICTS[entry.verdict];
+  if (!sc || !state.pointsEnabled || (entry.side !== "a" && entry.side !== "b")) return null;
+  const cfg = window.APP_CONFIG || {};
+  const minConf = cfg.AUTO_FACTCHECK_CONFIDENCE ?? 0.7;
+  const lowB = cfg.CONSENSUS_BORDERLINE_LOW ?? 0.6;
+  const conf = entry.confidence || 0;
+  let fraction = conf >= minConf ? 1 : (cfg.CONFIDENCE_WEIGHTED_SCORING && conf >= lowB ? +(conf / minConf).toFixed(2) : 0);
+  fraction = +(fraction * sc.f).toFixed(2);
+  if (fraction <= 0) return null;
+  const quiet = !!(meta && meta.silent);
+  if (!quiet) {
+    flashScreen(sc.type === "fact" ? "green" : "red");
+    beepTone(sc.type === "fact" ? 880 : 220);
+  }
+  const evt = addPoint(entry.side, sc.type, null, {
+    auto: true, source: entry.source || "AI", silent: quiet,
+    claim: entry.claim, explanation: entry.explanation, citation: entry.citation, fraction
+  });
+  if (evt && evt.id) entry.scoreEvtId = evt.id;
+  return evt;
+}
+
+/* =========================================================================
+   BACKLOG — claims that need a real lookup are held back while people are
+   speaking (so the live check stays fast and cheap) and verified in batches
+   with Wikipedia evidence at turn changes and after the round.
+   ========================================================================= */
+function pendingClaims() { return state.claimLog.filter(c => c.verdict === "pending"); }
+
+function queueBacklog(entry) {
+  if (pendingClaims().some(c => c.claim.toLowerCase() === entry.claim.toLowerCase())) return;
+  if (pendingClaims().length >= 40) return; // keep the final pass bounded
+  state.backlog.push(entry);
+}
+
+function backlogAvailable() {
+  const cfg = window.APP_CONFIG || {};
+  return !!fcKey() || !!cfg.PROXY_MODE;
+}
+
+function buildBacklogPrompt(items) {
+  const lines = items.map((it, i) => {
+    const ev = (it.evidence || []).slice(0, 2)
+      .map(e => `   [${e.title}] ${(e.extract || "").slice(0, 280).replace(/\s+/g, " ")}`).join("\n");
+    return `${i + 1}. [${it.kind}] "${it.claim.replace(/"/g, "'")}"` + (ev ? "\n" + ev : "");
+  }).join("\n");
+  return [
+    "Verify these claims made in a debate, one by one. Some come with Wikipedia snippets: they can be newer than your training data, so trust them over memory when they speak to the claim.",
+    "verdict: true | mostly_true (right but rounded or imprecise) | misleading (technically true, missing context) | false | inconclusive (evidence mixed or missing) | unverifiable (nothing could settle it: private, vague, unsourced).",
+    'Return ONLY JSON: {"results":[{"i":number,"verdict":str,"confidence":0-1,"explanation":str (<=140 chars),"citation":str (<=60 chars)}]}',
+    "",
+    "Claims:",
+    lines
+  ].join("\n");
+}
+
+async function groqJSON(system, user, o) {
+  const cfg = window.APP_CONFIG || {};
+  const key = fcKey();
+  const useProxy = !key && !!cfg.PROXY_MODE;
+  if (!key && !useProxy) throw new Error("No Groq key configured (and PROXY_MODE off).");
+  const url = useProxy ? "/api/groq-chat" : "https://api.groq.com/openai/v1/chat/completions";
+  const headers = useProxy
+    ? { "Content-Type": "application/json" }
+    : { "Authorization": "Bearer " + key, "Content-Type": "application/json" };
+  const resp = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      model: fcModel(),
+      temperature: 0.1,
+      max_tokens: (o && o.maxTokens) || 1400,
+      reasoning_effort: (o && o.effort) || "low",
+      response_format: { type: "json_object" },
+      messages: [{ role: "system", content: system }, { role: "user", content: user }]
+    })
+  });
+  if (!resp.ok) throw new Error(`Groq ${resp.status}: ${(await resp.text()).slice(0, 300)}`);
+  const data = await resp.json();
+  const raw = data?.choices?.[0]?.message?.content || "";
+  try { return JSON.parse(raw.trim()); } catch (e) {
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error("Groq returned no JSON: " + raw.slice(0, 160));
+    return JSON.parse(m[0]);
+  }
+}
+
+function refreshAfterBacklog() {
+  renderClaimLog();
+  if (document.getElementById("screen-results")?.classList.contains("active")) {
+    renderResultScores();
+    renderClaimReport();
+  }
+}
+
+function verifyBacklog() {
+  if (state.backlogBusy) return state.backlogBusy;
+  if (!pendingClaims().length || !backlogAvailable()) return Promise.resolve();
+  state.backlogBusy = (async () => {
+    refreshAfterBacklog();
+    let failures = 0;
+    while (pendingClaims().length && failures < 2) {
+      const batch = pendingClaims().slice(0, 5);
+      try {
+        await Promise.all(batch.map(async it => { it.evidence = await fetchWikiContext(it.claim).catch(() => []); }));
+        const r = await groqJSON(
+          "You are a careful fact-checker that responds with JSON only, no prose. " + todayRule(),
+          buildBacklogPrompt(batch), { maxTokens: 1600, effort: "medium" });
+        const list = Array.isArray(r && r.results) ? r.results : [];
+        batch.forEach((it, idx) => {
+          const res = list.find(x => Number(x.i) === idx + 1) || list[idx] || {};
+          let v = String(res.verdict || "").toLowerCase().replace(/[\s-]+/g, "_");
+          if (!(SCORED_VERDICTS[v] || v === "inconclusive" || v === "unverifiable")) v = "inconclusive";
+          it.verdict = v;
+          it.confidence = Math.max(0, Math.min(1, Number(res.confidence) || 0));
+          if (SCORED_VERDICTS[v] && it.confidence < ((window.APP_CONFIG || {}).CONSENSUS_BORDERLINE_LOW ?? 0.6)) it.verdict = "inconclusive";
+          it.explanation = String(res.explanation || (res.verdict ? "" : "The check didn't return a verdict for this claim."));
+          it.citation = String(res.citation || "");
+          it.late = true;
+          it.source = "AI backlog";
+          delete it.evidence;
+          applyClaimScore(it, { silent: true });
+        });
+        failures = 0;
+      } catch (e) {
+        console.warn("[backlog] batch failed:", e.message || e);
+        failures++;
+        if (!isTransientCheckError(e.message || e)) break;
+        await new Promise(res => setTimeout(res, 2500 * failures));
+      }
+      refreshAfterBacklog();
+    }
+  })().finally(() => {
+    state.backlogBusy = null;
+    state.backlog = state.backlog.filter(c => c.verdict === "pending");
+    refreshAfterBacklog();
+  });
+  return state.backlogBusy;
+}
+
+/* The results page: every statement from the round, grouped by what it is. */
+function renderClaimReport() {
+  const el = document.getElementById("claim-report");
+  if (!el) return;
+  const log = state.claimLog;
+  if (!log.length) { el.innerHTML = ""; return; }
+  const group = c => VERDICT_GROUP[c.verdict === "uncertain" ? "inconclusive" : c.verdict] || "facts";
+  const counts = {};
+  log.forEach(c => { const v = c.verdict === "uncertain" ? "inconclusive" : c.verdict; counts[v] = (counts[v] || 0) + 1; });
+  const order = ["true", "mostly_true", "misleading", "false", "inconclusive", "opinion", "value", "prediction", "hypothetical", "testimony", "unverifiable", "pending"];
+  const chips = order.filter(v => counts[v]).map(v => `<span class="rep-chip verdict-${v}" title="${escapeHtml(vdesc(v))}">${escapeHtml(vlabel(v))} <b>${counts[v]}</b></span>`).join("");
+  const status = state.backlogBusy
+    ? `<div class="rep-status">${escapeHtml(t("claims.report.working"))}</div>`
+    : (pendingClaims().length && backlogAvailable() ? `<button type="button" class="btn rep-verify" onclick="verifyBacklog()">${escapeHtml(t("claims.verifynow"))} (${pendingClaims().length})</button>` : "");
+  const section = (g) => {
+    const rows = log.filter(c => group(c) === g);
+    if (!rows.length) return "";
+    return `<h4 class="rep-h">${escapeHtml(t("claims.report." + g))}</h4><div class="rep-list">${rows.map(claimItemHtml).join("")}</div>`;
+  };
+  el.innerHTML = `<h3 class="rep-title">${escapeHtml(t("claims.report"))}</h3>
+    <div class="rep-chips">${chips}</div>${status}
+    ${section("facts")}${section("views")}${section("unverifiable")}${section("pending")}`;
+}
+
 function flashScreen(color) {
   const o = document.getElementById("flash-overlay");
   if (!o) return;
@@ -7920,10 +8192,9 @@ function flashScreen(color) {
 function showAfcBanner({ claim, explanation, verdict, side, confidence, citation }) {
   const el = document.getElementById("afc-banner");
   if (!el) return;
-  el.classList.remove("verdict-true", "verdict-false", "verdict-uncertain");
+  el.className = el.className.replace(/\bverdict-\S+/g, "").trim();
   el.classList.add("verdict-" + verdict);
-  document.getElementById("afc-verdict").textContent =
-    verdict === "true" ? "verified" : verdict === "false" ? "false" : "unclear";
+  document.getElementById("afc-verdict").textContent = verdict === "true" ? "verified" : vlabel(verdict).toLowerCase();
   document.getElementById("afc-claim").textContent = claim;
   let exp = explanation || "";
   if (typeof confidence === "number") {
@@ -7970,7 +8241,7 @@ function speakVerdict(c) {
   const now = Date.now();
   if (now - (state.ttsLast || 0) < 500) return;
   state.ttsLast = now;
-  const word = c.verdict === "true" ? "true" : c.verdict === "false" ? "false" : "unclear";
+  const word = c.verdict === "true" ? "true" : c.verdict === "mostly_true" ? "mostly true" : c.verdict === "misleading" ? "misleading" : c.verdict === "false" ? "false" : "unclear";
   try {
     const u = new SpeechSynthesisUtterance(word);
     u.volume = Math.max(0, Math.min(1, cfg.TTS_VOLUME ?? 0.7));
@@ -7981,34 +8252,62 @@ function speakVerdict(c) {
   } catch (_) {}
 }
 
-/* Render the live claim log sidebar. Newest first. */
-function renderClaimLog() {
-  const wrap = document.getElementById("claim-log-list");
-  if (!wrap) return;
-  const items = state.claimLog.slice().reverse().slice(0, 60);
-  if (!items.length) {
-    wrap.innerHTML = `<div class="claim-log-empty">No claims checked yet. Start the timer and speak a factual statement.</div>`;
-    return;
-  }
-  wrap.innerHTML = items.map(c => {
-    const sideName = c.side === "a" ? state.nameA : c.side === "b" ? state.nameB : "";
-    const v = c.verdict;
-    const vLabel = v === "true" ? "TRUE" : v === "false" ? "FALSE" : "UNCLEAR";
-    const conf = (c.confidence != null) ? `${Math.round(c.confidence * 100)}%` : "";
-    const cite = c.citation ? `<span class="cl-cite">${escapeHtml(c.citation)}</span>` : "";
-    const overturn = c.overturned ? `<span class="cl-overturned">overturned</span>` : "";
-    return `<div class="cl-item verdict-${v}${c.overturned ? " overturned" : ""}">
+/* One claim-log entry; used by the live sidebar and the results report. */
+function claimItemHtml(c) {
+  const sideName = c.side === "a" ? state.nameA : c.side === "b" ? state.nameB : "";
+  const v = c.verdict === "uncertain" ? "inconclusive" : c.verdict;
+  const conf = (c.confidence != null && SCORED_VERDICTS[v]) ? `${Math.round(c.confidence * 100)}%` : "";
+  const cite = c.citation ? `<span class="cl-cite">${escapeHtml(c.citation)}</span>` : "";
+  const overturn = c.overturned ? `<span class="cl-overturned">overturned</span>` : "";
+  const late = c.late ? `<span class="cl-late" title="Checked after the claim was made">checked later</span>` : "";
+  const kind = (c.kind === "stat") ? `<span class="cl-kind">stat</span>` : "";
+  return `<div class="cl-item verdict-${v}${c.overturned ? " overturned" : ""}">
       <div class="cl-row1">
-        <span class="cl-verdict">${vLabel}</span>
-        <span class="cl-conf">${conf}</span>
+        <span class="cl-verdict" title="${escapeHtml(vdesc(v))}">${escapeHtml(vlabel(v))}</span>
+        ${kind}<span class="cl-conf">${conf}</span>
         <span class="cl-side">${escapeHtml(sideName)}</span>
-        ${overturn}
+        ${late}${overturn}
       </div>
       <div class="cl-claim">${escapeHtml(c.claim || c.utterance || "")}</div>
       ${c.explanation ? `<div class="cl-exp">${escapeHtml(c.explanation)}</div>` : ""}
       ${cite}
     </div>`;
-  }).join("");
+}
+
+function claimGroupCounts() {
+  const n = { all: 0, facts: 0, views: 0, unverifiable: 0, pending: 0 };
+  state.claimLog.forEach(c => {
+    const g = VERDICT_GROUP[c.verdict === "uncertain" ? "inconclusive" : c.verdict] || "facts";
+    n.all++; n[g]++;
+  });
+  return n;
+}
+
+function setClaimFilter(f) {
+  state.claimFilter = f;
+  renderClaimLog();
+}
+
+/* Render the live claim log sidebar. Newest first. */
+function renderClaimLog() {
+  const wrap = document.getElementById("claim-log-list");
+  if (!wrap) return;
+  const filter = state.claimFilter || "all";
+  const n = claimGroupCounts();
+  const bar = document.getElementById("claim-log-filters");
+  if (bar) {
+    bar.innerHTML = ["all", "facts", "views", "unverifiable", "pending"]
+      .filter(g => g === "all" || n[g])
+      .map(g => `<button type="button" class="cl-filter${filter === g ? " on" : ""}" onclick="setClaimFilter('${g}')">${escapeHtml(t("claims.group." + g))} ${n[g]}</button>`)
+      .join("") + (n.pending ? `<button type="button" class="cl-verify" onclick="verifyBacklog()" ${state.backlogBusy ? "disabled" : ""}>${escapeHtml(t(state.backlogBusy ? "claims.verifying" : "claims.verifynow"))}</button>` : "");
+  }
+  const items = state.claimLog.filter(c => filter === "all" || (VERDICT_GROUP[c.verdict === "uncertain" ? "inconclusive" : c.verdict] || "facts") === filter)
+    .slice().reverse().slice(0, 60);
+  if (!items.length) {
+    wrap.innerHTML = `<div class="claim-log-empty">${state.claimLog.length ? "Nothing in this group yet." : "No claims checked yet. Start the timer and speak."}</div>`;
+    return;
+  }
+  wrap.innerHTML = items.map(claimItemHtml).join("");
 }
 
 function toggleClaimLog() {
@@ -8062,10 +8361,10 @@ async function factCheckQuery(q) {
       };
       const raw = await runClaimCheck(q, promptOpts);
       const claims = normalizeClaims(raw);
-      const top = claims[0] || { claim: q, verdict: "uncertain", confidence: 0, explanation: "No verifiable claim detected.", citation: "" };
+      const top = claims[0] || { claim: q, verdict: "inconclusive", confidence: 0, explanation: "No verifiable claim detected.", citation: "" };
       const verdict = top.verdict;
-      const verdictLabel = verdict === "true" ? "VERIFIED" : verdict === "false" ? "FALSE" : "UNCLEAR";
-      const verdictClass = verdict === "true" ? "verdict-true" : verdict === "false" ? "verdict-false" : "verdict-uncertain";
+      const verdictLabel = verdict === "true" ? "VERIFIED" : vlabel(verdict);
+      const verdictClass = "verdict-" + verdict;
       const cite = top.citation ? ` · src: ${escapeHtml(top.citation)}` : "";
       html += `
         <div class="fc-result afc-banner ${verdictClass}" style="position:static; transform:none; opacity:1; pointer-events:auto; margin-bottom:10px; max-width:none; min-width:0;">
@@ -8187,7 +8486,9 @@ function endDebate() {
   setMic(false);
   renderResults();
   switchScreen("screen-results");
-  recordDebateSummary();
+  // Verify what was held back, then fold the late verdicts into the score before it is recorded
+  const backlogDone = pendingClaims().length ? verifyBacklog().catch(() => {}) : Promise.resolve();
+  backlogDone.then(() => recordDebateSummary());
   const judged = maybeRunAIJudges();
   if (state.practiceMode && judged && typeof judged.then === "function") {
     judged.then(recordPracticeAttempt).catch(recordPracticeAttempt);
@@ -8195,6 +8496,13 @@ function endDebate() {
 }
 
 function renderResults() {
+  renderResultScores();
+  renderClaimReport();
+  renderResultsRest();
+}
+
+/* Winner banner + score cards. Re-run when late backlog verdicts change the points. */
+function renderResultScores() {
   const a = state.scores.a, b = state.scores.b;
   const mode = DEBATE_MODES[state.mode];
 
@@ -8236,6 +8544,11 @@ function renderResults() {
     });
   }
 
+}
+
+function renderResultsRest() {
+  const a = state.scores.a, b = state.scores.b;
+  const mode = DEBATE_MODES[state.mode];
   document.getElementById("ai-verdicts").innerHTML = "";
   const argAnalysisEl = document.getElementById("arg-analysis");
   if (argAnalysisEl) argAnalysisEl.innerHTML = "";
