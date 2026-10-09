@@ -5128,7 +5128,8 @@ function queueOnlineFactCheck(chunk) {
 async function runOneOnlineFactCheck(sentence, side, opts) {
   try {
     const cfg = window.APP_CONFIG || {};
-    const combined = await runCombinedCheck(sentence, Object.assign({}, opts, { wantFallacies: !!cfg.AUTO_FALLACY_DETECTION }));
+    const evidence = await groundingFor(sentence);
+    const combined = await runCombinedCheck(sentence, Object.assign({}, opts, { evidence, wantFallacies: !!cfg.AUTO_FALLACY_DETECTION }));
     if (!state.onlineRoom || state.onlineRoom.currentSide !== side) return; // turn already moved on — stale result
 
     if (cfg.AUTO_FALLACY_DETECTION) {
@@ -6498,7 +6499,7 @@ async function scoreLabeledSegments(segments, topic, onProgress) {
     const sourceName = "AI";
 
     const promptOpts = { topic, context: recentBySide[seg.side].slice(-ctxN), wantFallacies: !!cfg.AUTO_FALLACY_DETECTION };
-    const evidence = cfg.USE_WIKIPEDIA_GROUNDING ? await fetchWikiContext(seg.text).catch(() => []) : [];
+    const evidence = await groundingFor(seg.text).catch(() => []);
     const combined = await runCombinedCheck(seg.text, Object.assign({}, promptOpts, { evidence })).catch(e => {
       console.warn("Combined check failed for segment:", e.message || e);
       return null;
@@ -7076,7 +7077,7 @@ Opinions, questions, greetings, filler, and predictions are NOT claims and shoul
     const ev = evidence.slice(0, 3).map((e, i) =>
       `[${i + 1}] ${e.title ? e.title + " — " : ""}${(e.extract || "").slice(0, 320).replace(/\s+/g, " ")}`
     ).join("\n");
-    blocks.push("", "Reference snippets (Wikipedia, may help — verify, don't trust blindly):", ev);
+    blocks.push("", "Reference snippets (Wikipedia, can be newer than your training data, so trust them over memory when they speak to the claim):", ev);
   }
   blocks.push("", `Utterance: """${sentence.replace(/"/g, '\\"')}"""`);
   return blocks.join("\n");
@@ -7103,7 +7104,7 @@ async function groqClaimCheck(sentence, opts) {
       reasoning_effort: "low",
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: "You are a strict fact-checker that responds with JSON only, no prose." },
+        { role: "system", content: "You are a strict fact-checker that responds with JSON only, no prose. " + todayRule() },
         { role: "user",   content: buildClaimPrompt(sentence, opts) }
       ]
     })
@@ -7268,7 +7269,7 @@ function buildCombinedPrompt(sentence, opts) {
     const ev = evidence.slice(0, 3).map((e, i) =>
       `[${i + 1}] ${e.title ? e.title + " — " : ""}${(e.extract || "").slice(0, 320).replace(/\s+/g, " ")}`
     ).join("\n");
-    blocks.push("", "Reference snippets (Wikipedia, may help — verify, don't trust blindly):", ev);
+    blocks.push("", "Reference snippets (Wikipedia, can be newer than your training data, so trust them over memory when they speak to the claim):", ev);
   }
   blocks.push("", `Utterance: """${sentence.replace(/"/g, '\\"')}"""`);
   return blocks.join("\n");
@@ -7294,7 +7295,7 @@ async function groqCombinedCheck(sentence, opts) {
       reasoning_effort: "low",
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: "You are a strict fact-checker and fallacy-spotter that responds with JSON only, no prose." },
+        { role: "system", content: "You are a strict fact-checker and fallacy-spotter that responds with JSON only, no prose. " + todayRule() },
         { role: "user",   content: buildCombinedPrompt(sentence, opts) }
       ]
     })
@@ -7654,33 +7655,48 @@ function toggleModeratorPanel() {
 
 /* Pull a couple of short Wikipedia summaries to ground the LLM.
    Best-effort: returns [] on any failure, never throws. */
+/* The model's training data ends before today, so it can call real recent
+   events false ("2025 is in the future"). Two defences: tell it today's date,
+   and look recent claims up on Wikipedia, which is current. */
+const RECENT_RE = /\b20(2[4-9]|3\d)\b|\b(last|this|next) (year|month|week)\b|\brecent(ly)?\b|\bjust (passed|signed|announced|elected|happened)\b|\b(current|new|latest) (president|prime minister|law|policy|ruling)\b/i;
+
+function todayRule() {
+  const d = new Date();
+  const day = d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  return `Today is ${day}. Your training data ends earlier, so events up to today can be real even if you don't know them, and a year up to today is never "in the future". Say "false" only when a claim clearly contradicts well-established facts; if it concerns recent events you can't confirm, say "uncertain".`;
+}
+
+/* Wikipedia snippets for a claim, but only when they earn their tokens:
+   the claim looks recent, or always-on grounding is enabled in config. */
+async function groundingFor(text) {
+  const cfg = window.APP_CONFIG || {};
+  const always = !!cfg.USE_WIKIPEDIA_GROUNDING;
+  if (!always && cfg.GROUND_RECENT_CLAIMS === false) return [];
+  const target = always
+    ? text
+    : splitIntoClaims(text).find(x => RECENT_RE.test(x));
+  if (!target) return [];
+  return fetchWikiContext(target);
+}
+
 async function fetchWikiContext(sentence) {
-  if (!window.APP_CONFIG?.USE_WIKIPEDIA_GROUNDING) return [];
   const q = (sentence || "").trim();
   if (!q || q.length < 4) return [];
   try {
-    const searchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&limit=2&search=${encodeURIComponent(q)}&format=json&origin=*`;
+    // one full-text search request that also returns each page's intro
+    const url = "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&exsentences=3&exlimit=3&format=json&origin=*&gsrsearch=" + encodeURIComponent(q);
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 1800);
-    const sresp = await fetch(searchUrl, { signal: ctrl.signal });
+    const timer = setTimeout(() => ctrl.abort(), 2500);
+    const resp = await fetch(url, { signal: ctrl.signal });
     clearTimeout(timer);
-    if (!sresp.ok) return [];
-    const sdata = await sresp.json();
-    const titles = (sdata && sdata[1]) || [];
-    if (!titles.length) return [];
-    const results = await Promise.all(titles.slice(0, 2).map(async t => {
-      try {
-        const c = new AbortController();
-        const tt = setTimeout(() => c.abort(), 1800);
-        const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`, { signal: c.signal });
-        clearTimeout(tt);
-        if (!r.ok) return null;
-        const j = await r.json();
-        if (!j || !j.extract) return null;
-        return { title: j.title || t, extract: j.extract };
-      } catch (_) { return null; }
-    }));
-    return results.filter(Boolean);
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const pages = Object.values((data && data.query && data.query.pages) || {});
+    return pages
+      .sort((a, b) => (a.index || 9) - (b.index || 9))
+      .filter(pg => pg && pg.extract)
+      .slice(0, 2)
+      .map(pg => ({ title: pg.title, extract: pg.extract }));
   } catch (_) { return []; }
 }
 
@@ -7755,7 +7771,7 @@ async function runOneFactCheck(sentence, side, opts) {
   state.afcBusy = true; updateAfcChip();
   try {
     const cfg = window.APP_CONFIG || {};
-    const evidence = cfg.USE_WIKIPEDIA_GROUNDING ? await fetchWikiContext(sentence) : [];
+    const evidence = await groundingFor(sentence);
 
     const promptOpts = {
       topic: (opts && opts.topic) || state.topic || (document.getElementById("custom-topic")?.value || "").trim(),
@@ -7774,6 +7790,8 @@ async function runOneFactCheck(sentence, side, opts) {
     }
 
     const claims = normalizeClaims(r);
+    // Recent claim, no source found: the model may simply not know it yet.
+    if (!evidence.length) claims.forEach(c => { if (c.verdict === "false" && RECENT_RE.test(c.claim)) c.verdict = "uncertain"; });
     console.log("[AFC] normalized claims:", claims);
     if (!claims.length) { console.log("[AFC] no claims extracted — banner skipped"); return; }
 
@@ -8033,7 +8051,7 @@ async function factCheckQuery(q) {
   //    pipeline as auto fact-check (Wikipedia evidence + topic + citations).
   if (hasAI) {
     try {
-      const evidence = cfg.USE_WIKIPEDIA_GROUNDING ? await fetchWikiContext(q) : [];
+      const evidence = await groundingFor(q);
       const promptOpts = {
         topic: state.topic || (document.getElementById("custom-topic")?.value || "").trim(),
         context: [],
