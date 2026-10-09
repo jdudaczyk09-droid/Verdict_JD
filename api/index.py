@@ -95,43 +95,64 @@ def get_groq_keys():
 
     keys = list(dict.fromkeys(keys))  # de-dupe, keep it simple
     random.shuffle(keys)
-    # Load balancing: keys that were just rate-limited (or rejected) rest for a
-    # short while instead of being retried first on every request. If every key
-    # is resting we still try them all, so a request never fails for that alone.
-    now = time.time()
-    ready = [k for k in keys if KEY_REST_UNTIL.get(k, 0) <= now]
-    resting = [k for k in keys if KEY_REST_UNTIL.get(k, 0) > now]
-    return ready + resting
+    return keys
 
 
-# key -> unix time until which it is tried last. Per serverless instance, which
-# is still enough to stop one busy key being hammered during a burst.
+# (key, model) -> unix time until which that pair is tried last. The model
+# "*" means the key itself was rejected. Per serverless instance, which is
+# still enough to stop one busy key being hammered during a burst.
 KEY_REST_UNTIL = {}
 RATE_LIMIT_REST_SECONDS = 15
+DAILY_LIMIT_REST_SECONDS = 1800
 BAD_KEY_REST_SECONDS = 600
+DEFAULT_CHAT_MODEL = "openai/gpt-oss-120b"
+# When the main model is rate limited everywhere, the same request goes to these
+# instead. Each model has its own free-tier quota, so this adds capacity. Both
+# take the same parameters (JSON mode, reasoning_effort).
+FALLBACK_CHAT_MODELS = [m.strip() for m in os.environ.get("GROQ_FALLBACK_MODELS", "openai/gpt-oss-20b").split(",") if m.strip()]
+MAX_ATTEMPTS = 8
 
 
-def rest_key(key, status):
+def is_resting(key, model, now):
+    return max(KEY_REST_UNTIL.get((key, model), 0), KEY_REST_UNTIL.get((key, "*"), 0)) > now
+
+
+def rest_key(key, model, status, text=""):
     if status == 429:
-        KEY_REST_UNTIL[key] = time.time() + RATE_LIMIT_REST_SECONDS
+        daily = bool(re.search(r"per day|TPD|RPD", text or "", re.I))
+        KEY_REST_UNTIL[(key, model)] = time.time() + (DAILY_LIMIT_REST_SECONDS if daily else RATE_LIMIT_REST_SECONDS)
     elif status in (401, 403):
-        KEY_REST_UNTIL[key] = time.time() + BAD_KEY_REST_SECONDS
+        KEY_REST_UNTIL[(key, "*")] = time.time() + BAD_KEY_REST_SECONDS
 
 
-def groq_post(url, keys, body, content_type, timeout):
-    """POST to Groq, moving on to the next key when one is rate limited (429)
-    or rejected (401/403). Returns the last upstream response."""
+def groq_post(url, keys, body, content_type, timeout, models=None):
+    """POST to Groq, moving on when a key is rate limited (429) or rejected
+    (401/403): first to the next key, then to the next model in `models`.
+    Pairs that were just limited are tried last. Returns the last response."""
+    payload = None
+    if models and "json" in (content_type or "").lower():
+        try:
+            payload = json.loads(body)
+        except Exception:
+            payload = None
+    now = time.time()
+    pairs = [(m, k) for m in (models or [None]) for k in keys]
+    ready = [p for p in pairs if not is_resting(p[1], p[0] or "", now)]
+    resting = [p for p in pairs if is_resting(p[1], p[0] or "", now)]
     upstream = None
-    for key in keys:
+    for model, key in (ready + resting)[:MAX_ATTEMPTS]:
+        data = body
+        if payload is not None and model and payload.get("model") != model:
+            data = json.dumps(dict(payload, model=model))
         upstream = requests.post(
             url,
-            data=body,
+            data=data,
             headers={"Authorization": "Bearer " + key, "Content-Type": content_type},
             timeout=timeout,
         )
         if upstream.status_code not in (429, 401, 403):
             break  # success, or an error another key can't fix
-        rest_key(key, upstream.status_code)
+        rest_key(key, model or "", upstream.status_code, upstream.text[:300])
     return upstream
 
 
@@ -227,7 +248,13 @@ def groq_chat():
     content_type = request.headers.get("Content-Type", "application/json")
 
     try:
-        upstream = groq_post(GROQ_CHAT_URL, keys, body, content_type, 60)
+        requested = DEFAULT_CHAT_MODEL
+        try:
+            requested = json.loads(body).get("model") or DEFAULT_CHAT_MODEL
+        except Exception:
+            pass
+        models = [requested] + (FALLBACK_CHAT_MODELS if requested == DEFAULT_CHAT_MODEL else [])
+        upstream = groq_post(GROQ_CHAT_URL, keys, body, content_type, 40, models)
     except Exception as e:
         return jsonify({"error": "Upstream error: " + str(e)}), 502
 
