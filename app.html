@@ -1063,6 +1063,9 @@
   .tos-body h4 { font-size: 19px; font-variation-settings: "wdth" 88; margin: 18px 0 6px; color: #000; }
   .tos-body h4:first-child { margin-top: 0; }
   .tos-body p { margin-bottom: 6px; }
+  .tos-body ul { list-style: disc; margin: 0 0 8px; padding-left: 22px; }
+  .tos-body li { margin-bottom: 4px; }
+  .tos-body a { color: var(--pen); font-weight: 800; }
 
   .fallacy-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
   .fallacy-item { padding: 11px 13px; background: #fff; border: 2px solid var(--ink); cursor: pointer; }
@@ -1940,8 +1943,7 @@
           <button class="btn" onclick="googleIt(document.getElementById('fc-query').value)" data-i18n="debate.google">Google</button>
         </div>
         <div data-i18n="debate.factcheck.disclaimer" style="font-size:11px; color:var(--text-faint); margin: 2px 4px 6px; line-height: 1.5;">
-          If a turn is live and the verdict is confident, the current speaker auto-scores
-          (+fact for true, −wrong for false). Off-turn searches just flash without scoring.
+          If a turn is live and the verdict is a confident true or false, the current speaker auto-scores. Opinions, predictions and unverifiable statements are never scored. Off-turn searches just flash without scoring.
         </div>
         <div class="fc-results" id="fc-results">
           <div class="fc-empty">No lookups yet.</div>
@@ -2153,7 +2155,7 @@
             <div class="upload-drop-inner">
               <div class="upload-icon">⏏</div>
               <div class="upload-cta" data-i18n="upload.dropcta">Click to choose a file or drop one here</div>
-              <div class="upload-hint" data-i18n="upload.drophint">Most video and audio formats supported. We extract the audio in your browser — nothing goes to our servers; the audio only goes to our transcription engine.</div>
+              <div class="upload-hint" data-i18n="upload.drophint">Most video and audio formats supported. We extract the audio in your browser, then send it in chunks through our server to Groq for transcription. We don't keep the audio.</div>
             </div>
           </div>
           <div id="upload-file-meta" class="upload-meta" style="display:none;"></div>
@@ -2360,26 +2362,27 @@
         <div class="how-section">
           <h3><span class="how-badge">3</span> <span data-i18n="how.s3.title">Claim detection &amp; fact-check</span></h3>
           <p data-i18n="how.s3.p1">
-            Every sentence has to clear two questions before anything happens:
+            Every statement is sorted before anything happens:
           </p>
           <ol>
-            <li data-i18n-html="how.s3.li1"><b>Is there an actual factual claim here?</b> (Opinions, questions, filler, and predictions get skipped — you won't get dinged for saying "I think.")</li>
-            <li data-i18n-html="how.s3.li2"><b>Is that claim true or false</b>, based on well-established public knowledge?</li>
+            <li data-i18n-html="how.s3.li1"><b>What kind of statement is it?</b> A fact or statistic, an opinion, a value judgment, a prediction, a what-if, a claim about the case (Mock Trial), or something unverifiable. Views are logged with a label but never scored — you won't get dinged for saying "I think."</li>
+            <li data-i18n-html="how.s3.li2"><b>Can it be settled right now?</b> Well-known facts and statistics are judged on the spot. Harder ones — exact figures, recent events, niche sources — are held back and checked with a Wikipedia lookup at turn changes and after the round.</li>
           </ol>
           <p data-i18n="how.s3.p2">
-            The checks are paced on purpose — they won't stack up mid-speech, they won't
-            double-check something you already said, and they go quiet during crossfire,
-            because even we can't tell who's talking over whom.
+            The checks are paced on purpose — sentences are grouped into one check every few
+            seconds (longer when the AI service is busy), nothing already said is checked twice,
+            and they go quiet during crossfire, because even we can't tell who's talking over whom.
           </p>
         </div>
 
         <div class="how-section">
           <h3><span class="how-badge">4</span> <span data-i18n="how.s4.title">Instant feedback</span></h3>
-          <p data-i18n="how.s4.p1">The verdict comes back fast, and it only goes three ways:</p>
+          <p data-i18n="how.s4.p1">Facts that can be settled on the spot come back fast. Every statement gets a label:</p>
           <ul>
-            <li data-i18n-html="how.s4.li1"><b>Verified</b> — screen flashes green, a short high tone plays, and the speaker gets <code>+fact</code>.</li>
-            <li data-i18n-html="how.s4.li2"><b>False</b> — screen flashes red, a low tone plays, and the speaker loses <code>−wrong</code>.</li>
-            <li data-i18n-html="how.s4.li3"><b>Unclear</b> or not really a claim — a banner briefly shows what it found, but no points move.</li>
+            <li data-i18n-html="how.s4.li1"><b>True</b> or <b>mostly true</b> — screen flashes green, a short high tone plays, and the speaker gets <code>+fact</code> (partial points for mostly true).</li>
+            <li data-i18n-html="how.s4.li2"><b>False</b> or <b>misleading</b> — screen flashes red, a low tone plays, and the speaker loses <code>−wrong</code> (partial for misleading).</li>
+            <li data-i18n-html="how.s4.li3"><b>Opinion, value claim, prediction, hypothetical, case claim, unverifiable</b> or <b>inconclusive</b> — logged in the claim log with the reason, and no points move.</li>
+            <li data-i18n-html="how.s4.li4"><b>To verify</b> — held back until a pause or the end of the round. If it turns out true or false, points are added or removed then and the results page marks it "checked later."</li>
           </ul>
           <p data-i18n-html="how.s4.p2">
             A banner surfaces the claim in plain English, one line of reasoning, and whoever
@@ -2436,12 +2439,7 @@
         <div class="how-section">
           <h3><span data-i18n="how.privacy.title">Privacy</span></h3>
           <p data-i18n="how.privacy.p">
-            Your audio never leaves your browser. What gets sent out is the text of the one
-            sentence being checked, nothing more — not a recording, not the round before it,
-            not your name. Nothing is stored anywhere afterward. And if the fact-checker can't
-            reach its engine for any reason, it doesn't throw an error at you — it just goes
-            quiet and hands control back, and the app keeps running in fully-manual mode like
-            nothing happened.
+            Speech is turned into text first. By default your browser's own speech recognition does that — in Chrome and Edge it is run by Google or Microsoft, not by us. In High-accuracy mode, in Upload mode, and if your browser can't listen, short audio clips go through our server to Groq for transcription, and we don't keep them. The live checks then send only a few recent sentences and the topic to Groq — no audio and no names — and claims that look recent are looked up on Wikipedia from your browser. The AI judge and analysis do send the round's transcript and the names you entered. Nothing about a round is stored on our servers unless you sign in, enter a League code, or play an online room. If the AI service is busy, checks slow down or pause and the app keeps working in manual mode. The Privacy Policy has the full list.
           </p>
         </div>
 
@@ -2517,10 +2515,13 @@
       <p>Verdict Debate AI is a practice and scoring tool for debate and Mock Trial. It is <b>not</b> an official tournament judge, <b>not</b> a substitute for your league's actual rules or a certified adjudicator's decision, and — for Mock Trial mode specifically — <b>not</b> a real courtroom, a licensed attorney, or legal advice of any kind. It is educational role-play software only.</p>
 
       <h4>3. AI-generated content — accuracy disclaimer</h4>
-      <p>Fact-checks, fallacy flags, the Respect Filter, AI judge verdicts, argument analysis, Case Checker and Case Builder output, and everything else the Service generates is produced automatically by artificial-intelligence models and <b>can be wrong, biased, incomplete, out of date, or entirely fabricated</b>. Nothing generated by the Service constitutes fact, professional advice, or an authoritative ruling of any kind. You are solely responsible for independently verifying anything before relying on it — for a real competition, for a grade, or for any other purpose. You, your coach, and your actual judges are always the final word, never the Service.</p>
+      <p>Fact-checks, statement labels, fallacy flags, the Respect Filter, AI judge verdicts, argument analysis, Case Checker and Case Builder output, and everything else the Service generates is produced automatically by artificial-intelligence models and <b>can be wrong, biased, incomplete, out of date, or entirely fabricated</b>. Nothing generated by the Service constitutes fact, professional advice, or an authoritative ruling of any kind. You are solely responsible for independently verifying anything before relying on it — for a real competition, for a grade, or for any other purpose. You, your coach, and your actual judges are always the final word, never the Service.</p>
+      <p><b>Labels.</b> The Service sorts what is said into labels such as true, mostly true, misleading, false, inconclusive, opinion, value claim, prediction, hypothetical, case claim (Mock Trial), unverifiable, and to verify. These are an AI's best guess, not a finding. "Opinion," "unverifiable," and "inconclusive" mean the tool did not or could not decide — they are not a judgment that anything is right or wrong. The AI's knowledge ends before today's date, so it can mislabel recent events; for claims that look recent it may consult Wikipedia, which can itself be wrong, incomplete, or out of date.</p>
+      <p><b>Automatic scoring.</b> While a turn is live, a confident true, mostly true, misleading, or false label can add or remove points for the speaker automatically (partial points for "mostly true" and "misleading"). Claims marked "to verify" are held back and checked at turn changes and after the round, so points can change — and the winner shown on the results page can change — after a turn has ended. In Online Debate, fallacy flags that meet the confidence threshold are also scored automatically; in a local round they are suggestions that a person accepts or ignores. Opinions, predictions, hypotheticals, case claims, and unverifiable statements are never scored. Automatic scores are tagged and can be reversed ("Wrong call?" or the undo tray). A limit on automatic checks applies to each round.</p>
+      <p><b>Availability.</b> The Service depends on third-party AI services used under free usage limits. When a limit is reached, checks may slow down, be retried, fall back to a different AI model (whose accuracy may differ), be skipped, or pause, and transcription may switch to a different method. We do not guarantee that any check will run, or run on time.</p>
 
       <h4>4. Microphone access &amp; data collection consent</h4>
-      <p>Live-transcription features request access to your device's microphone. By granting that permission and using those features, you consent to your speech being processed — via your browser's built-in speech recognition and/or a third-party AI transcription service — for the sole purpose of generating a transcript and running the fact-check, fallacy-detection, and judging features you've enabled. You are responsible for what you say while the microphone is active and for obtaining any consent required from other people present or recorded. Don't use the Service to capture or process anyone's speech without their knowledge where that's required by law.</p>
+      <p>Live-transcription features request access to your device's microphone. By granting that permission and using those features, you consent to your speech being processed for the sole purpose of generating a transcript and running the fact-check, fallacy-detection, and judging features you've enabled. That processing is done by your browser's built-in speech recognition (which in many browsers, including Chrome and Edge, is run by the browser's maker and may send audio to its servers under its own policy) or — in High-accuracy mode, in Upload mode, and automatically if your browser's speech recognition is unavailable or stops working — by short audio clips sent through our server to Groq for transcription. The resulting text is then sent to Groq (and, where described in the Privacy Policy, looked up on Wikipedia) to produce fact-checks, labels, and judging. Details are in the Privacy Policy. You are responsible for what you say while the microphone is active and for obtaining any consent required from other people present or recorded. Don't use the Service to capture or process anyone's speech without their knowledge where that's required by law.</p>
 
       <h4>5. Assumption of risk</h4>
       <p>You use the Service, including any AI-generated feedback, scoring, or judging, entirely at your own risk. To the fullest extent permitted by law, you assume all risk of loss, inaccuracy, or harm — including reputational, academic, competitive, or emotional harm — that may result from reliance on the Service.</p>
@@ -2532,7 +2533,7 @@
       <p>Creating an account is entirely optional — every feature of Verdict Debate AI works fully without one. If you do create one, you're responsible for keeping your password confidential and for all activity under your account. Passwords are stored using one-way cryptographic hashing (bcrypt); we cannot see or recover your actual password. Notify us promptly if you believe your account has been compromised.</p>
 
       <h4>8. Your content &amp; data</h4>
-      <p>Most of what you do in Verdict Debate AI without an account — practice history, progress stats, saved settings, your language choice — lives only in your own browser's local storage; we never see it. Speech from a live round is sent to a third-party AI provider only to produce the transcript, fact-checks, and judging. If a League code is enabled, your results are shared with anyone who has that code — it's a shared classroom code, not a password, so don't treat it as private. If you create an account, your saved stats are stored server-side and tied to your account until you request deletion.</p>
+      <p>Most of what you do in Verdict Debate AI without an account — practice history, progress summaries, saved settings, your language choice — lives only in your own browser's local storage; we never see it. What you say or type into an AI-powered feature is sent to third-party AI services to produce the result (see the Privacy Policy for exactly what goes where). If a League code is entered, each finished round's summary is shared with anyone who has that code — it's a shared classroom code, not a password, so don't treat it as private. If you create an account, your account details and synced round summaries are stored on our servers until you ask us to delete them. If you use Online Debate, the room — including a text transcript of what each side said — is stored on our servers and is not currently deleted automatically; you can ask us to delete it. By using these features you confirm you have the right to submit that content.</p>
 
       <h4>9. Disclaimer of warranties</h4>
       <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WITHOUT LIMITATION WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, ACCURACY, OR UNINTERRUPTED / ERROR-FREE OPERATION. WE DO NOT WARRANT THAT AI-GENERATED OUTPUT WILL BE ACCURATE, RELIABLE, OR SUITABLE FOR ANY PARTICULAR PURPOSE.</p>
@@ -2553,7 +2554,7 @@
       <p>If any part of these Terms is found unenforceable, the rest remains in full effect. These Terms, together with the Privacy Policy, are the entire agreement between you and us regarding the Service.</p>
 
       <h4>15. Contact</h4>
-      <p>Questions or issues — including anything you think the Respect Filter got wrong, or a request to delete your account — can be raised through the project's GitHub repository.</p>
+      <p>Questions or issues — including anything you think the Respect Filter or the fact-checker got wrong, or a request to delete your account or a room — can be sent to jdudaczyk09@gmail.com or jeffbegun08@gmail.com.</p>
     </div>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="closeTosModal()">Close</button>
@@ -2567,34 +2568,67 @@
     <h2 data-i18n="footer.privacy">Privacy Policy</h2>
     <div class="modal-sub" data-i18n-html="modal.privacy.sub">Last updated <span id="privacy-date"></span> · See also our <a href="javascript:void(0)" onclick="closePrivacyModal(); openTosModal();">Terms of Service</a></div>
     <div class="tos-body">
-      <h4>1. What we collect</h4>
-      <p>Without an account: nothing leaves your browser except the specific text/audio needed to run a feature you actively triggered (a fact-check, a judge verdict, a Case Checker request). Practice history, progress stats, and settings are stored only in your browser's local storage.</p>
-      <p>If you create an account: your email address and a bcrypt-hashed password (never the plain password), a display name, and — only if you choose to sign in while practicing — your debate summaries (topic, scores, fallacies, judge persona) so your stats sync across devices.</p>
-      <p>If a coach enables a League code: the debate summaries submitted under that code (topic, scores, fallacies, student name as typed) are visible to anyone who has the code.</p>
+      <p>Verdict Debate AI is run by Jan Dudaczyk and Jeffrey Begun (New York metropolitan area, USA). This page describes what the app actually does with your data. We update it when the app changes; if anything here doesn't match what the app does, please tell us.</p>
 
-      <h4>2. Microphone use</h4>
-      <p>Microphone access is requested only to power live transcription while a turn is running, and only after your browser's own permission prompt. Audio is processed in real time by your browser's built-in speech recognition or, for higher-accuracy mode, sent to a transcription service in short chunks. We do not record, store, or retain raw audio ourselves.</p>
+      <h4>1. The short version</h4>
+      <ul>
+        <li>You don't need an account. Without one, nothing about your rounds is stored on our servers.</li>
+        <li>Your speech is turned into text, and that text is sent to an AI service (Groq) to be fact-checked, labelled, and judged. The audio itself is processed by your browser's speech recognition or sent to Groq for transcription — see section 2.</li>
+        <li>Things are stored on our servers only if you create an account, enter a League code, or use Online Debate (section 3).</li>
+        <li>No advertising, no selling of data, no cross-site tracking.</li>
+      </ul>
 
-      <h4>3. Cookies &amp; local storage</h4>
-      <p>We don't use third-party advertising or analytics cookies. We use your browser's local storage to remember your preferences, practice history, and (if you sign in) your session token. No tracking across other websites.</p>
+      <h4>2. What happens to your speech and text, feature by feature</h4>
+      <p><b>Live subtitles (default).</b> Your browser's built-in speech recognition listens through the microphone you allowed. In Chrome and Edge that recognition is normally performed on servers run by Google or Microsoft, under their own privacy policies; the audio does not come to us. If your browser has no speech recognition, blocks it, or it stops returning words, the app automatically switches to the High-accuracy method below and tells you.</p>
+      <p><b>High-accuracy transcription, and Upload mode.</b> The app records short clips from the microphone (about 3½ seconds each; longer if the service is busy; clips with no sound are skipped), or, in Upload mode, extracts the audio from the file you choose inside your browser and cuts it into chunks of up to about 2 minutes. Each clip or chunk is sent to our server, which forwards it to Groq's speech-to-text service and returns the text. Our server does not save the audio. Your browser may apply echo cancellation, noise suppression, and automatic gain to the microphone before capture; that happens on your device.</p>
+      <p><b>Live fact-checks, labels, and fallacy flags.</b> The transcribed text is sent, through our server, to Groq: up to the 4 most recent sentences from the current speaker, up to 2 earlier sentences from the same speaker as context, and the debate topic. It does not include audio and does not include debater names. Groq returns a kind and verdict for each statement and any fallacies. If Groq's main model is at its limit, our server retries the same request with another Groq model and, if every Groq key is limited, the check fails and is retried later.</p>
+      <p><b>Wikipedia lookups.</b> For claims that look recent (for example they mention 2024 or later, or "recently" or "last year"), and for claims held back for the after-round check, your browser sends the claim text directly to Wikipedia's search (run by the Wikimedia Foundation), which can see your IP address and that text. The first Wikipedia excerpts that come back are added to the request sent to Groq.</p>
+      <p><b>Held-back claims.</b> Claims that need a real lookup are kept in your browser's memory during the round, verified at turn changes and after the round, and are not saved anywhere when you leave the page.</p>
+      <p><b>AI judge, argument analysis, Case Checker, Case Builder, Respect Filter (when you turn it on), and the manual fact-check box.</b> The text you type, or the transcript of your round, plus the debater names and topic you entered where the feature uses them, is sent to Groq through our server. If in Setup you choose Anthropic or OpenAI and enter your own API key, those requests go from your browser straight to that company under its terms instead; your key is kept in your browser's memory for that session and is not saved by us.</p>
+      <p><b>What you can switch off.</b> The microphone features only run after your browser's permission prompt. You can turn off Auto fact-check in Setup, leave the Respect Filter off (its default), and not enable High-accuracy transcription. If you do, text is sent only for the features you use.</p>
 
-      <h4>4. Third-party processors</h4>
-      <p>Text (and audio, for transcription) is sent to a third-party AI service to power fact-checking, fallacy detection, judging, and related features. Don't submit sensitive personal information during a debate — assume anything spoken or typed into an AI-powered feature is processed by that outside service.</p>
+      <h4>3. What we store, and where</h4>
+      <p><b>In your browser (local storage), on your device only:</b> your language choice; that you dismissed the cookie notice; a login token, if you sign in (valid for 30 days); the code of an online room you are in, so you can rejoin; a progress log of up to 200 finished-round summaries (date, mode, topic, scores, fallacy names, judge persona); and practice history of up to 20 attempts per topic (score, counts, word count). Transcripts, claim logs, and held-back claims are not saved there. You can clear all of this in your browser settings.</p>
+      <p><b>On our servers</b> (a Postgres database hosted through Vercel, powered by Neon), only if you use these features:</p>
+      <ul>
+        <li><b>Account:</b> email address, a bcrypt-hashed password (never the plain password), display name, optional bio (up to 500 characters) and profile picture (a small image your browser resizes), and sign-up date. If you are signed in, each finished round's summary (date, mode, topic, scores, judge persona, fallacy names) is also stored.</li>
+        <li><b>League code:</b> if you enter one in Setup, each finished round sends the code, the name of Debater A as typed, mode, topic, practice flag, judge persona, scores, and fallacy names. Anyone who has the code can see that league's data.</li>
+        <li><b>Online Debate</b> (requires an account): room code, mode, topic, the host's and guest's display names and account IDs, turn, timer and score state, the score log, and a text transcript of what each side said (up to 20,000 characters per turn). Only the host and the one person who joins with the room code can read it. Rooms are not currently deleted automatically.</li>
+      </ul>
+      <p>We do not store audio, fact-check results, claim logs, or held-back claims on our servers. Our own code does not write request logs; our hosting provider keeps standard logs (see section 5).</p>
 
-      <h4>5. Children's privacy</h4>
-      <p>Verdict Debate AI is built for use in an educational setting — debate and Mock Trial practice — and is commonly used by students under 18 under a coach's or teacher's supervision. We do not knowingly collect personal information directly from children under 13 without appropriate parental or school consent. If you believe a child has created an account without proper consent, contact us so we can remove it.</p>
+      <h4>4. Cookies &amp; local storage</h4>
+      <p>We don't use advertising cookies or third-party tracking cookies. The browser storage listed in section 3 is what we use to remember your settings, progress, and sign-in.</p>
 
-      <h4>6. Data retention &amp; deletion</h4>
-      <p>Local browser data can be cleared at any time through your browser settings. Account data (email, stats) is retained until you request deletion through the project's GitHub repository, at which point we'll remove it.</p>
+      <h4>5. Services that handle your data</h4>
+      <p>Each of these handles data under its own terms and privacy policy, which we don't control — including how long it keeps data.</p>
+      <ul>
+        <li><b>Groq</b> (AI and speech-to-text): receives the audio clips, text, topic, and (for the judge, analysis, and similar features) names and transcripts described in section 2. We use Groq through our own account keys; the keys are never sent to your browser.</li>
+        <li><b>Wikipedia / Wikimedia Foundation:</b> receives claim text and your IP address for the lookups in section 2.</li>
+        <li><b>Your browser's speech service</b> (for example Google in Chrome, Microsoft in Edge): may receive microphone audio during default live subtitles.</li>
+        <li><b>Anthropic or OpenAI:</b> only if you choose them in Setup and enter your own key.</li>
+        <li><b>Vercel</b> (hosting): serves the site and our server code and keeps standard request logs (such as IP address, browser, and pages requested). The app also loads Vercel's analytics script, which may record page views and basic device and location information in aggregate. Vercel also hosts the database provided by Neon.</li>
+        <li><b>Google Fonts:</b> the pages load fonts from Google, so Google receives your IP address and browser information when a page loads.</li>
+      </ul>
+      <p>Don't speak or type sensitive personal information into an AI-powered feature; assume it will be processed by the outside services above.</p>
 
-      <h4>7. Your rights</h4>
-      <p>You can request access to, correction of, or deletion of any account data we hold about you at any time.</p>
+      <h4>6. Booking a call (landing page)</h4>
+      <p>The scheduler on our landing page does not send your name, email, or note to us. It prepares an email to Jeffrey (opened in your email app, or a Gmail compose link if you choose it) and an optional calendar file, all in your browser. Nothing reaches us unless you press send in your email program, and then it is handled by your email provider and by us as ordinary email. Times are shown using your device's time zone.</p>
 
-      <h4>8. Changes</h4>
-      <p>We may update this policy as the Service changes. Material changes will be reflected in the "last updated" date above.</p>
+      <h4>7. Children's privacy</h4>
+      <p>Verdict Debate AI is built for use in an educational setting — debate and Mock Trial practice — and is commonly used by students under 18 under a coach's or teacher's supervision. Accounts require you to be at least 13. We do not knowingly collect personal information directly from children under 13 without appropriate parental or school consent. If you believe a child has created an account without proper consent, contact us so we can remove it. Note that spoken words, and names entered into the app, can be personal information; adults supervising students should keep that in mind.</p>
 
-      <h4>9. Contact</h4>
-      <p>Privacy questions or deletion requests can be raised through the project's GitHub repository.</p>
+      <h4>8. Data retention &amp; deletion</h4>
+      <p>Local browser data can be cleared at any time through your browser settings. Account data, League submissions, and Online Debate rooms (including their transcripts) are kept until you ask us to delete them, because we do not yet delete them automatically. Email us (section 11) and we will delete your account and its round summaries, and any room or League entry you point us to. Data held by the services in section 5 follows their own retention rules.</p>
+
+      <h4>9. Security</h4>
+      <p>Passwords are stored only as one-way bcrypt hashes. The site is served over HTTPS. Our Groq keys stay on the server. No online service is perfectly secure, and a League code is not a password.</p>
+
+      <h4>10. Your choices and rights</h4>
+      <p>You can request access to, correction of, or deletion of any account data we hold about you at any time. You can use the app without an account, without a League code, and without Online Debate, and you can decline the microphone permission and use the manual features.</p>
+
+      <h4>11. Changes &amp; contact</h4>
+      <p>We may update this policy as the Service changes. Material changes will be reflected in the "last updated" date above. Privacy questions or deletion requests: jdudaczyk09@gmail.com or jeffbegun08@gmail.com.</p>
     </div>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="closePrivacyModal()">Close</button>
@@ -2665,7 +2699,7 @@
 
 <div id="cookie-banner" class="cookie-banner" style="display:none;">
   <div class="cookie-text" data-i18n-html="cookie.text">
-    Verdict Debate AI runs on your browser's local storage — and, if you sign in, a login token — instead of ad-tracking cookies.
+    Verdict Debate AI uses your browser's local storage — and, if you sign in, a login token — instead of ad-tracking cookies. It also loads Vercel's analytics script and Google Fonts.
     <a href="javascript:void(0)" onclick="openPrivacyModal()">Privacy Policy</a>
   </div>
   <button class="btn btn-sm btn-primary" onclick="acceptCookieNotice()" data-i18n="cookie.gotit">Got it</button>
@@ -3122,7 +3156,7 @@ const TRANSLATIONS = {
     "debate.factcheck": "Fact-Check", "debate.factcheck.note": "Checked by AI against Wikipedia",
     "debate.factcheck.ph": "Type a claim and hit Enter — flashes green/red like auto fact-check",
     "debate.search": "Search", "debate.google": "Google",
-    "debate.factcheck.disclaimer": "If a turn is live and the verdict is confident, the current speaker auto-scores (+fact for true, −wrong for false). Off-turn searches just flash without scoring.",
+    "debate.factcheck.disclaimer": "If a turn is live and the verdict is a confident true or false, the current speaker auto-scores. Opinions, predictions and unverifiable statements are never scored. Off-turn searches just flash without scoring.",
 
     "results.winner": "Winner", "results.tryjudge": "Try another judge persona",
     "results.runanalysis": "Run advanced argument analysis", "results.rematch": "Rematch",
@@ -3150,7 +3184,7 @@ const TRANSLATIONS = {
     "upload.lead": "Drop in a video or audio file of a debate and we'll transcribe it, attribute each turn to a side, fact-check every claim, flag fallacies, and produce the same per-side breakdown the live mode gives you.",
     "upload.step1": "1. Pick a file",
     "upload.dropcta": "Click to choose a file or drop one here",
-    "upload.drophint": "Most video and audio formats supported. We extract the audio in your browser — nothing goes to our servers; the audio only goes to our transcription engine.",
+    "upload.drophint": "Most video and audio formats supported. We extract the audio in your browser, then send it in chunks through our server to Groq for transcription. We don't keep the audio.",
     "upload.step2": "2. Tell us about the debate",
     "upload.sidea": "Side A name", "upload.sideaph": "e.g. Alice",
     "upload.sideb": "Side B name", "upload.sidebph": "e.g. Bob",
@@ -3187,15 +3221,16 @@ const TRANSLATIONS = {
     "how.s2.p1": "Hit start and the mic goes live. Words show up almost as fast as you say them — faded at first, while the recognizer's still deciding what it heard, then locked in solid once it's sure. That mic light isn't decoration; it's the only proof anyone's actually listening.",
     "how.s2.p2": "And while you're mid-sentence on your next point, the one you just finished is already getting checked behind the scenes.",
     "how.s3.title": "Claim detection & fact-check",
-    "how.s3.p1": "Every sentence has to clear two questions before anything happens:",
-    "how.s3.li1": "<b>Is there an actual factual claim here?</b> (Opinions, questions, filler, and predictions get skipped — you won't get dinged for saying \"I think.\")",
-    "how.s3.li2": "<b>Is that claim true or false</b>, based on well-established public knowledge?",
-    "how.s3.p2": "The checks are paced on purpose — they won't stack up mid-speech, they won't double-check something you already said, and they go quiet during crossfire, because even we can't tell who's talking over whom.",
+    "how.s3.p1": "Every statement is sorted before anything happens:",
+    "how.s3.li1": "<b>What kind of statement is it?</b> A fact or statistic, an opinion, a value judgment, a prediction, a what-if, a claim about the case (Mock Trial), or something unverifiable. Views are logged with a label but never scored — you won't get dinged for saying \"I think.\"",
+    "how.s3.li2": "<b>Can it be settled right now?</b> Well-known facts and statistics are judged on the spot. Harder ones — exact figures, recent events, niche sources — are held back and checked with a Wikipedia lookup at turn changes and after the round.",
+    "how.s3.p2": "The checks are paced on purpose — sentences are grouped into one check every few seconds (longer when the AI service is busy), nothing already said is checked twice, and they go quiet during crossfire, because even we can't tell who's talking over whom.",
     "how.s4.title": "Instant feedback",
-    "how.s4.p1": "The verdict comes back fast, and it only goes three ways:",
-    "how.s4.li1": "<b>Verified</b> — screen flashes green, a short high tone plays, and the speaker gets <code>+fact</code>.",
-    "how.s4.li2": "<b>False</b> — screen flashes red, a low tone plays, and the speaker loses <code>−wrong</code>.",
-    "how.s4.li3": "<b>Unclear</b> or not really a claim — a banner briefly shows what it found, but no points move.",
+    "how.s4.p1": "Facts that can be settled on the spot come back fast. Every statement gets a label:",
+    "how.s4.li1": "<b>True</b> or <b>mostly true</b> — screen flashes green, a short high tone plays, and the speaker gets <code>+fact</code> (partial points for mostly true).",
+    "how.s4.li2": "<b>False</b> or <b>misleading</b> — screen flashes red, a low tone plays, and the speaker loses <code>−wrong</code> (partial for misleading).",
+    "how.s4.li3": "<b>Opinion, value claim, prediction, hypothetical, case claim, unverifiable</b> or <b>inconclusive</b> — logged in the claim log with the reason, and no points move.",
+    "how.s4.li4": "<b>To verify</b> — held back until a pause or the end of the round. If it turns out true or false, points are added or removed then and the results page marks it \"checked later.\"",
     "how.s4.p2": "A banner surfaces the claim in plain English, one line of reasoning, and whoever just got scored. Every one of these calls is tagged <code>· auto</code> in the undo tray, in case the machine got it wrong and you need to say so.",
     "how.s5.title": "Manual scoring & fallacies",
     "how.s5.p1": "The AI doesn't get the final word — you do. Missed a claim? Hit <b>+fact</b> or <b>−wrong</b> yourself. Heard a straw man or a slippery slope slide by? The <b>−fallacy</b> button pulls up all 16 — pick the one that fits and it docks the point and tags the transcript right where it happened.",
@@ -3212,7 +3247,7 @@ const TRANSLATIONS = {
     "how.table.r5.f": "<b>Parliamentary</b>", "how.table.r5.s": "Government vs Opposition", "how.table.r5.st": "PMC · LOC · MG · MO · LOR · PMR. Points of information expected.",
     "how.table.r6.f": "<b>Mock Trial</b>", "how.table.r6.s": "Prosecution vs Defense", "how.table.r6.st": "Openings · direct & cross exams per witness · closings · rebuttal.",
     "how.privacy.title": "Privacy",
-    "how.privacy.p": "Your audio never leaves your browser. What gets sent out is the text of the one sentence being checked, nothing more — not a recording, not the round before it, not your name. Nothing is stored anywhere afterward. And if the fact-checker can't reach its engine for any reason, it doesn't throw an error at you — it just goes quiet and hands control back, and the app keeps running in fully-manual mode like nothing happened.",
+    "how.privacy.p": "Speech is turned into text first. By default your browser's own speech recognition does that — in Chrome and Edge it is run by Google or Microsoft, not by us. In High-accuracy mode, in Upload mode, and if your browser can't listen, short audio clips go through our server to Groq for transcription, and we don't keep them. The live checks then send only a few recent sentences and the topic to Groq — no audio and no names — and claims that look recent are looked up on Wikipedia from your browser. The AI judge and analysis do send the round's transcript and the names you entered. Nothing about a round is stored on our servers unless you sign in, enter a League code, or play an online room. If the AI service is busy, checks slow down or pause and the app keeps working in manual mode. The Privacy Policy has the full list.",
     "how.overrule.title": "When to overrule the AI",
     "how.overrule.p": "It will get things wrong sometimes — statistics, very recent events, and anything that hinges on exact wording are where it stumbles. It's tuned to stay quiet unless it's genuinely confident, but \"genuinely confident\" still isn't \"certain.\" Watch the banner. If a call looks off, it probably is — <b>undo</b> is one click away in the tray, every time.",
     "how.backtosetup": "Back to setup",
@@ -3241,7 +3276,7 @@ const TRANSLATIONS = {
     "profile.bio": "Bio", "profile.bioph": "A sentence or two — your events, your league, whatever you want.",
     "profile.save": "Save",
 
-    "cookie.text": "Verdict Debate AI runs on your browser's local storage — and, if you sign in, a login token — instead of ad-tracking cookies.\n    <a href=\"javascript:void(0)\" onclick=\"openPrivacyModal()\">Privacy Policy</a>",
+    "cookie.text": "Verdict Debate AI uses your browser's local storage — and, if you sign in, a login token — instead of ad-tracking cookies. It also loads Vercel's analytics script and Google Fonts.\n    <a href=\"javascript:void(0)\" onclick=\"openPrivacyModal()\">Privacy Policy</a>",
     "cookie.gotit": "Got it",
   },
   es: {
@@ -3360,7 +3395,7 @@ const TRANSLATIONS = {
     "debate.factcheck": "Verificación de datos", "debate.factcheck.note": "Verificado por IA con Wikipedia",
     "debate.factcheck.ph": "Escribe una afirmación y presiona Enter — destella verde/rojo como la verificación automática",
     "debate.search": "Buscar", "debate.google": "Google",
-    "debate.factcheck.disclaimer": "Si un turno está activo y el veredicto es confiable, el orador actual anota automáticamente (+fact si es verdadero, −wrong si es falso). Las búsquedas fuera de turno solo destellan sin puntuar.",
+    "debate.factcheck.disclaimer": "Si un turno está activo y el veredicto es un verdadero o falso confiable, el orador actual anota automáticamente. Las opiniones, predicciones y afirmaciones no verificables nunca puntúan. Las búsquedas fuera de turno solo destellan sin puntuar.",
 
     "results.winner": "Ganador", "results.tryjudge": "Probar otro perfil de juez",
     "results.runanalysis": "Ejecutar análisis avanzado de argumentos", "results.rematch": "Revancha",
@@ -3388,7 +3423,7 @@ const TRANSLATIONS = {
     "upload.lead": "Sube un archivo de video o audio de un debate y lo transcribiremos, atribuiremos cada turno a un lado, verificaremos cada afirmación, marcaremos falacias y produciremos el mismo desglose por lado que ofrece el modo en vivo.",
     "upload.step1": "1. Elige un archivo",
     "upload.dropcta": "Haz clic para elegir un archivo o suéltalo aquí",
-    "upload.drophint": "Se admite la mayoría de formatos de video y audio. Extraemos el audio en tu navegador — nada va a nuestros servidores; el audio solo va a nuestro motor de transcripción.",
+    "upload.drophint": "Se admiten la mayoría de formatos de video y audio. Extraemos el audio en tu navegador y lo enviamos por partes, a través de nuestro servidor, a Groq para transcribirlo. No conservamos el audio.",
     "upload.step2": "2. Cuéntanos sobre el debate",
     "upload.sidea": "Nombre del lado A", "upload.sideaph": "p. ej. Alicia",
     "upload.sideb": "Nombre del lado B", "upload.sidebph": "p. ej. Roberto",
@@ -3425,15 +3460,16 @@ const TRANSLATIONS = {
     "how.s2.p1": "Presiona iniciar y el micrófono se activa. Las palabras aparecen casi tan rápido como las dices — tenues al principio, mientras el reconocedor todavía decide qué escuchó, y luego se fijan una vez que está seguro. Esa luz del micrófono no es decoración; es la única prueba de que alguien realmente está escuchando.",
     "how.s2.p2": "Y mientras estás a mitad de tu siguiente frase, la que acabas de terminar ya se está verificando entre bambalinas.",
     "how.s3.title": "Detección de afirmaciones y verificación de datos",
-    "how.s3.p1": "Cada frase tiene que superar dos preguntas antes de que pase algo:",
-    "how.s3.li1": "<b>¿Hay realmente una afirmación fáctica aquí?</b> (Las opiniones, preguntas, muletillas y predicciones se omiten — no te penalizarán por decir \"yo creo\".)",
-    "how.s3.li2": "<b>¿Esa afirmación es verdadera o falsa</b>, según conocimiento público bien establecido?",
+    "how.s3.p1": "Cada afirmación se clasifica antes de que pase algo:",
+    "how.s3.li1": "<b>¿Qué tipo de afirmación es?</b> Un hecho o estadística, una opinión, un juicio de valor, una predicción, un supuesto, un hecho del caso (Mock Trial) o algo no verificable. Las opiniones se registran con una etiqueta pero nunca puntúan — no te penalizarán por decir \"yo creo\".",
+    "how.s3.li2": "<b>¿Se puede resolver ahora mismo?</b> Los hechos y estadísticas bien conocidos se juzgan al instante. Los más difíciles — cifras exactas, hechos recientes, fuentes especializadas — se guardan y se comprueban con una búsqueda en Wikipedia en los cambios de turno y al terminar la ronda.",
     "how.s3.p2": "Las verificaciones están espaciadas a propósito — no se acumulan a mitad de un discurso, no vuelven a revisar algo que ya dijiste, y guardan silencio durante el crossfire, porque ni siquiera nosotros podemos distinguir quién habla sobre quién.",
     "how.s4.title": "Retroalimentación instantánea",
-    "how.s4.p1": "El veredicto llega rápido, y solo puede ir de tres maneras:",
-    "how.s4.li1": "<b>Verificado</b> — la pantalla destella en verde, suena un tono agudo breve, y el orador recibe <code>+fact</code>.",
-    "how.s4.li2": "<b>Falso</b> — la pantalla destella en rojo, suena un tono grave, y el orador pierde <code>−wrong</code>.",
-    "how.s4.li3": "<b>No está claro</b> o no es realmente una afirmación — un banner muestra brevemente lo que encontró, pero no se mueven puntos.",
+    "how.s4.p1": "Los hechos que se pueden resolver al instante llegan rápido. Cada afirmación recibe una etiqueta:",
+    "how.s4.li1": "<b>Verdadero</b> o <b>casi cierto</b> — la pantalla destella en verde, suena un tono agudo breve, y el orador recibe <code>+fact</code> (puntos parciales si es casi cierto).",
+    "how.s4.li2": "<b>Falso</b> o <b>engañoso</b> — la pantalla destella en rojo, suena un tono grave, y el orador pierde <code>−wrong</code> (parcial si es engañoso).",
+    "how.s4.li3": "<b>Opinión, juicio de valor, predicción, hipotético, hecho del caso, no verificable</b> o <b>no concluyente</b> — se registra en el registro de afirmaciones con el motivo, y no se mueven puntos.",
+    "how.s4.li4": "<b>Por verificar</b> — se guarda hasta una pausa o el final de la ronda. Si resulta verdadero o falso, los puntos se suman o restan entonces y la página de resultados lo marca como \"verificado después\".",
     "how.s4.p2": "Un banner muestra la afirmación en lenguaje sencillo, una línea de razonamiento y quién acaba de anotar. Cada una de estas decisiones queda etiquetada como <code>· auto</code> en la bandeja de deshacer, por si la máquina se equivocó y necesitas corregirlo.",
     "how.s5.title": "Puntuación manual y falacias",
     "how.s5.p1": "La IA no tiene la última palabra — la tienes tú. ¿Se te escapó una afirmación? Presiona <b>+fact</b> o <b>−wrong</b> tú mismo. ¿Escuchaste pasar un hombre de paja o una pendiente resbaladiza? El botón <b>−fallacy</b> despliega las 16 — elige la que corresponda y descuenta el punto, etiquetando la transcripción justo donde ocurrió.",
@@ -3450,7 +3486,7 @@ const TRANSLATIONS = {
     "how.table.r5.f": "<b>Parliamentary</b>", "how.table.r5.s": "Gobierno vs Oposición", "how.table.r5.st": "PMC · LOC · MG · MO · LOR · PMR. Se esperan puntos de información.",
     "how.table.r6.f": "<b>Mock Trial</b>", "how.table.r6.s": "Fiscalía vs Defensa", "how.table.r6.st": "Aperturas · interrogatorio directo y contrainterrogatorio por testigo · cierres · réplica.",
     "how.privacy.title": "Privacidad",
-    "how.privacy.p": "Tu audio nunca sale de tu navegador. Lo único que se envía es el texto de la frase que se está verificando, nada más — ni una grabación, ni la ronda anterior, ni tu nombre. Nada se almacena después. Y si el verificador de datos no puede contactar a su motor por cualquier razón, no te muestra un error — simplemente se queda en silencio y te devuelve el control, y la app sigue funcionando en modo totalmente manual como si nada hubiera pasado.",
+    "how.privacy.p": "Primero el habla se convierte en texto. Por defecto lo hace el reconocimiento de voz de tu propio navegador — en Chrome y Edge lo ejecuta Google o Microsoft, no nosotros. En el modo de alta precisión, en el modo de carga y si tu navegador no puede escuchar, breves clips de audio pasan por nuestro servidor hacia Groq para transcribirse, y no los conservamos. Las verificaciones en vivo envían a Groq solo unas pocas frases recientes y el tema — sin audio ni nombres — y las afirmaciones que parecen recientes se consultan en Wikipedia desde tu navegador. El juez de IA y el análisis sí envían la transcripción de la ronda y los nombres que escribiste. Nada de una ronda se guarda en nuestros servidores a menos que inicies sesión, uses un código de liga o juegues una sala en línea. Si el servicio de IA está ocupado, las verificaciones se vuelven más lentas o se pausan y la app sigue funcionando en modo manual. La Política de privacidad tiene la lista completa.",
     "how.overrule.title": "Cuándo anular a la IA",
     "how.overrule.p": "A veces se equivocará — las estadísticas, los eventos muy recientes y todo lo que dependa de la redacción exacta son donde más tropieza. Está calibrado para quedarse callado a menos que esté genuinamente seguro, pero \"genuinamente seguro\" todavía no es \"certeza\". Presta atención al banner. Si una decisión parece incorrecta, probablemente lo sea — <b>deshacer</b> está a un clic de distancia en la bandeja, siempre.",
     "how.backtosetup": "Volver a configuración",
@@ -3479,7 +3515,7 @@ const TRANSLATIONS = {
     "profile.bio": "Biografía", "profile.bioph": "Una o dos frases — tus eventos, tu liga, lo que quieras.",
     "profile.save": "Guardar",
 
-    "cookie.text": "Verdict Debate AI funciona con el almacenamiento local de tu navegador — y, si inicias sesión, un token de acceso — en lugar de cookies de rastreo publicitario.\n    <a href=\"javascript:void(0)\" onclick=\"openPrivacyModal()\">Política de privacidad</a>",
+    "cookie.text": "Verdict Debate AI usa el almacenamiento local de tu navegador — y, si inicias sesión, un token de acceso — en lugar de cookies de rastreo publicitario. También carga el script de analíticas de Vercel y Google Fonts.\n    <a href=\"javascript:void(0)\" onclick=\"openPrivacyModal()\">Política de privacidad</a>",
     "cookie.gotit": "Entendido",
   },
 };
@@ -3511,6 +3547,15 @@ function applyTranslations(lang) {
     if (text) el.setAttribute("title", text);
   });
   document.documentElement.lang = lang;
+  setPolicyDates();
+}
+
+const POLICY_DATE = "October 9, 2026";
+function setPolicyDates() {
+  ["tos-date", "privacy-date"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = POLICY_DATE;
+  });
 }
 
 function setUILang(lang) {
@@ -3689,11 +3734,14 @@ function init() {
   populateOnlineModes();
   const footerYearEl = document.getElementById("footer-year");
   if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
-  const tosDateEl = document.getElementById("tos-date");
-  if (tosDateEl) tosDateEl.textContent = "August 23, 2026";
-  const privacyDateEl = document.getElementById("privacy-date");
-  if (privacyDateEl) privacyDateEl.textContent = "August 23, 2026";
+  setPolicyDates();
   initCookieBanner();
+  const openPolicyFromHash = () => {
+    if (location.hash === "#privacy") openPrivacyModal();
+    else if (location.hash === "#terms") openTosModal();
+  };
+  openPolicyFromHash();
+  window.addEventListener("hashchange", openPolicyFromHash);
   loadAuthSession().then(() => { if (typeof tryRestoreOnlineRoom === "function") tryRestoreOnlineRoom(); });
   let savedLang = "en";
   try { savedLang = localStorage.getItem("calledout_ui_lang") || "en"; } catch (e) {}
