@@ -1,4 +1,4 @@
-"""Verdict AI backend — a single Flask app handling every /api/* route.
+"""Verdict Debate AI backend — a single Flask app handling every /api/* route.
 
 Deliberately one file, zero local imports between files: Vercel's Python
 runtime treats each file under /api/ as its own isolated serverless
