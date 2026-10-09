@@ -1235,7 +1235,7 @@
 
   /* keep the claim log from sitting on top of the debate on wide screens */
   @media (min-width: 1380px) {
-    body:has(.claim-log.show) main { margin-right: 372px; margin-left: auto; }
+    body:has(.claim-log.show) main { max-width: min(1220px, calc(100vw - 372px)); margin-left: auto; margin-right: 372px; }
   }
 
   /* ---------- Small screens ---------- */
@@ -1274,6 +1274,136 @@
     .glossary-term { flex-direction: column; gap: 2px; }
     .gt-term { min-width: 0; }
     .results-actions .btn { flex: 1; }
+  }
+
+  /* ---------- Live round: quiet and minimal ----------
+     Setup and the other pages can be loud. While people are actually talking
+     the page should get out of the way: no boxes, no shadows, just paper, ink,
+     and a single line between the two debaters. Scoped to the debate screen
+     and the live part of Online Debate so nothing else changes. */
+  :is(#screen-debate, #online-active) .stage { background: transparent; border: 0; box-shadow: none; padding: 0; margin-bottom: 30px; }
+  :is(#screen-debate, #online-active) .stage-head { padding-bottom: 12px; margin-bottom: 14px; border-bottom: 2px solid var(--ink); }
+  :is(#screen-debate, #online-active) .topic-display h2 { font-size: clamp(22px, 2.3vw, 30px); font-variation-settings: "wdth" 88; line-height: 1.15; max-width: 52ch; }
+  :is(#screen-debate, #online-active) .mode-badge { background: transparent; color: var(--ink-2); padding: 0; margin-bottom: 4px; font-size: 14px; }
+  :is(#screen-debate, #online-active) .phase-banner { background: transparent; border: 0; border-left: 4px solid var(--margin); padding: 0 0 0 12px; margin-bottom: 0; }
+  :is(#screen-debate, #online-active) .phase-banner .pb-index { font-size: 24px; }
+  :is(#screen-debate, #online-active) .phase-banner .pb-name { font-size: 18px; }
+  :is(#screen-debate, #online-active) .round-pill { width: 24px; height: 24px; font-size: 12px; border-width: 1.5px; }
+
+  :is(#screen-debate, #online-active) .timer-wrap { padding: 14px 0 0; max-width: 560px; margin: 0 auto; }
+  :is(#screen-debate, #online-active) .timer-label { font-size: 16px; margin-bottom: 2px; }
+  :is(#screen-debate, #online-active) .timer { font-size: clamp(76px, 11vw, 128px); margin-bottom: 14px; }
+  :is(#screen-debate, #online-active) .timer-bar { height: 8px; border-width: 2px; margin-bottom: 18px; }
+  :is(#screen-debate, #online-active) .timer-fill { background: var(--ink); }
+  :is(#screen-debate, #online-active) .timer.warning ~ .timer-bar .timer-fill,
+  :is(#screen-debate, #online-active) .timer-fill.warning { background: #C45F00; }
+  :is(#screen-debate, #online-active) .timer.critical ~ .timer-bar .timer-fill { background: var(--margin); }
+
+  :is(#screen-debate, #online-active) .controls { gap: 10px; }
+  :is(#screen-debate, #online-active) .controls .btn { padding: 8px 16px; font-size: 14px; border-width: 2px; box-shadow: none; }
+  :is(#screen-debate, #online-active) .controls .btn:hover { transform: none; background: var(--paper-pale); }
+  :is(#screen-debate, #online-active) .controls .btn:active { transform: translateY(1px); }
+  :is(#screen-debate, #online-active) .controls .btn-primary { background: #000; color: var(--paper); }
+  :is(#screen-debate, #online-active) .controls .btn-danger { background: transparent; color: var(--red-pen); border-color: var(--red-pen); }
+  :is(#screen-debate, #online-active) .controls .btn-danger:hover { background: var(--red-pen); color: #fff; }
+
+  :is(#screen-debate, #online-active) .undo-tray { border: 0; background: transparent; padding: 0; margin-bottom: 18px; }
+  :is(#screen-debate, #online-active) .undo-tray .undo-label { font-size: 22px; }
+  :is(#screen-debate, #online-active) .undo-chip { border-width: 1.5px; font-size: 13px; padding: 3px 8px; }
+
+  /* Two debaters: one ruled-off row, no cards. */
+  #screen-debate .debate-layout, #online-active .results-scores { gap: 0; margin-bottom: 30px; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+  :is(#screen-debate, #online-active) :is(.debater-panel, .result-card) {
+    position: relative;
+    background: transparent;
+    color: var(--ink);
+    border: 0;
+    box-shadow: none;
+    padding: 16px 26px 18px;
+  }
+  #screen-debate #panel-b, #online-active #online-card-b { background: transparent; color: var(--ink); border: 0; border-left: 2px solid var(--ink); box-shadow: none; }
+  #screen-debate .debater-panel.active::before { content: ""; position: absolute; left: 0; right: 0; top: -2px; height: 5px; background: var(--margin); }
+
+  :is(#screen-debate, #online-active) .panel-head h2, :is(#screen-debate, #online-active) .result-card h3 { font-size: 22px; font-variation-settings: "wdth" 84; }
+  :is(#screen-debate, #online-active) .side-label, :is(#screen-debate, #online-active) .result-card .rc-side { font-size: 22px; margin-top: 2px; color: var(--pen); }
+  :is(#screen-debate, #online-active) .score, :is(#screen-debate, #online-active) .result-card .big-score { font-size: 96px; line-height: 0.7; padding-top: 18px; margin-bottom: 14px; color: var(--pen); }
+  #screen-debate .score { margin-bottom: 0; }
+
+  :is(#screen-debate, #online-active) .score-controls { gap: 8px; margin-top: 8px; }
+  :is(#screen-debate, #online-active) .score-btn {
+    position: relative;
+    min-height: 44px;
+    flex-direction: row;
+    gap: 6px;
+    padding: 6px 10px 9px;
+    background: #fff;
+    color: #000;
+    border: 2px solid #000;
+    box-shadow: inset 0 -5px 0 var(--bar, #000);
+    transition: background 0.1s;
+  }
+  :is(#screen-debate, #online-active) .score-btn.plus { --bar: var(--hl-green); background: #fff; color: #000; }
+  :is(#screen-debate, #online-active) .score-btn.minus { --bar: var(--margin); background: #fff; color: #000; }
+  :is(#screen-debate, #online-active) .score-btn.fallacy { --bar: var(--hl-orange); background: #fff; color: #000; }
+  :is(#screen-debate, #online-active) .score-btn:hover { transform: none; background: var(--paper-pale); box-shadow: inset 0 -5px 0 var(--bar, #000); }
+  :is(#screen-debate, #online-active) .score-btn:active { transform: translateY(1px); box-shadow: inset 0 -5px 0 var(--bar, #000); }
+  :is(#screen-debate, #online-active) .score-btn .val { font-size: 15px; }
+  /* keep the descriptor for screen readers, but don't draw it */
+  :is(#screen-debate, #online-active) .score-btn .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  :is(#screen-debate, #online-active) .panel-stats { display: flex; gap: 22px; justify-content: flex-start; margin-top: 12px; padding-top: 0; border-top: 0; font-size: 14px; text-align: left; }
+  :is(#screen-debate, #online-active) .panel-stats > div { display: flex; align-items: baseline; gap: 6px; }
+  :is(#screen-debate, #online-active) .panel-stats .s-val { display: inline; font-size: 30px; margin: 0; color: var(--pen); }
+
+  :is(#screen-debate, #online-active) .subtitles-wrap { margin-bottom: 28px; }
+  :is(#screen-debate, #online-active) .subtitles-head { margin-bottom: 8px; padding-bottom: 0; border-bottom: 0; }
+  :is(#screen-debate, #online-active) .sub-head-left h3 { font-size: 18px; font-variation-settings: "wdth" 88; }
+  :is(#screen-debate, #online-active) .mic-indicator { width: 12px; height: 12px; border-width: 1.5px; }
+  :is(#screen-debate, #online-active) .subtitles {
+    min-height: 92px;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 0;
+    border-left: 4px solid var(--pen);
+    font-size: clamp(17px, 1.6vw, 21px);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  :is(#screen-debate, #online-active) .subtitles.empty { font-size: 16px; }
+  .mic-engine { font-family: var(--font-hand); font-size: 22px; line-height: 1; color: var(--pen); margin-left: 6px; }
+  .mic-engine:empty { display: none; }
+  :is(#screen-debate, #online-active) .subtitles-head .btn { padding: 4px 10px; font-size: 13px; border-width: 2px; box-shadow: none; }
+
+  #screen-debate .factcheck { margin-bottom: 28px; }
+  #screen-debate .factcheck-head { margin-bottom: 8px; padding-bottom: 0; border-bottom: 0; }
+  #screen-debate .factcheck h3 { font-size: 18px; font-variation-settings: "wdth" 88; }
+  #screen-debate .fc-note { font-size: 22px; }
+  #screen-debate .fc-search { gap: 8px; margin-bottom: 8px; }
+  #screen-debate .fc-search input { padding: 8px 12px; font-size: 16px; border-width: 2px; }
+  #screen-debate .fc-search .btn { padding: 8px 14px; font-size: 14px; border-width: 2px; box-shadow: none; }
+  #screen-debate .factcheck > div[data-i18n] { font-size: 13px !important; margin: 0 0 10px !important; color: var(--ink-3) !important; }
+  #screen-debate .fc-results { gap: 8px; }
+  #screen-debate .fc-result { padding: 10px 14px; background: rgba(255, 255, 255, 0.6); border: 0; border-left: 4px solid var(--ink); }
+  #screen-debate .fc-result h4 { font-size: 16px; }
+  #screen-debate .fc-result p { font-size: 14px; }
+  #screen-debate .fc-empty { padding: 10px 0; text-align: left; font-size: 14px; }
+
+  /* the floating claim log: lighter too */
+  .claim-log { border-width: 2px; box-shadow: none; }
+  .claim-log-head { padding: 8px 12px; }
+  .claim-log-head h4 { font-size: 18px; }
+  .cl-item { border-width: 1.5px; border-left-width: 8px; }
+  .ftray-item, .rtray-item { box-shadow: 3px 3px 0 var(--ink); transform: none; border-width: 2px; border-left-width: 10px; }
+  .toast { box-shadow: 3px 3px 0 var(--ink); }
+
+  @media (max-width: 900px) {
+    #screen-debate .debate-layout, #online-active .results-scores { grid-template-columns: 1fr; }
+    #screen-debate #panel-b, #online-active #online-card-b { border-left: 0; border-top: 2px solid var(--ink); }
+  }
+  @media (max-width: 720px) {
+    :is(#screen-debate, #online-active) :is(.debater-panel, .result-card) { padding: 14px 4px 16px; }
+    :is(#screen-debate, #online-active) .timer { font-size: clamp(64px, 22vw, 96px); }
+    :is(#screen-debate, #online-active) .score, :is(#screen-debate, #online-active) .result-card .big-score { font-size: 80px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
