@@ -8019,46 +8019,30 @@ function buildCombinedPrompt(sentence, opts) {
   const wantCitations = cfg.REQUIRE_CITATIONS;
   const wantFallacies = o.wantFallacies !== false;
 
-  const schema = `Return ONLY compact JSON — no prose, no markdown fences — with this exact shape:
-{
-  "claims": [
-    {
-      "claim": string,           // short paraphrase of one factual assertion
-      "verdict": "true" | "false" | "uncertain",
-      "confidence": number,      // 0.0 - 1.0
-      "explanation": string${wantCitations ? "," : ""}
-${wantCitations ? '      "citation": string         // <= 80 chars, name a source (e.g. "wikipedia: Ant"), "" if none' : ""}
-    }
-  ]${wantFallacies ? `,
-  "fallacies": [
-    {
-      "fallacy": string,        // EXACTLY one of the fallacy names listed below (case-sensitive)
-      "quote": string,          // <= 120 chars, the exact problematic phrase
-      "explanation": string,    // one sentence, <= 200 chars
-      "confidence": number      // 0.0 - 1.0
-    }
-  ]` : ""}
-}
-If the utterance has no verifiable factual assertion, "claims" is [].
-Extract a separate claims entry per distinct factual assertion (typically 1, sometimes 2-3).${wantFallacies ? ' If it commits no fallacy, "fallacies" is []. Never invent a fallacy name not in the list below.' : ""}`;
+  // Kept deliberately compact — every call pays for this prefix in tokens, and
+  // the static part comes first so Groq's prompt caching can reuse it.
+  const claimShape = `{"claim":str,"verdict":"true"|"false"|"uncertain","confidence":0-1,"explanation":str (<=100 chars)${wantCitations ? ',"citation":str (<=60 chars, "" if none)' : ""}}`;
+  const fallacyShape = `{"fallacy":str,"quote":str (<=80 chars),"explanation":str (<=100 chars),"confidence":0-1}`;
+  const shape = `{"claims":[${claimShape}]${wantFallacies ? `,"fallacies":[${fallacyShape}]` : ""}}`;
 
   const blocks = [
-    `You are doing two jobs on ONE utterance from a live debate: fact-checking${wantFallacies ? " and fallacy-spotting" : ""}.`,
+    `${wantFallacies ? "Fact-check and fallacy-check" : "Fact-check"} ONE utterance from a live debate.`,
     "",
-    `FACT-CHECK: Pull out every distinct verifiable factual assertion and judge each TRUE or FALSE per well-established public knowledge (taxonomy, geography, basic science, history, widely-reported facts). Opinions, questions, greetings, filler, and predictions are NOT claims. BE DECISIVE — for basic, well-established facts use confidence 0.9+ rather than defaulting to "uncertain". Only use "uncertain" for genuinely ambiguous, unverifiable, or future-hinging claims. Keep "claim" faithful to what was actually said.${wantCitations ? ' Always fill "citation" with a short attribution — "" only if truly unsourceable.' : ""}`
+    `CLAIMS: extract each distinct verifiable factual assertion (usually 1, up to 3) and judge it true/false/uncertain by well-established public knowledge. Skip opinions, questions, filler, predictions. Be decisive on basic facts (confidence 0.9+); use "uncertain" only for ambiguous, unverifiable, or future claims. Keep "claim" faithful to what was said.${wantCitations ? ' Fill "citation" with a short source attribution.' : ""}`
   ];
 
   if (wantFallacies) {
     blocks.push(
       "",
-      `FALLACY-SPOT: Decide if the utterance commits any of these classical fallacies. Be strict — only flag a clear fit, never an opinion you disagree with, a factual mistake, or a merely weak argument.`,
-      "",
-      "Fallacies:",
-      FALLACIES.map(f => `- "${f.name}": ${f.desc}`).join("\n")
+      "FALLACIES: flag only a clear fit (never mere disagreement or a factual error), using these exact names:",
+      FALLACIES.map(f => `${f.name}: ${f.desc}`).join("\n")
     );
   }
 
-  blocks.push("", schema);
+  blocks.push(
+    "",
+    `Return ONLY compact JSON:\n${shape}\nNo claim -> "claims":[].${wantFallacies ? ' No fallacy -> "fallacies":[].' : ""}`
+  );
 
   if (topic) blocks.push("", `Debate topic: "${topic.replace(/"/g, '\\"')}"`);
   if (ctx.length) {
