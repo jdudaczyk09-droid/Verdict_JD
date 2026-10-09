@@ -1,4 +1,4 @@
-# Verdict AI
+# Verdict Debate AI
 
 Live and uploaded debate scoring with fact-checking and fallacy detection. Powered by Groq (GPT-OSS 120B for reasoning, Whisper-large-v3-turbo for transcription).
 
@@ -42,7 +42,7 @@ Without a Postgres database attached, the League tab shows a clear error instead
 
 ### Accounts (optional — needs the same database, plus one more secret)
 
-Every feature of Verdict AI works fully without an account — it's a purely optional layer for syncing practice history and progress across devices. Passwords are hashed with bcrypt before they ever touch the database; the plaintext password is never stored.
+Every feature of Verdict Debate AI works fully without an account — it's a purely optional layer for syncing practice history and progress across devices. Passwords are hashed with bcrypt before they ever touch the database; the plaintext password is never stored.
 
 1. You need the same Postgres database as League Dashboards (see above) — the accounts feature reuses it and creates its own `users` / `user_debates` tables automatically on first use.
 2. In the Vercel dashboard, add one more environment variable: `JWT_SECRET` — a long random string (e.g. `openssl rand -hex 32`) used to sign session tokens. Without it, the log in / sign up buttons show a clear error instead of failing silently.

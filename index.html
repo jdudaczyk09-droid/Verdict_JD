@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verdict AI</title>
+<title>Verdict Debate AI — Live AI Debate Fact-Checker &amp; Judge</title>
+<meta name="description" content="Verdict Debate AI is a live AI debate referee. It listens to both sides, fact-checks claims, flags logical fallacies in real time, and delivers a final verdict. Built for debate teams, coaches, and classrooms.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Verdict Debate AI">
+<meta property="og:title" content="Verdict Debate AI — Live AI Debate Fact-Checker &amp; Judge">
+<meta property="og:description" content="A live AI debate referee: real-time fact-checking, fallacy detection, and a final verdict for Public Forum, Lincoln-Douglas, Policy, Parliamentary, and Mock Trial.">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Verdict Debate AI","alternateName":["Verdict Debate","VerdictDebateAI"],"applicationCategory":"EducationalApplication","operatingSystem":"Any (web browser)","description":"A live AI debate referee that fact-checks claims, flags logical fallacies, and delivers a final verdict for competitive and casual debate.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
@@ -369,18 +378,74 @@ footer{
 .footer-right{display:flex;gap:24px}
 .footer-right a{font-size:12px;color:rgba(250,250,248,0.25);transition:color 0.15s}
 .footer-right a:hover{color:rgba(250,250,248,0.6)}
+
+/* BOOK A CALL */
+[hidden]{display:none!important}
+.sched-instant{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:28px;font-size:15px;color:var(--gray-3)}
+.sched-instant-link{display:inline-flex;align-items:center;padding:11px 22px;border-radius:999px;background:var(--black);color:var(--white);font-size:14px;font-weight:500}
+.sched-instant-link:hover{opacity:.88}
+.sched{margin-top:40px;display:grid;grid-template-columns:1.15fr 1fr;border:1px solid var(--gray-5);border-radius:22px;overflow:hidden;background:var(--white)}
+.sched-pick{padding:34px;min-width:0}
+.sched-form{min-width:0;padding:34px;background:var(--gray-6);border-left:1px solid var(--gray-5);display:flex;flex-direction:column;gap:14px}
+.sched-label{font-size:13px;font-weight:600;color:var(--gray-3);margin-bottom:12px}
+.sched-tz{font-weight:400;color:var(--gray-4)}
+.sched-days{display:flex;flex-wrap:wrap;gap:8px;padding:2px 2px 8px;margin-bottom:24px}
+.sched-day{flex:0 0 auto;min-width:76px;padding:10px 12px;border:1px solid var(--gray-5);border-radius:16px;background:var(--white);text-align:center;cursor:pointer;font:inherit;color:var(--black);line-height:1.2}
+.sched-day b{display:block;font-size:12px;font-weight:600;color:var(--gray-3)}
+.sched-day span{display:block;margin-top:3px;font-family:var(--font-display);font-size:19px;font-weight:700;letter-spacing:-.3px}
+.sched-day:hover{border-color:var(--black)}
+.sched-day[aria-pressed="true"]{background:var(--black);border-color:var(--black);color:var(--white)}
+.sched-day[aria-pressed="true"] b{color:rgba(250,250,248,.7)}
+.sched-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.sched-slot{padding:11px 8px;border:1px solid var(--gray-5);border-radius:999px;background:var(--white);font:inherit;font-size:14px;font-weight:500;color:var(--black);text-align:center;cursor:pointer;line-height:1.2}
+.sched-slot small{display:block;margin-top:1px;font-size:11px;font-weight:400;opacity:.6}
+.sched-slot:hover{border-color:var(--black)}
+.sched-slot[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:var(--white)}
+.sched-empty{font-size:14px;color:var(--gray-3)}
+.sched-summary{padding:12px 14px;border:1px dashed var(--gray-4);border-radius:14px;background:var(--white);font-size:14px;line-height:1.5;color:var(--gray-3)}
+.sched-summary.is-set{border-style:solid;border-color:var(--black);color:var(--black)}
+.sched-summary small{display:block;color:var(--gray-3);font-size:12px}
+.sched-field{display:block;font-size:13px;font-weight:600;color:var(--gray-2)}
+.sched-field em{font-weight:400;font-style:normal;color:var(--gray-4)}
+.sched-field input,.sched-field textarea{display:block;margin-top:6px;width:100%;padding:12px 14px;border:1px solid var(--gray-4);border-radius:12px;background:var(--white);font:inherit;font-size:15px;font-weight:400;color:var(--black)}
+.sched-field textarea{resize:vertical;min-height:84px}
+.sched-field input:focus,.sched-field textarea:focus{outline:2px solid var(--black);outline-offset:1px;border-color:var(--black)}
+.sched-error{font-size:13px;font-weight:500;color:var(--red)}
+.sched-submit{margin-top:4px;padding:15px 26px;border:0;border-radius:999px;background:var(--black);color:var(--white);font:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.sched-submit:hover:not(:disabled){opacity:.88}
+.sched-submit:disabled{opacity:.3;cursor:not-allowed}
+.sched-fine{font-size:12px;color:var(--gray-3)}
+.sched-done{grid-column:1 / -1;padding:36px 34px}
+.sched-done h3{font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-.8px;margin-bottom:10px;font-variation-settings:"opsz" 144}
+.sched-done p{max-width:60ch;font-size:16px;line-height:1.65;color:var(--gray-2)}
+.sched-done-alt{margin-top:14px;color:var(--gray-3)!important;font-size:14px!important}
+.sched-done-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.sched-btn{padding:12px 20px;border:1px solid var(--gray-4);border-radius:999px;background:var(--white);font:inherit;font-size:14px;font-weight:500;color:var(--black);cursor:pointer}
+.sched-btn:hover{border-color:var(--black)}
+.sched-btn-solid{background:var(--black);border-color:var(--black);color:var(--white)}
+.sched-btn-quiet{border-color:transparent;color:var(--gray-3);text-decoration:underline}
+.sched-copied{margin-top:14px;font-size:14px;font-weight:500;color:var(--green)}
+.sched button:focus-visible,.sched-instant-link:focus-visible,.sched-btn:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.team-cta{display:inline-flex;align-items:center;margin-top:18px;padding:10px 20px;border-radius:999px;border:1px solid var(--black);font-size:13px;font-weight:600;color:var(--black);transition:background .15s,color .15s}
+.team-cta:hover{background:var(--black);color:var(--white)}
+@media(max-width:860px){
+  .sched{grid-template-columns:minmax(0,1fr)}
+  .sched-form{border-left:0;border-top:1px solid var(--gray-5)}
+  .sched-pick,.sched-form,.sched-done{padding:24px 20px}
+}
 </style>
 </head>
 <body>
 
 <nav>
   <a href="#" class="nav-logo">
-    <span class="nav-logo-text">Verdict AI</span>
+    <span class="nav-logo-text">Verdict Debate AI</span>
   </a>
   <div class="nav-right">
     <a href="#problem" class="nav-link">Why</a>
     <a href="#how" class="nav-link">How it works</a>
     <a href="#team" class="nav-link">Team</a>
+    <a href="#schedule" class="nav-link">Book a call</a>
     <a href="#contact" class="nav-link">Contact</a>
     <a href="app.html" class="nav-pill">Launch app</a>
   </div>
@@ -402,7 +467,7 @@ footer{
       </h1>
       <div class="hero-bottom">
         <p class="hero-sub">
-          <strong>Verdict AI</strong> listens to both sides of any argument in real time, flags logical fallacies and false facts the moment they are spoken, and delivers a final judgment. No bias. No memory. Just the truth.
+          <strong>Verdict Debate AI</strong> listens to both sides of any argument in real time, flags logical fallacies and false facts the moment they are spoken, and delivers a final judgment. No bias. No memory. Just the truth.
         </p>
         <div class="hero-actions">
           <a href="#contact" class="btn-ghost">Contact us</a>
@@ -466,13 +531,13 @@ footer{
         <div class="problem-stat">
           <div class="problem-stat-num">0</div>
           <div class="problem-stat-label">real-time tools exist to referee a live conversation between two people. Until now.</div>
-          <div class="problem-source">Verdict AI internal analysis, 2026</div>
+          <div class="problem-source">Verdict Debate AI internal analysis, 2026</div>
         </div>
       </div>
       <div class="problem-copy">
         <p>We live in a time where people argue confidently with facts that are simply wrong. Social media has made it worse. News ecosystems have fractured. And somewhere along the way, <strong>the ability to actually hear the other side out became a rare skill.</strong></p>
         <p>Most people are not arguing to find the truth. They are arguing to win. Logical fallacies go unchecked because nobody wants to be the one to call it out. Conversations go in circles. Nobody changes their mind.</p>
-        <p>We built Verdict AI because <strong>the best debates are not won by the loudest voice.</strong> They are won by the most accurate one. Verdict AI puts truth back at the center of every argument, in real time, with no agenda.</p>
+        <p>We built Verdict Debate AI because <strong>the best debates are not won by the loudest voice.</strong> They are won by the most accurate one. Verdict Debate AI puts truth back at the center of every argument, in real time, with no agenda.</p>
       </div>
     </div>
   </div>
@@ -497,7 +562,7 @@ footer{
       <div class="how-item">
         <div class="how-num">03</div>
         <h4>Place and speak</h4>
-        <p>Put the phone between both people. Verdict AI listens through the live mic, transcribes in real time, and flags issues the moment they happen.</p>
+        <p>Put the phone between both people. Verdict Debate AI listens through the live mic, transcribes in real time, and flags issues the moment they happen.</p>
       </div>
       <div class="how-item">
         <div class="how-num">04</div>
@@ -512,7 +577,7 @@ footer{
         <div class="mockup-dot" style="background:#FF5F56"></div>
         <div class="mockup-dot" style="background:#FFBD2E"></div>
         <div class="mockup-dot" style="background:#27C93F"></div>
-        <div class="mockup-title">Verdict AI &middot; Round 2 of 3 &middot; Topic: Universal Basic Income</div>
+        <div class="mockup-title">Verdict Debate AI &middot; Round 2 of 3 &middot; Topic: Universal Basic Income</div>
       </div>
       <div class="mockup-body">
         <div class="debate-line">
@@ -557,7 +622,7 @@ footer{
         <div>
           <div class="team-name">Jan Dudaczyk</div>
           <div class="team-role">Co-Founder &amp; CTO</div>
-          <p class="team-bio">Based in the NYC metropolitan area. Jan has a background in software engineering, AI, and machine learning, and has taught Python, AI, and ML to students at local public libraries. He built Verdict AI because he believes most arguments could be resolved if both sides were actually willing to listen, and saw technology as the only neutral party capable of holding them to that standard.</p>
+          <p class="team-bio">Based in the NYC metropolitan area. Jan has a background in software engineering, AI, and machine learning, and has taught Python, AI, and ML to students at local public libraries. He built Verdict Debate AI because he believes most arguments could be resolved if both sides were actually willing to listen, and saw technology as the only neutral party capable of holding them to that standard.</p>
         </div>
       </div>
       <div class="team-card">
@@ -565,8 +630,65 @@ footer{
         <div>
           <div class="team-name">Jeffrey Begun</div>
           <div class="team-role">Co-Founder &amp; COO</div>
-          <p class="team-bio">Based in the NYC metropolitan area. Jeffrey has a background in law, public policy, and civic advocacy, and has competed in debate and mock trial at a high level. He currently runs local debate leagues, giving students the tools to argue with precision and integrity. He built Verdict AI to bring that same standard of structured, evidence-based discourse to everyday conversations.</p>
+          <p class="team-bio">Based in the NYC metropolitan area. Jeffrey has a background in law, public policy, and civic advocacy, and has competed in debate and mock trial at a high level. He currently runs local debate leagues, giving students the tools to argue with precision and integrity. He built Verdict Debate AI to bring that same standard of structured, evidence-based discourse to everyday conversations.</p>
+          <a class="team-cta" href="#schedule">Book a call with Jeffrey</a>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOK A CALL -->
+<div class="section" id="schedule">
+  <div class="section-inner">
+    <div class="kicker">Book a call</div>
+    <h2>Talk to Jeffrey.</h2>
+    <p class="body-text">Thirty minutes to talk about bringing Verdict Debate AI to your league, classroom, or tournament. Pick a time and he'll confirm by email.</p>
+
+    <div class="sched-instant" id="sched-instant" hidden>
+      <a class="sched-instant-link" id="sched-instant-link" href="#" target="_blank" rel="noopener">Book instantly on Jeffrey's calendar</a>
+      <span>or request a time below.</span>
+    </div>
+
+    <div class="sched" id="sched">
+      <div class="sched-pick">
+        <div class="sched-label">1. Pick a day</div>
+        <div class="sched-days" id="sched-days" role="group" aria-label="Available days"></div>
+
+        <div class="sched-label">2. Pick a time <span class="sched-tz" id="sched-tz"></span></div>
+        <div class="sched-slots" id="sched-slots" role="group" aria-label="Available times"></div>
+      </div>
+
+      <form class="sched-form" id="sched-form" novalidate>
+        <div class="sched-label">3. Where should he confirm?</div>
+        <div class="sched-summary" id="sched-summary" aria-live="polite">Choose a day and a time to continue.</div>
+
+        <label class="sched-field">Your name
+          <input id="sched-name" type="text" autocomplete="name" placeholder="Alex Rivera">
+        </label>
+        <label class="sched-field">Your email
+          <input id="sched-email" type="email" autocomplete="email" placeholder="alex@school.org">
+        </label>
+        <label class="sched-field">What would you like to talk about? <em>(optional)</em>
+          <textarea id="sched-note" rows="3" placeholder="Running a league of 40 students, a classroom pilot, a tournament..."></textarea>
+        </label>
+
+        <div class="sched-error" id="sched-error" role="alert" hidden></div>
+        <button type="submit" class="sched-submit" id="sched-submit" disabled>Request this time</button>
+        <div class="sched-fine">This opens an email to Jeffrey with your request. He replies to confirm.</div>
+      </form>
+
+      <div class="sched-done" id="sched-done" hidden>
+        <h3>Your request is ready.</h3>
+        <p id="sched-done-text">Your email app should have opened with the message filled in. Send it and Jeffrey will confirm by reply.</p>
+        <p class="sched-done-alt">Nothing opened? Use one of these instead.</p>
+        <div class="sched-done-actions">
+          <a class="sched-btn sched-btn-solid" id="sched-gmail" href="#" target="_blank" rel="noopener">Open in Gmail</a>
+          <button type="button" class="sched-btn" id="sched-copy">Copy message</button>
+          <button type="button" class="sched-btn" id="sched-ics">Add to my calendar</button>
+          <button type="button" class="sched-btn sched-btn-quiet" id="sched-again">Pick a different time</button>
+        </div>
+        <div class="sched-copied" id="sched-copied" role="status" hidden>Copied. Paste it into an email to jeffbegun08@gmail.com.</div>
       </div>
     </div>
   </div>
@@ -577,7 +699,7 @@ footer{
   <div class="section-inner">
     <div class="kicker">Get in touch</div>
     <h2>Questions? Feedback?<br>We're an email away.</h2>
-    <p class="body-text">Verdict AI is live — <a href="app.html" style="color:var(--white);text-decoration:underline;">jump into the app</a> anytime. For press, partnerships, or anything else, reach out directly.</p>
+    <p class="body-text">Verdict Debate AI is live — <a href="app.html" style="color:var(--white);text-decoration:underline;">jump into the app</a> anytime. For press, partnerships, or anything else, reach out directly.</p>
 
     <dl class="contact-meta" style="margin-top:40px;max-width:480px;">
       <div class="contact-meta-item">
@@ -597,13 +719,361 @@ footer{
 </div>
 
 <footer>
-  <div class="footer-left">&copy; 2026 Verdict AI. All rights reserved.</div>
+  <div class="footer-left">&copy; 2026 Verdict Debate AI. All rights reserved.</div>
   <div class="footer-right">
     <a href="#">Privacy</a>
     <a href="#">Terms</a>
     <a href="#">Press</a>
   </div>
 </footer>
+
+<script>
+/* Book a call with Jeffrey.
+   No scheduling service is wired up, so a booking is a request: the visitor
+   picks a slot, and this builds a pre-filled email to Jeffrey (with Gmail,
+   copy, and .ics fallbacks). He confirms by reply. Edit CFG to change his
+   availability; paste a Calendly/Cal.com link into bookingUrl to also show
+   an instant-booking button. */
+(function () {
+  var CFG = {
+    hostName: "Jeffrey",
+    hostEmail: "jeffbegun08@gmail.com",
+    tz: "America/New_York",      // availability below is expressed in this zone
+    tzLabel: "ET",
+    durationMin: 30,
+    // Hours he can take calls, per day of week (0 = Sunday ... 6 = Saturday),
+    // as [start, end] in minutes after midnight Eastern. Days not listed are
+    // closed. School runs weekdays, so weekdays are after school only.
+    hours: {
+      1: [16 * 60, 19 * 60],     // Monday    4:00 PM - 7:00 PM ET
+      2: [16 * 60, 19 * 60],     // Tuesday   4:00 PM - 7:00 PM ET
+      3: [16 * 60, 19 * 60],     // Wednesday 4:00 PM - 7:00 PM ET
+      4: [16 * 60, 19 * 60],     // Thursday  4:00 PM - 7:00 PM ET
+      5: [16 * 60, 19 * 60],     // Friday    4:00 PM - 7:00 PM ET
+      6: [12 * 60, 17 * 60],     // Saturday 12:00 PM - 5:00 PM ET
+      0: [12 * 60, 17 * 60]      // Sunday   12:00 PM - 5:00 PM ET
+    },
+    daysAhead: 28,               // how far ahead to look
+    maxDays: 10,                 // how many day buttons to show (about two weeks)
+    minNoticeHours: 24,          // no bookings sooner than this
+    bookingUrl: ""               // optional instant-booking link
+  };
+
+  var root = document.getElementById("schedule");
+  if (!root) return;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var daysEl = $("sched-days"), slotsEl = $("sched-slots"), tzEl = $("sched-tz");
+  var form = $("sched-form"), summaryEl = $("sched-summary"), errEl = $("sched-error");
+  var submitBtn = $("sched-submit"), doneEl = $("sched-done"), pickEl = root.querySelector(".sched-pick");
+  var nameEl = $("sched-name"), emailEl = $("sched-email"), noteEl = $("sched-note");
+  var CRLF = String.fromCharCode(13, 10);
+  var LF = String.fromCharCode(10);
+
+  var visitorTz = "";
+  try { visitorTz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+
+  if (CFG.bookingUrl) {
+    $("sched-instant").hidden = false;
+    $("sched-instant-link").href = CFG.bookingUrl;
+  }
+
+  /* ---- time zone helpers (no libraries) ---- */
+  function zoneParts(ms, tz) {
+    var f = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz, hourCycle: "h23", year: "numeric", month: "numeric",
+      day: "numeric", hour: "numeric", minute: "numeric"
+    });
+    var o = {};
+    f.formatToParts(new Date(ms)).forEach(function (p) {
+      if (p.type !== "literal") o[p.type] = parseInt(p.value, 10);
+    });
+    return o;
+  }
+
+  // The UTC instant at which the wall clock in `tz` reads y-mo-d h:mi.
+  function zonedToUtc(y, mo, d, h, mi, tz) {
+    var want = Date.UTC(y, mo - 1, d, h, mi);
+    var guess = want;
+    for (var i = 0; i < 4; i++) {
+      var p = zoneParts(guess, tz);
+      var got = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
+      var diff = want - got;
+      if (diff === 0) break;
+      guess += diff;
+    }
+    return guess;
+  }
+
+  var fmtLocalTime = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
+  var fmtEtTime = new Intl.DateTimeFormat("en-US", { timeZone: CFG.tz, hour: "numeric", minute: "2-digit" });
+  var fmtLocalDay = new Intl.DateTimeFormat(undefined, { weekday: "short" });
+  var fmtEtDay = new Intl.DateTimeFormat("en-US", { timeZone: CFG.tz, weekday: "short" });
+  var fmtLong = new Intl.DateTimeFormat(undefined, {
+    weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short"
+  });
+  var fmtLongEt = new Intl.DateTimeFormat("en-US", {
+    timeZone: CFG.tz, weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short"
+  });
+  var fmtDow = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "UTC" });
+  var fmtMd = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+
+  /* ---- build the list of bookable days and slots ---- */
+  function buildDays() {
+    var now = Date.now();
+    var today = zoneParts(now, CFG.tz);
+    var days = [];
+    for (var off = 0; off <= CFG.daysAhead && days.length < CFG.maxDays; off++) {
+      var base = new Date(Date.UTC(today.year, today.month - 1, today.day + off));
+      var window_ = CFG.hours[base.getUTCDay()];
+      if (!window_) continue;
+      var y = base.getUTCFullYear(), mo = base.getUTCMonth() + 1, d = base.getUTCDate();
+      var slots = [];
+      for (var m = window_[0]; m + CFG.durationMin <= window_[1]; m += CFG.durationMin) {
+        var t = zonedToUtc(y, mo, d, Math.floor(m / 60), m % 60, CFG.tz);
+        if (t >= now + CFG.minNoticeHours * 3600000) slots.push(t);
+      }
+      if (slots.length) days.push({ base: base, slots: slots });
+    }
+    return days;
+  }
+
+  var days = buildDays();
+  var selectedDay = -1;
+  var selectedSlot = 0;
+  var lastMessage = null;
+
+  tzEl.textContent = visitorTz && visitorTz !== CFG.tz
+    ? "Shown in your time zone (" + visitorTz.split("_").join(" ") + ")"
+    : "Shown in Eastern Time";
+
+  function renderDays() {
+    daysEl.textContent = "";
+    if (!days.length) {
+      var none = document.createElement("div");
+      none.className = "sched-empty";
+      none.textContent = "No open times right now. Email " + CFG.hostEmail + " and he will find one.";
+      daysEl.appendChild(none);
+      return;
+    }
+    days.forEach(function (day, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "sched-day";
+      b.setAttribute("aria-pressed", i === selectedDay ? "true" : "false");
+      var top = document.createElement("b");
+      top.textContent = fmtDow.format(day.base);
+      var num = document.createElement("span");
+      num.textContent = fmtMd.format(day.base);
+      b.appendChild(top);
+      b.appendChild(num);
+      b.addEventListener("click", function () { selectDay(i); });
+      daysEl.appendChild(b);
+    });
+  }
+
+  function renderSlots() {
+    slotsEl.textContent = "";
+    if (selectedDay < 0) {
+      var hint = document.createElement("div");
+      hint.className = "sched-empty";
+      hint.textContent = "Pick a day to see open times.";
+      slotsEl.appendChild(hint);
+      return;
+    }
+    days[selectedDay].slots.forEach(function (t) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "sched-slot";
+      b.setAttribute("aria-pressed", t === selectedSlot ? "true" : "false");
+      var local = fmtLocalTime.format(t);
+      var et = fmtEtTime.format(t);
+      var label = local;
+      if (fmtLocalDay.format(t) !== fmtEtDay.format(t)) label = fmtLocalDay.format(t) + " " + local;
+      b.appendChild(document.createTextNode(label));
+      if (local !== et) {
+        var sm = document.createElement("small");
+        sm.textContent = et + " " + CFG.tzLabel;
+        b.appendChild(sm);
+      }
+      b.addEventListener("click", function () { selectSlot(t); });
+      slotsEl.appendChild(b);
+    });
+  }
+
+  function renderSummary() {
+    summaryEl.textContent = "";
+    if (!selectedSlot) {
+      summaryEl.className = "sched-summary";
+      summaryEl.textContent = "Choose a day and a time to continue.";
+      submitBtn.disabled = true;
+      return;
+    }
+    summaryEl.className = "sched-summary is-set";
+    summaryEl.appendChild(document.createTextNode(fmtLong.format(selectedSlot)));
+    var local = fmtLocalTime.format(selectedSlot), et = fmtEtTime.format(selectedSlot);
+    if (local !== et) {
+      var sm = document.createElement("small");
+      sm.textContent = fmtLongEt.format(selectedSlot) + " for Jeffrey";
+      summaryEl.appendChild(sm);
+    }
+    submitBtn.disabled = false;
+  }
+
+  function selectDay(i) {
+    selectedDay = i;
+    selectedSlot = 0;
+    renderDays();
+    renderSlots();
+    renderSummary();
+  }
+
+  function selectSlot(t) {
+    selectedSlot = t;
+    renderSlots();
+    renderSummary();
+  }
+
+  /* ---- build the request ---- */
+  function clean(s) { return (s || "").split(CRLF).join(" ").split(LF).join(" ").trim(); }
+
+  function buildMessage(name, email, note) {
+    var when = fmtLong.format(selectedSlot);
+    var whenEt = fmtLongEt.format(selectedSlot);
+    var lines = [
+      "Hi " + CFG.hostName + ",",
+      "",
+      "I'd like to book a " + CFG.durationMin + "-minute call.",
+      "",
+      "Time: " + when,
+      "(" + whenEt + " for you)",
+      "",
+      "Name: " + name,
+      "Email: " + email
+    ];
+    if (note) lines.push("About: " + note);
+    lines.push("", "Sent from the Verdict Debate AI website.");
+    return {
+      subject: "Call request: " + name + ", " + whenEt,
+      body: lines.join(LF)
+    };
+  }
+
+  function showError(msg) {
+    errEl.textContent = msg;
+    errEl.hidden = !msg;
+  }
+
+  function looksLikeEmail(v) {
+    var at = v.indexOf("@");
+    return at > 0 && v.indexOf(".", at) > at + 1 && v.indexOf(" ") === -1 && v.charAt(v.length - 1) !== ".";
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!selectedSlot) { showError("Pick a day and a time first."); return; }
+    var name = clean(nameEl.value), email = clean(emailEl.value), note = clean(noteEl.value);
+    if (!name) { showError("Add your name so Jeffrey knows who to expect."); nameEl.focus(); return; }
+    if (!looksLikeEmail(email)) { showError("Add an email address he can reply to."); emailEl.focus(); return; }
+    showError("");
+
+    lastMessage = buildMessage(name, email, note);
+    lastMessage.start = selectedSlot;
+    var enc = encodeURIComponent;
+    var mailto = "mailto:" + CFG.hostEmail + "?subject=" + enc(lastMessage.subject) + "&body=" + enc(lastMessage.body);
+    $("sched-gmail").href = "https://mail.google.com/mail/?view=cm&fs=1&to=" + enc(CFG.hostEmail) +
+      "&su=" + enc(lastMessage.subject) + "&body=" + enc(lastMessage.body);
+
+    pickEl.hidden = true;
+    form.hidden = true;
+    doneEl.hidden = false;
+    $("sched-copied").hidden = true;
+    doneEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    var a = document.createElement("a");
+    a.href = mailto;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+
+  $("sched-copy").addEventListener("click", function () {
+    if (!lastMessage) return;
+    var text = "To: " + CFG.hostEmail + LF + "Subject: " + lastMessage.subject + LF + LF + lastMessage.body;
+    var done = function () { $("sched-copied").hidden = false; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+    } else { fallbackCopy(text); done(); }
+  });
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function stamp(ms) {
+    var d = new Date(ms);
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + "T" +
+      p(d.getUTCHours()) + p(d.getUTCMinutes()) + p(d.getUTCSeconds()) + "Z";
+  }
+
+  $("sched-ics").addEventListener("click", function () {
+    if (!lastMessage) return;
+    var start = lastMessage.start, end = start + CFG.durationMin * 60000;
+    var lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Verdict Debate AI//Call request//EN",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "BEGIN:VEVENT",
+      "UID:" + start + "-" + Math.floor(Math.random() * 1e9) + "@verdict-debate-ai",
+      "DTSTAMP:" + stamp(Date.now()),
+      "DTSTART:" + stamp(start),
+      "DTEND:" + stamp(end),
+      "STATUS:TENTATIVE",
+      "SUMMARY:Call with " + CFG.hostName + " (Verdict Debate AI), requested",
+      "DESCRIPTION:Requested call. Pending " + CFG.hostName + " confirming by email.",
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ];
+    var blob = new Blob([lines.join(CRLF) + CRLF], { type: "text/calendar;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "call-with-jeffrey.ics";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+  });
+
+  $("sched-again").addEventListener("click", function () {
+    doneEl.hidden = true;
+    pickEl.hidden = false;
+    form.hidden = false;
+    selectedSlot = 0;
+    renderSlots();
+    renderSummary();
+  });
+
+  [nameEl, emailEl].forEach(function (el) {
+    el.addEventListener("input", function () { showError(""); });
+  });
+
+  renderDays();
+  renderSlots();
+  renderSummary();
+  if (days.length) selectDay(0);
+})();
+</script>
 
 </body>
 </html>
