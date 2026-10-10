@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Usage Stats</title>
+<style>
+  :root { --bg:#FAFAF7; --ink:#111; --ink-2:#555; --line:#DDD; --card:#fff; --accent:#C8201E; --green:#2E9E5B; --blue:#2438B8; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0F0F0E; --ink:#F2F1EC; --ink-2:#A8A69E; --line:#2A2A28; --card:#181817; --accent:#FF5A55; --green:#4CC37F; --blue:#8FA0FF; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 28px 0 10px; }
+  .sub { color: var(--ink-2); margin: 0 0 20px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 20px; }
+  input, select, button { font: inherit; padding: 8px 12px; border: 1.5px solid var(--ink); background: var(--card); color: var(--ink); border-radius: 6px; }
+  button { cursor: pointer; font-weight: 700; }
+  button.go { background: var(--ink); color: var(--bg); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .card b { display: block; font-size: 28px; line-height: 1.1; }
+  .card span { color: var(--ink-2); font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  th { color: var(--ink-2); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 3px; height: 90px; background: var(--card); border: 1px solid var(--line); padding: 8px; overflow-x: auto; }
+  .bars i { flex: 1 0 8px; max-width: 26px; background: var(--blue); min-height: 2px; position: relative; }
+  .bars i.v { background: var(--green); }
+  .legend { color: var(--ink-2); font-size: 13px; margin: 6px 0 0; }
+  .err { color: var(--accent); font-weight: 600; }
+  .sug { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+  .sug small { color: var(--ink-2); }
+  .hide { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Usage stats</h1>
+  <p class="sub">Anonymous counts only: no names, speech, topics, or IP addresses. Only you can see this page.</p>
+
+  <div class="bar">
+    <input id="key" type="password" placeholder="Admin key" autocomplete="off" aria-label="Admin key">
+    <select id="days" aria-label="Time range">
+      <option value="7">Last 7 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+      <option value="365">Last year</option>
+    </select>
+    <button class="go" id="go">Show stats</button>
+    <span id="msg" class="err"></span>
+  </div>
+
+  <div id="out" class="hide">
+    <h2>Visitors</h2>
+    <div class="cards" id="c-visitors"></div>
+    <h2>Visitors per day</h2>
+    <div class="bars" id="bars"></div>
+    <p class="legend"><span style="color:var(--green)">■</span> people &nbsp; <span style="color:var(--blue)">■</span> page views</p>
+    <table id="t-pages"><thead><tr><th>Page</th><th class="n">Views</th><th class="n">People</th></tr></thead><tbody></tbody></table>
+
+    <h2>Debates</h2>
+    <div class="cards" id="c-debates"></div>
+    <table id="t-modes"><thead><tr><th>Debate mode</th><th class="n">Debates</th><th class="n">People</th></tr></thead><tbody></tbody></table>
+
+    <h2>AI use</h2>
+    <div class="cards" id="c-ai"></div>
+    <table id="t-lanes"><thead><tr><th>Kind of AI call</th><th class="n">Calls</th><th class="n">People</th></tr></thead><tbody></tbody></table>
+
+    <h2>Features</h2>
+    <div class="cards" id="c-features"></div>
+    <table id="t-features"><thead><tr><th>Feature</th><th class="n">Uses</th><th class="n">People</th></tr></thead><tbody></tbody></table>
+
+    <h2>Suggestions <span id="sug-count"></span></h2>
+    <div id="sug"></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var LANES = { check: "Live fact-checks (main model)", feedback: "Turn reviews, judge, analysis (second model)", coach: "Case tools and lessons (second model)", listen: "Speech-to-text" };
+  var FEATURES = { turn_review: "Turn reviews", case_checker: "Case Checker", case_builder: "Case Builder", ai_judge: "AI judge", argument_analysis: "Argument analysis",
+    personal_lesson: "Personal lessons", manual_factcheck: "Manual fact-check box", upload: "Upload a debate", online_room: "Online Debate", league: "League submissions",
+    high_accuracy_listening: "High-accuracy listening", book_call: "Booked a call (landing page)" };
+  var MODES = { casual: "Casual", publicforum: "Public Forum", lincolndouglas: "Lincoln-Douglas", mocktrial: "Mock Trial", parliamentary: "Parliamentary", policy: "Policy" };
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function card(big, small) { return '<div class="card"><b>' + esc(big) + '</b><span>' + esc(small) + '</span></div>'; }
+  function rows(tb, list) { tb.querySelector("tbody").innerHTML = list.length ? list.map(function (r) { return "<tr><td>" + esc(r[0]) + '</td><td class="n">' + r[1] + '</td><td class="n">' + r[2] + "</td></tr>"; }).join("") : '<tr><td colspan="3">Nothing yet.</td></tr>'; }
+
+  try { $("key").value = sessionStorage.getItem("verdictai_admin") || ""; } catch (e) {}
+
+  async function load() {
+    $("msg").textContent = "";
+    var key = $("key").value.trim();
+    if (!key) { $("msg").textContent = "Enter your admin key."; return; }
+    var resp, data;
+    try {
+      resp = await fetch("/api/stats?days=" + $("days").value, { headers: { Authorization: "Bearer " + key } });
+      data = await resp.json();
+    } catch (e) { $("msg").textContent = "Couldn't connect."; return; }
+    if (!resp.ok) { $("msg").textContent = data.error || "Something went wrong."; if (data.detail) $("msg").textContent += " " + data.detail; return; }
+    try { sessionStorage.setItem("verdictai_admin", key); } catch (e) {}
+    render(data);
+  }
+
+  function render(d) {
+    $("out").classList.remove("hide");
+    var v = d.visitors, db = d.debates, ai = d.ai.byLane, f = d.features;
+    $("c-visitors").innerHTML = card(v.unique, "people in this period") + card(v.pageViews, "page views");
+    var max = Math.max.apply(null, [1].concat(v.perDay.map(function (x) { return Math.max(x.visitors, x.pageViews); })));
+    $("bars").innerHTML = v.perDay.map(function (x) {
+      return '<i title="' + esc(x.day) + ": " + x.visitors + " people, " + x.pageViews + ' views" style="height:' + Math.round(x.pageViews / max * 100) + '%"></i>' +
+             '<i class="v" title="' + esc(x.day) + '" style="height:' + Math.round(x.visitors / max * 100) + '%"></i>';
+    }).join("") || "No data yet.";
+    rows($("t-pages"), v.byPage.map(function (x) { return [x.page === "app" ? "The app" : x.page === "landing" ? "Landing page" : x.page, x.views, x.visitors]; }));
+
+    $("c-debates").innerHTML = card(db.started, "debates started") + card(db.finished, "debates finished") + card(db.people, "people who debated") +
+      card(db.minutes, "minutes of speaking") + card(db.avgMinutes, "avg minutes per debate");
+    rows($("t-modes"), db.byMode.map(function (x) { return [MODES[x.mode] || x.mode, x.debates, x.people]; }));
+
+    var lanes = ["check", "feedback", "coach", "listen"];
+    $("c-ai").innerHTML = card(f.factCheckPeople, "people using the fact-check AI") + card(f.coachingPeople, "people using coaching features") +
+      card((ai.check || { calls: 0 }).calls, "live fact-check calls") + card(["feedback", "coach"].reduce(function (n, k) { return n + ((ai[k] || {}).calls || 0); }, 0), "coaching / feedback calls");
+    rows($("t-lanes"), lanes.filter(function (k) { return ai[k]; }).map(function (k) { return [LANES[k], ai[k].calls, ai[k].people]; }));
+
+    var feats = Object.keys(f.byFeature).sort(function (a, b) { return f.byFeature[b].uses - f.byFeature[a].uses; });
+    $("c-features").innerHTML = feats.slice(0, 4).map(function (k) { return card(f.byFeature[k].uses, (FEATURES[k] || k) + " (" + f.byFeature[k].people + " people)"); }).join("");
+    rows($("t-features"), feats.map(function (k) { return [FEATURES[k] || k, f.byFeature[k].uses, f.byFeature[k].people]; }));
+
+    $("sug-count").textContent = "(" + d.suggestions.total + " total)";
+    $("sug").innerHTML = d.suggestions.recent.length ? d.suggestions.recent.map(function (s) {
+      return '<div class="sug"><small>' + esc(new Date(s.ts).toLocaleString()) + " · " + esc(s.category) + (s.contact ? " · " + esc(s.contact) : "") + "</small><div>" + esc(s.message) + "</div></div>";
+    }).join("") : "<p>No suggestions yet.</p>";
+  }
+
+  $("go").addEventListener("click", load);
+  $("key").addEventListener("keydown", function (e) { if (e.key === "Enter") load(); });
+  if ($("key").value) load();
+})();
+</script>
+</body>
+</html>

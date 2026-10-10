@@ -23,6 +23,9 @@ request/response JSON shapes — the client in app.html needed zero changes,
 plus the new profile route):
   POST /api/groq-chat             - Groq chat-completions proxy
   POST /api/groq-whisper          - Groq Whisper transcription proxy
+  POST /api/track                 - anonymous usage counts (no names, no speech, no IP stored)
+  POST /api/suggestion            - the suggestion box
+  GET  /api/stats                 - usage dashboard data (needs ADMIN_TOKEN)
   POST /api/league-submit         - record a debate against a league code
   GET  /api/league-stats          - aggregate stats for a league code
   POST /api/auth-signup           - create an account (bcrypt-hashed password)
@@ -33,6 +36,7 @@ plus the new profile route):
   GET  /api/account-stats         - aggregate stats for a signed-in account
 """
 import datetime
+import hmac
 import json
 import os
 import random
@@ -56,9 +60,14 @@ GROQ_WHISPER_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
 TOKEN_TTL_DAYS = 30
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
-DB_ERROR = {"error": "Couldn't reach the database. Make sure a Postgres database is attached in Vercel's Storage tab — if it already is, it may just be waking up from being idle; try again in a few seconds."}
-NO_KEY_ERROR = {"error": "No Groq API key configured on the server. Add GROQ_API_KEY (or GROQ_API_KEYS for a rotating pool) in Vercel → Settings → Environment Variables."}
-NO_JWT_ERROR = {"error": "JWT_SECRET env var is not set on the server. Add a long random string in Vercel → Settings → Environment Variables."}
+# User-facing messages are plain language; the technical reason travels in "detail"
+# (not shown in the app) so whoever runs the deployment can still diagnose it.
+DB_ERROR = {"error": "We couldn't load your account data just now. Please try again in a few seconds.",
+            "detail": "Couldn't reach the database. Make sure a Postgres database is attached in Vercel's Storage tab; if it already is, it may be waking up from being idle."}
+NO_KEY_ERROR = {"error": "The AI helper isn't available right now. Please try again later.",
+                "detail": "No Groq API key configured on the server. Add Verdict_1.. (or GROQ_API_KEYS / GROQ_API_KEY) in Vercel -> Settings -> Environment Variables."}
+NO_JWT_ERROR = {"error": "Signing in isn't available right now. Please try again later.",
+                "detail": "JWT_SECRET env var is not set on the server. Add a long random string in Vercel -> Settings -> Environment Variables."}
 NOT_SIGNED_IN = {"error": "Not signed in."}
 
 
@@ -109,7 +118,13 @@ DEFAULT_CHAT_MODEL = "openai/gpt-oss-120b"
 # When the main model is rate limited everywhere, the same request goes to these
 # instead. Each model has its own free-tier quota, so this adds capacity. Both
 # take the same parameters (JSON mode, reasoning_effort).
-FALLBACK_CHAT_MODELS = [m.strip() for m in os.environ.get("GROQ_FALLBACK_MODELS", "openai/gpt-oss-20b").split(",") if m.strip()]
+COACH_CHAT_MODEL = "openai/gpt-oss-20b"
+# Live fact-checks use the main model, coaching/feedback use the second one (each has its own
+# free-tier allowance). If either is at its limit the request goes to the other.
+FALLBACK_CHAT_MODELS = {
+    DEFAULT_CHAT_MODEL: [m.strip() for m in os.environ.get("GROQ_FALLBACK_MODELS", COACH_CHAT_MODEL).split(",") if m.strip()],
+    COACH_CHAT_MODEL: [DEFAULT_CHAT_MODEL],
+}
 MAX_ATTEMPTS = 8
 
 
@@ -253,10 +268,10 @@ def groq_chat():
             requested = json.loads(body).get("model") or DEFAULT_CHAT_MODEL
         except Exception:
             pass
-        models = [requested] + (FALLBACK_CHAT_MODELS if requested == DEFAULT_CHAT_MODEL else [])
+        models = [requested] + FALLBACK_CHAT_MODELS.get(requested, [])
         upstream = groq_post(GROQ_CHAT_URL, keys, body, content_type, 40, models)
     except Exception as e:
-        return jsonify({"error": "Upstream error: " + str(e)}), 502
+        return jsonify({"error": "The AI service didn't respond. Please try again.", "detail": "Upstream error: " + str(e)}), 502
 
     return Response(
         upstream.content,
@@ -283,7 +298,7 @@ def groq_whisper():
     try:
         upstream = groq_post(GROQ_WHISPER_URL, keys, body, content_type, 120)
     except Exception as e:
-        return jsonify({"error": "Upstream error: " + str(e)}), 502
+        return jsonify({"error": "The AI service didn't respond. Please try again.", "detail": "Upstream error: " + str(e)}), 502
 
     return Response(
         upstream.content,
@@ -352,7 +367,7 @@ def league_submit():
             """, (league_code, student_name, mode, topic, practice_mode, judge_persona, score_a, score_b, json.dumps(fallacy_names)))
         return jsonify({"ok": True})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -415,7 +430,7 @@ def league_stats():
             "recent": recent,
         })
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -497,7 +512,7 @@ def auth_signup():
         token = sign_token(row[0], row[1])
         return jsonify({"token": token, "user": public_user(row)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -533,7 +548,7 @@ def auth_login():
         user_row = (row[0], row[1], row[3], row[4], row[5])  # drop password_hash before returning
         return jsonify({"token": token, "user": public_user(user_row)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -561,7 +576,7 @@ def auth_me():
             return jsonify({"error": "Account no longer exists."}), 401
         return jsonify({"user": public_user(row)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -620,7 +635,7 @@ def account_profile():
             return jsonify({"error": "Account no longer exists."}), 401
         return jsonify({"user": public_user(row)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -665,7 +680,7 @@ def account_save_debate():
             """, (payload.get("uid"), mode, topic, practice_mode, judge_persona, score_a, score_b, json.dumps(fallacy_names)))
         return jsonify({"ok": True})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -726,7 +741,7 @@ def account_stats():
             "recent": recent,
         })
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -856,7 +871,7 @@ def room_create():
             row = cur.fetchone()
         return jsonify({"room": room_public_state(row, payload.get("uid"))})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -890,20 +905,30 @@ def room_join():
 
             uid = payload.get("uid")
             host_user_id, guest_user_id = row[3], row[5]
-            if uid == host_user_id:
-                return jsonify({"room": room_public_state(row, uid)})  # host "joining" their own room — just return state
-            if guest_user_id and guest_user_id != uid:
+            if uid == host_user_id or (guest_user_id and uid == guest_user_id):
+                return jsonify({"room": room_public_state(row, uid)})  # already in this room — just return state
+            if guest_user_id:
                 return jsonify({"error": "That room already has two debaters in it."}), 409
 
-            cur.execute(f"""
-                UPDATE online_rooms SET guest_user_id = %s, guest_name = %s, status = 'active', updated_at = now()
-                WHERE room_code = %s
-                RETURNING {ROOM_COLUMNS};
-            """, (uid, guest_name, room_code))
+            # Coin flip: whoever lands on side "a" argues the affirmative / first side. Which of the two
+            # people that is gets decided at random once, when the second person joins.
+            if random.random() < 0.5:
+                cur.execute(f"""
+                    UPDATE online_rooms SET host_user_id = %s, host_name = %s, guest_user_id = %s, guest_name = %s,
+                           status = 'active', updated_at = now()
+                    WHERE room_code = %s
+                    RETURNING {ROOM_COLUMNS};
+                """, (uid, guest_name, host_user_id, row[4], room_code))
+            else:
+                cur.execute(f"""
+                    UPDATE online_rooms SET guest_user_id = %s, guest_name = %s, status = 'active', updated_at = now()
+                    WHERE room_code = %s
+                    RETURNING {ROOM_COLUMNS};
+                """, (uid, guest_name, room_code))
             row = cur.fetchone()
         return jsonify({"room": room_public_state(row, uid)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -933,7 +958,7 @@ def room_state():
             return jsonify({"error": "Room not found, or you're not a participant in it."}), 404
         return jsonify({"room": room_public_state(row, payload.get("uid"))})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
@@ -1027,7 +1052,229 @@ def room_action():
             row = cur.fetchone()
         return jsonify({"room": room_public_state(row, uid)})
     except Exception as e:
-        return jsonify({"error": "Database error: " + str(e)}), 500
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
+    finally:
+        conn.close()
+
+
+# =============================================================================
+# Anonymous usage stats + suggestion box
+#
+# What is recorded: a random visitor id made in the browser, an event name, and a
+# few whitelisted numbers/words (page, mode, minutes, feature, lane, count). No
+# names, no speech, no topics, no IP address. Honors Do Not Track / Global
+# Privacy Control, and the app lets people opt out entirely.
+# =============================================================================
+USAGE_TABLE = """
+    CREATE TABLE IF NOT EXISTS usage_events (
+        id BIGSERIAL PRIMARY KEY,
+        ts TIMESTAMPTZ NOT NULL DEFAULT now(),
+        visitor TEXT NOT NULL,
+        event TEXT NOT NULL,
+        props JSONB NOT NULL DEFAULT '{}'
+    );
+    CREATE INDEX IF NOT EXISTS usage_events_ts ON usage_events (ts);
+"""
+SUGGESTIONS_TABLE = """
+    CREATE TABLE IF NOT EXISTS suggestions (
+        id SERIAL PRIMARY KEY,
+        ts TIMESTAMPTZ NOT NULL DEFAULT now(),
+        category TEXT NOT NULL,
+        message TEXT NOT NULL,
+        contact TEXT NOT NULL DEFAULT ''
+    );
+"""
+TRACK_EVENTS = {"page_view", "debate_start", "debate_end", "feature_use", "ai_calls"}
+TRACK_NUMBERS = {"minutes": 600, "turns": 300, "n": 5000}
+TRACK_WORDS = {"page", "mode", "feature", "lane"}
+TRACK_BOOLS = {"practice"}
+USAGE_RETENTION_DAYS = 400
+VISITOR_RE = re.compile(r"^[a-f0-9]{16,64}$")
+SUGGESTION_CATEGORIES = {"idea", "problem", "other"}
+COACHING_FEATURES = ("turn_review", "case_checker", "case_builder", "ai_judge", "argument_analysis", "personal_lesson")
+_tables_ready = set()
+_suggest_hits = {}
+
+
+def ensure_table(cur, name, ddl):
+    if name not in _tables_ready:
+        cur.execute(ddl)
+        _tables_ready.add(name)
+
+
+def clean_event(raw):
+    """One incoming event -> (event, props) or None. Anything not on the whitelist is dropped."""
+    if not isinstance(raw, dict):
+        return None
+    event = raw.get("e")
+    if event not in TRACK_EVENTS:
+        return None
+    props = {}
+    incoming = raw.get("p") if isinstance(raw.get("p"), dict) else {}
+    for key, val in incoming.items():
+        if key in TRACK_NUMBERS and isinstance(val, (int, float)) and not isinstance(val, bool):
+            props[key] = max(0, min(TRACK_NUMBERS[key], round(float(val), 1)))
+        elif key in TRACK_WORDS and isinstance(val, str):
+            word = re.sub(r"[^a-z0-9_-]", "", val.lower())[:32]
+            if word:
+                props[key] = word
+        elif key in TRACK_BOOLS and isinstance(val, bool):
+            props[key] = val
+    return event, props
+
+
+@app.route("/api/track", methods=["POST", "OPTIONS"])
+def track():
+    if request.method == "OPTIONS":
+        return "", 204
+    # Never break the app over analytics: every failure path is a quiet 204.
+    if request.headers.get("DNT") == "1" or request.headers.get("Sec-GPC") == "1":
+        return "", 204
+    body = request.get_json(silent=True, force=True) or {}
+    vid = str(body.get("vid") or "")
+    events = body.get("events")
+    if not VISITOR_RE.match(vid) or not isinstance(events, list):
+        return "", 204
+    rows = []
+    for raw in events[:25]:
+        cleaned = clean_event(raw)
+        if cleaned:
+            rows.append((vid, cleaned[0], json.dumps(cleaned[1])))
+    if not rows:
+        return "", 204
+    conn = get_conn()
+    if not conn:
+        return "", 204
+    try:
+        with conn.cursor() as cur:
+            ensure_table(cur, "usage", USAGE_TABLE)
+            cur.executemany("INSERT INTO usage_events (visitor, event, props) VALUES (%s, %s, %s::jsonb);", rows)
+            if random.random() < 0.01:  # housekeeping: keep about 13 months
+                cur.execute("DELETE FROM usage_events WHERE ts < now() - (%s || ' days')::interval;", (str(USAGE_RETENTION_DAYS),))
+    except Exception:
+        pass
+    finally:
+        conn.close()
+    return "", 204
+
+
+@app.route("/api/suggestion", methods=["POST", "OPTIONS"])
+def suggestion():
+    if request.method == "OPTIONS":
+        return "", 204
+    body = request.get_json(silent=True) or {}
+    if body.get("website"):  # honeypot: real people never fill this in
+        return jsonify({"ok": True})
+    category = str(body.get("category") or "other").lower()
+    if category not in SUGGESTION_CATEGORIES:
+        category = "other"
+    message = str(body.get("message") or "").strip()
+    contact = str(body.get("contact") or "").strip()[:200]
+    if len(message) < 5:
+        return jsonify({"error": "Tell us a little more so we can act on it."}), 400
+    if len(message) > 1000:
+        return jsonify({"error": "That's a bit long. Please keep it under 1,000 characters."}), 400
+
+    # light spam brake, kept in memory only: 5 per visitor per hour
+    vid = str(body.get("vid") or "anon")[:64]
+    now = time.time()
+    hits = [t for t in _suggest_hits.get(vid, []) if now - t < 3600]
+    if len(hits) >= 5:
+        return jsonify({"error": "You've sent a few already. Please try again in a while."}), 429
+    _suggest_hits[vid] = hits + [now]
+
+    conn = get_conn()
+    if not conn:
+        return jsonify(DB_ERROR), 500
+    try:
+        with conn.cursor() as cur:
+            ensure_table(cur, "suggestions", SUGGESTIONS_TABLE)
+            cur.execute("INSERT INTO suggestions (category, message, contact) VALUES (%s, %s, %s);", (category, message, contact))
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
+    finally:
+        conn.close()
+
+
+def admin_ok():
+    token = os.environ.get("ADMIN_TOKEN", "")
+    given = (request.headers.get("Authorization", "") or "")[7:]
+    return bool(token) and hmac.compare_digest(token, given)
+
+
+@app.route("/api/stats", methods=["GET", "OPTIONS"])
+def stats():
+    if request.method == "OPTIONS":
+        return "", 204
+    if not os.environ.get("ADMIN_TOKEN"):
+        return jsonify({"error": "Stats aren't set up yet.", "detail": "Add an ADMIN_TOKEN environment variable in Vercel (any long random string) and redeploy."}), 503
+    if not admin_ok():
+        return jsonify({"error": "That key isn't right."}), 401
+    try:
+        days = max(1, min(365, int(request.args.get("days", "30"))))
+    except ValueError:
+        days = 30
+    conn = get_conn()
+    if not conn:
+        return jsonify(DB_ERROR), 500
+    since = "ts >= now() - (%s || ' days')::interval"
+    d = (str(days),)
+    out = {"days": days}
+    try:
+        with conn.cursor() as cur:
+            ensure_table(cur, "usage", USAGE_TABLE)
+            ensure_table(cur, "suggestions", SUGGESTIONS_TABLE)
+
+            cur.execute(f"SELECT COUNT(DISTINCT visitor), COUNT(*) FILTER (WHERE event = 'page_view') FROM usage_events WHERE {since};", d)
+            uniq, views = cur.fetchone()
+            cur.execute(f"""SELECT ts::date, COUNT(DISTINCT visitor), COUNT(*) FILTER (WHERE event = 'page_view')
+                            FROM usage_events WHERE {since} GROUP BY 1 ORDER BY 1;""", d)
+            per_day = [{"day": str(r[0]), "visitors": r[1], "pageViews": r[2]} for r in cur.fetchall()]
+            cur.execute(f"""SELECT props->>'page', COUNT(*), COUNT(DISTINCT visitor) FROM usage_events
+                            WHERE event = 'page_view' AND {since} GROUP BY 1 ORDER BY 2 DESC;""", d)
+            by_page = [{"page": r[0] or "?", "views": r[1], "visitors": r[2]} for r in cur.fetchall()]
+            out["visitors"] = {"unique": uniq, "pageViews": views, "perDay": per_day, "byPage": by_page}
+
+            cur.execute(f"""SELECT props->>'mode', COUNT(*), COUNT(DISTINCT visitor) FROM usage_events
+                            WHERE event = 'debate_start' AND {since} GROUP BY 1 ORDER BY 2 DESC;""", d)
+            by_mode = [{"mode": r[0] or "?", "debates": r[1], "people": r[2]} for r in cur.fetchall()]
+            cur.execute(f"SELECT COUNT(*), COUNT(DISTINCT visitor) FROM usage_events WHERE event = 'debate_start' AND {since};", d)
+            started, debaters = cur.fetchone()
+            cur.execute(f"""SELECT COUNT(*), COALESCE(SUM((props->>'minutes')::numeric), 0), COALESCE(SUM((props->>'turns')::numeric), 0)
+                            FROM usage_events WHERE event = 'debate_end' AND {since};""", d)
+            ended, minutes, turns = cur.fetchone()
+            minutes = float(minutes or 0)
+            out["debates"] = {"started": started, "finished": ended, "people": debaters, "minutes": round(minutes, 1),
+                              "avgMinutes": round(minutes / ended, 1) if ended else 0, "turns": int(turns or 0), "byMode": by_mode}
+
+            cur.execute(f"""SELECT props->>'lane', COALESCE(SUM((props->>'n')::numeric), 0), COUNT(DISTINCT visitor) FROM usage_events
+                            WHERE event = 'ai_calls' AND {since} GROUP BY 1 ORDER BY 2 DESC;""", d)
+            lanes = {(r[0] or "?"): {"calls": int(r[1]), "people": r[2]} for r in cur.fetchall()}
+            cur.execute(f"""SELECT ts::date, props->>'lane', COALESCE(SUM((props->>'n')::numeric), 0) FROM usage_events
+                            WHERE event = 'ai_calls' AND {since} GROUP BY 1, 2 ORDER BY 1;""", d)
+            lane_days = [{"day": str(r[0]), "lane": r[1] or "?", "calls": int(r[2])} for r in cur.fetchall()]
+            out["ai"] = {"byLane": lanes, "perDay": lane_days}
+
+            cur.execute(f"""SELECT props->>'feature', COUNT(*), COUNT(DISTINCT visitor) FROM usage_events
+                            WHERE event = 'feature_use' AND {since} GROUP BY 1 ORDER BY 2 DESC;""", d)
+            features = {(r[0] or "?"): {"uses": r[1], "people": r[2]} for r in cur.fetchall()}
+            cur.execute(f"""SELECT COUNT(DISTINCT visitor) FROM usage_events WHERE event = 'feature_use'
+                            AND props->>'feature' = ANY(%s) AND {since};""", (list(COACHING_FEATURES), str(days)))
+            coaching_people = cur.fetchone()[0]
+            cur.execute(f"""SELECT COUNT(DISTINCT visitor) FROM usage_events WHERE {since} AND
+                            ((event = 'ai_calls' AND props->>'lane' = 'check') OR (event = 'feature_use' AND props->>'feature' = 'manual_factcheck'));""", d)
+            factcheck_people = cur.fetchone()[0]
+            out["features"] = {"byFeature": features, "coachingPeople": coaching_people, "factCheckPeople": factcheck_people}
+
+            cur.execute("SELECT COUNT(*) FROM suggestions;")
+            total_sug = cur.fetchone()[0]
+            cur.execute("SELECT ts, category, message, contact FROM suggestions ORDER BY ts DESC LIMIT 50;")
+            recent = [{"ts": r[0].isoformat(), "category": r[1], "message": r[2], "contact": r[3]} for r in cur.fetchall()]
+            out["suggestions"] = {"total": total_sug, "recent": recent}
+        return jsonify(out)
+    except Exception as e:
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
         conn.close()
 
