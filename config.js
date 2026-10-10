@@ -20,6 +20,11 @@
 
     // Model defaults (no keys — keys live in env vars / config.local.js)
     GROQ_MODEL: "openai/gpt-oss-120b",
+    // Coaching and feedback (turn reviews, judge, case tools, lessons) run on a second model with its
+    // own free allowance, so they can't use up the live fact-check allowance.
+    GROQ_COACH_MODEL: "openai/gpt-oss-20b",
+    // Most AI calls per lane per browser session (the live fact-check lane has PER_DEBATE_BUDGET below).
+    LANE_BUDGETS: { feedback: 30, coach: 40 },
     GROQ_WHISPER_MODEL: "whisper-large-v3-turbo",
 
     // --- Auto fact-check tuning ---

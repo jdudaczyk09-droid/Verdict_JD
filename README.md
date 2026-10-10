@@ -48,6 +48,17 @@ Every feature of Verdict Debate AI works fully without an account — it's a pur
 2. In the Vercel dashboard, add one more environment variable: `JWT_SECRET` — a long random string (e.g. `openssl rand -hex 32`) used to sign session tokens. Without it, the log in / sign up buttons show a clear error instead of failing silently.
 3. Users sign up or log in from the account control in the header. Signed-in users get their debate summaries synced to `/api/account-save-debate` and can see cross-device stats on the Progress screen; everyone else keeps using localStorage exactly as before.
 
+
+### Usage stats and the suggestion box (optional — same database)
+
+The app sends **anonymous** usage counts to `/api/track` (page opened, debate started/finished, minutes spoken, which features were used, AI calls per category). It never sends names, speech, topics, or IP addresses, honors Do Not Track / Global Privacy Control, and has an opt-out in the Privacy Policy. Events older than ~13 months are deleted automatically. Suggestions from the footer's **Suggestions** box are stored in a `suggestions` table.
+
+To read them, add one environment variable in Vercel — `ADMIN_TOKEN`, any long random string — redeploy, then open `/stats.html` and enter that key. You'll see visitors per day, page views, debates and minutes, AI calls by category (live fact-checks vs coaching vs listening), people using the fact-check AI vs the coaching features, per-feature usage, and the latest suggestions. Without `ADMIN_TOKEN` the stats endpoint stays closed.
+
+### AI "lanes" (keeps the free tier lasting)
+
+Live fact-checks use `GROQ_MODEL` (default `openai/gpt-oss-120b`). Turn reviews, the AI judge, argument analysis, Case Checker, Case Builder, and personal lessons use `GROQ_COACH_MODEL` (default `openai/gpt-oss-20b`), which has its own free allowance. Each lane also has its own per-session cap (`LANE_BUDGETS` in `config.js`), and if one model is rate-limited the proxy falls back to the other.
+
 ### Hobby tier note
 
 Vercel's Hobby tier caps request bodies at 4.5 MB. Upload mode chunks audio into 2-minute slices (~3.8 MB at 16 kHz mono) to stay under the cap. Local dev with `PROXY_MODE: false` can use bigger chunks via `UPLOAD_CHUNK_MINUTES` in `config.local.js`.
