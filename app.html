@@ -1007,6 +1007,9 @@
   .tr-earlier > summary { cursor: pointer; font-weight: 800; font-size: 14px; color: var(--ink-2); margin: 4px 0 8px; }
   .transcript-round .tr-card { margin: 10px 0 0; }
 
+  .site-counter { font-size: 13px; font-weight: 700; color: var(--brand); opacity: 0.85; white-space: nowrap; }
+  .site-counter[hidden] { display: none; }
+  .site-counter b { font-weight: 900; font-size: 15px; }
   .lesson-lead { margin: 6px 0 10px; font-size: 15px; }
   .lesson-title { font-size: 22px; font-weight: 900; font-variation-settings: "wdth" 88; margin: 8px 0 4px; }
   .lesson-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 24px; }
@@ -2523,6 +2526,7 @@
   </main>
   <footer class="app-footer">
     <div class="footer-mark">Verdict Debate AI</div>
+    <div class="site-counter" id="site-counter" hidden title="Anonymous totals. People who opt out of usage counts aren't included."></div>
     <div class="footer-links">
       <a href="index.html" data-i18n="footer.home">Home</a>
       <span class="footer-sep">·</span>
@@ -2694,7 +2698,7 @@
         <li><b>League code:</b> if you enter one in Setup, each finished round sends the code, the first name you typed in Setup, mode, topic, practice flag, judge persona, scores, and fallacy names. Anyone who has the code can see that league's data.</li>
         <li><b>Online Debate</b> (requires an account): room code, mode, topic, the host's and guest's display names and account IDs, turn, timer and score state, the score log, and a text transcript of what each side said (up to 20,000 characters per turn). Only the host and the one person who joins with the room code can read it. Rooms are not currently deleted automatically.</li>
       </ul>
-      <p><b>Anonymous usage counts.</b> To see how the app is used, the app sends our server small events: that a page was opened (landing page or app), that a debate started or finished (mode, whether it was practice, minutes of speaking, number of turns), which features were used (for example turn review, Case Checker, Case Builder, AI judge, argument analysis, personal lesson, manual fact-check, upload, online room, league, high-accuracy listening), and how many AI calls were made in each category. Each event carries only the random visitor ID from your browser, a timestamp, and those few values. It never carries your name, email, speech, topics, transcripts, or IP address. Our code does not store IP addresses; the hosting provider's standard logs may (section 5). We honor Do Not Track and Global Privacy Control, and you can switch this off with the checkbox at the top of this policy; turning it off also deletes the visitor ID from your browser. These counts are deleted automatically after about 13 months (the cleanup runs as new events arrive).</p>
+      <p><b>Anonymous usage counts.</b> To see how the app is used, the app sends our server small events: that a page was opened (landing page or app), that a debate started or finished (mode, whether it was practice, minutes of speaking, number of turns), which features were used (for example turn review, Case Checker, Case Builder, AI judge, argument analysis, personal lesson, manual fact-check, upload, online room, league, high-accuracy listening), and how many AI calls were made in each category. Each event carries only the random visitor ID from your browser, a timestamp, and those few values. It never carries your name, email, speech, topics, transcripts, or IP address. Our code does not store IP addresses; the hosting provider's standard logs may (section 5). We honor Do Not Track and Global Privacy Control, and you can switch this off with the checkbox at the top of this policy; turning it off also deletes the visitor ID from your browser. The detailed counts are deleted automatically after about 13 months (the cleanup runs as new events arrive). Two lasting totals are kept separately and shown publicly in the corner of the site: the number of finished debates and the number of visits (the first page opened in a browser session). They are plain numbers with no link to any person, and people who opt out aren't included.</p>
       <p><b>Suggestion box.</b> If you send a suggestion, we store its category, your message, and the email address if you choose to add one, until we delete it. Your browser's anonymous visitor ID is sent along only so we can limit spam; it is not saved with the suggestion. Don't put sensitive personal information in a suggestion.</p>
       <p>We do not store audio, fact-check results, claim logs, or held-back claims on our servers. Our own code does not write request logs; our hosting provider keeps standard logs (see section 5).</p>
 
@@ -2849,6 +2853,11 @@ const Stats = (() => {
     feature(name) { this.track("feature_use", { feature: name }); },
     ai(lane) { if (!enabled()) return; ai[lane] = (ai[lane] || 0) + 1; arm(30000); },
     flush,
+    // true only for the first page opened in this browser session, so a "visit" isn't counted on every reload
+    firstOfSession() {
+      try { if (sessionStorage.getItem("verdictai_session")) return false; sessionStorage.setItem("verdictai_session", "1"); } catch (_) {}
+      return true;
+    },
     isOff() { return read(KEY_OFF) === "1"; },
     setOff(off) { if (off) { write(KEY_OFF, "1"); drop(KEY_VID); vid = null; queue.length = 0; } else { drop(KEY_OFF); } }
   };
@@ -3254,6 +3263,7 @@ const TRANSLATIONS = {
     "debate.engine.busy": "Listening is a little slow right now. A few words may be missed.",
     "debate.engine.stalled": "Your browser stopped hearing you, so we switched to high-accuracy listening.",
     "footer.suggest": "Suggestions",
+    "counter.debates": "debates facilitated", "counter.visits": "site visits",
     "suggest.title": "Suggestion box", "suggest.sub": "Something you'd like us to add, fix, or change? Tell us. We read every one.",
     "suggest.cat": "What kind?", "suggest.idea": "An idea", "suggest.problem": "Something's not working", "suggest.other": "Something else",
     "suggest.msg": "Your suggestion", "suggest.msgph": "What would make Verdict Debate AI better for you?",
@@ -3518,6 +3528,7 @@ const TRANSLATIONS = {
     "debate.engine.busy": "La escucha va un poco lenta ahora. Puede que se pierdan algunas palabras.",
     "debate.engine.stalled": "Tu navegador dejó de escucharte, así que cambiamos a la escucha de alta precisión.",
     "footer.suggest": "Sugerencias",
+    "counter.debates": "debates facilitados", "counter.visits": "visitas al sitio",
     "suggest.title": "Buzón de sugerencias", "suggest.sub": "¿Algo que quieras que añadamos, arreglemos o cambiemos? Cuéntanos. Leemos todas.",
     "suggest.cat": "¿De qué tipo?", "suggest.idea": "Una idea", "suggest.problem": "Algo no funciona", "suggest.other": "Otra cosa",
     "suggest.msg": "Tu sugerencia", "suggest.msgph": "¿Qué haría que Verdict Debate AI fuera mejor para ti?",
@@ -3989,7 +4000,8 @@ function init() {
   if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
   setPolicyDates();
   initCookieBanner();
-  Stats.track("page_view", { page: "app" });
+  Stats.track("page_view", { page: "app", visit: Stats.firstOfSession() });
+  loadSiteCounter();
   const optOut = document.getElementById("stats-optout");
   if (optOut) optOut.checked = Stats.isOff();
   const openPolicyFromHash = () => {
@@ -5903,6 +5915,21 @@ function stopOnlineMic() {
     try { r.stop(); } catch (_) {}
   }
   document.getElementById("online-mic-dot")?.classList.remove("active");
+}
+
+/* The small corner counter in the footer: all-time totals, shown only once there is something to show. */
+async function loadSiteCounter() {
+  const el = document.getElementById("site-counter");
+  if (!el) return;
+  try {
+    const r = await fetch("/api/public-stats");
+    if (!r.ok) return;
+    const d = await r.json();
+    if (!d || (!d.debates && !d.visits)) return;
+    const fmt = (n) => Number(n).toLocaleString(currentUILang() === "es" ? "es" : "en-US");
+    el.innerHTML = `<b>${fmt(d.debates)}</b> ${escapeHtml(t("counter.debates"))} · <b>${fmt(d.visits)}</b> ${escapeHtml(t("counter.visits"))}`;
+    el.hidden = false;
+  } catch (_) {}
 }
 
 function openSuggest() {
