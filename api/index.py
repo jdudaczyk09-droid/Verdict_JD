@@ -895,16 +895,26 @@ def room_join():
 
             uid = payload.get("uid")
             host_user_id, guest_user_id = row[3], row[5]
-            if uid == host_user_id:
-                return jsonify({"room": room_public_state(row, uid)})  # host "joining" their own room — just return state
-            if guest_user_id and guest_user_id != uid:
+            if uid == host_user_id or (guest_user_id and uid == guest_user_id):
+                return jsonify({"room": room_public_state(row, uid)})  # already in this room — just return state
+            if guest_user_id:
                 return jsonify({"error": "That room already has two debaters in it."}), 409
 
-            cur.execute(f"""
-                UPDATE online_rooms SET guest_user_id = %s, guest_name = %s, status = 'active', updated_at = now()
-                WHERE room_code = %s
-                RETURNING {ROOM_COLUMNS};
-            """, (uid, guest_name, room_code))
+            # Coin flip: whoever lands on side "a" argues the affirmative / first side. Which of the two
+            # people that is gets decided at random once, when the second person joins.
+            if random.random() < 0.5:
+                cur.execute(f"""
+                    UPDATE online_rooms SET host_user_id = %s, host_name = %s, guest_user_id = %s, guest_name = %s,
+                           status = 'active', updated_at = now()
+                    WHERE room_code = %s
+                    RETURNING {ROOM_COLUMNS};
+                """, (uid, guest_name, host_user_id, row[4], room_code))
+            else:
+                cur.execute(f"""
+                    UPDATE online_rooms SET guest_user_id = %s, guest_name = %s, status = 'active', updated_at = now()
+                    WHERE room_code = %s
+                    RETURNING {ROOM_COLUMNS};
+                """, (uid, guest_name, room_code))
             row = cur.fetchone()
         return jsonify({"room": room_public_state(row, uid)})
     except Exception as e:
