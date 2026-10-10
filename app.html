@@ -980,6 +980,30 @@
   .cl-verify { margin-left: auto; background: #FFE14D; }
   .cl-verify:disabled { opacity: 0.6; cursor: default; }
 
+  /* turn review: quiet coaching note, ruled like the rest of the pad */
+  .turn-review { margin: 0 0 22px; }
+  .turn-review:empty { display: none; }
+  .tr-card { background: rgba(255, 255, 255, 0.6); border-left: 5px solid var(--pen); padding: 10px 16px 12px; margin-bottom: 10px; }
+  .tr-card.working { opacity: 0.8; }
+  .tr-head { font-family: var(--font-hand); font-size: 24px; line-height: 1.1; color: var(--pen); cursor: pointer; list-style: revert; }
+  .tr-card.working .tr-head { cursor: default; }
+  .tr-who { font-family: var(--font-body); font-size: 13px; font-weight: 800; color: var(--ink-2); margin-left: 8px; }
+  .tr-sum { font-size: 16px; font-weight: 800; margin: 8px 0 6px; line-height: 1.4; }
+  .tr-chips { margin-bottom: 8px; }
+  .tr-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 24px; }
+  .tr-h { font-weight: 900; font-size: 13px; margin: 6px 0 2px; color: var(--ink); }
+  .tr-card ul { margin: 0; padding-left: 18px; font-size: 14.5px; line-height: 1.45; }
+  .tr-gap { font-size: 14px; margin: 6px 0 8px; }
+  .tr-rates { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 10px 0 4px; font-size: 13px; font-weight: 800; align-items: center; }
+  .tr-pips { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: middle; }
+  .tr-pips i { width: 11px; height: 11px; border: 1.5px solid var(--ink); background: transparent; }
+  .tr-pips i.on { background: var(--ink); }
+  .tr-ans { font-weight: 700; color: var(--ink-2); }
+  .tr-tip { margin-top: 8px; font-family: var(--font-hand); font-size: 22px; line-height: 1.15; color: var(--pen); }
+  .tr-tip b { font-weight: 400; }
+  .tr-earlier > summary { cursor: pointer; font-weight: 800; font-size: 14px; color: var(--ink-2); margin: 4px 0 8px; }
+  .transcript-round .tr-card { margin: 10px 0 0; }
+
   .claim-report { margin: 0 0 30px; }
   .claim-report:empty { display: none; }
   .rep-title { font-size: 26px; margin: 0 0 10px; font-variation-settings: "wdth" 86; }
@@ -1715,6 +1739,16 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
+          <div class="toggle-row">
+            <div class="t-info">
+              <div class="t-name" data-i18n="setup.ai.turnreview">Review every turn</div>
+              <div class="t-desc" data-i18n="setup.ai.turnreviewdesc">When someone finishes speaking, get quick coaching on their argument: what they argued, what worked, what was missing, and one thing to try next. It never changes the score.</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="turn-review-on" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
           <details class="adv-opts">
           <summary data-i18n="setup.advanced">Advanced options</summary>
           <div class="field" style="margin-top:8px;">
@@ -1854,6 +1888,8 @@
         <div class="undo-list" id="undo-list"></div>
         <button class="btn btn-sm" onclick="undoAll()" data-i18n="debate.clearall">Clear all</button>
       </div>
+
+      <div class="turn-review" id="turn-review" aria-live="polite"></div>
 
       <div class="debate-layout" id="debate-layout">
         <div class="debater-panel" id="panel-a">
@@ -2389,6 +2425,7 @@
             <li data-i18n-html="how.s4.li3"><b>Opinion, value claim, prediction, hypothetical, case claim, unverifiable</b> or <b>inconclusive</b> — logged in the claim log with the reason, and no points move.</li>
             <li data-i18n-html="how.s4.li4"><b>To verify</b> — held back until a pause or the end of the round. If it turns out true or false, points are added or removed then and the results page marks it "checked later."</li>
           </ul>
+          <p data-i18n="how.s4.p3">After every turn, a short review appears: what the speaker argued, what worked, what was missing, whether they answered the other side, and one thing to try next. It's coaching only, and it never changes the score.</p>
           <p data-i18n-html="how.s4.p2">
             A banner surfaces the claim in plain English, one line of reasoning, and whoever
             just got scored. Every one of these calls is tagged <code>· auto</code> in the undo
@@ -2444,7 +2481,7 @@
         <div class="how-section">
           <h3><span data-i18n="how.privacy.title">Privacy</span></h3>
           <p data-i18n="how.privacy.p">
-            Speech is turned into text first. By default your browser does that itself — in Chrome and Edge it's done by Google or Microsoft, not by us. In high-accuracy mode, and for uploaded files, short audio clips are sent to our transcription service, and we don't keep them. For fact-checks, only a few recent sentences and the topic go to our AI service — no audio and no names — and claims about recent events are looked up on Wikipedia. The AI judge and analysis also send the round's transcript and the names you entered. Nothing about a round is saved on our servers unless you sign in, enter a league code, or play an online room. If the AI service is busy, checks slow down or pause and you can keep scoring by hand. The Privacy Policy has every detail.
+            Speech is turned into text first. By default your browser does that itself — in Chrome and Edge it's done by Google or Microsoft, not by us. In high-accuracy mode, and for uploaded files, short audio clips are sent to our transcription service, and we don't keep them. For fact-checks, only a few recent sentences and the topic go to our AI service — no audio and no names — and claims about recent events are looked up on Wikipedia. Turn reviews send that turn's text, the opponent's turn before it, and the topic, also without names. The AI judge and analysis also send the round's transcript and the names you entered. Nothing about a round is saved on our servers unless you sign in, enter a league code, or play an online room. If the AI service is busy, checks slow down or pause and you can keep scoring by hand. The Privacy Policy has every detail.
           </p>
         </div>
 
@@ -2520,7 +2557,7 @@
       <p>Verdict Debate AI is a practice and scoring tool for debate and Mock Trial. It is <b>not</b> an official tournament judge, <b>not</b> a substitute for your league's actual rules or a certified adjudicator's decision, and — for Mock Trial mode specifically — <b>not</b> a real courtroom, a licensed attorney, or legal advice of any kind. It is educational role-play software only.</p>
 
       <h4>3. AI-generated content — accuracy disclaimer</h4>
-      <p>Fact-checks, statement labels, fallacy flags, the Respect Filter, AI judge verdicts, argument analysis, Case Checker and Case Builder output, and everything else the Service generates is produced automatically by artificial-intelligence models and <b>can be wrong, biased, incomplete, out of date, or entirely fabricated</b>. Nothing generated by the Service constitutes fact, professional advice, or an authoritative ruling of any kind. You are solely responsible for independently verifying anything before relying on it — for a real competition, for a grade, or for any other purpose. You, your coach, and your actual judges are always the final word, never the Service.</p>
+      <p>Fact-checks, statement labels, fallacy flags, turn reviews and their 1–5 ratings, the Respect Filter, AI judge verdicts, argument analysis, Case Checker and Case Builder output, and everything else the Service generates is produced automatically by artificial-intelligence models and <b>can be wrong, biased, incomplete, out of date, or entirely fabricated</b>. Nothing generated by the Service constitutes fact, professional advice, or an authoritative ruling of any kind. You are solely responsible for independently verifying anything before relying on it — for a real competition, for a grade, or for any other purpose. You, your coach, and your actual judges are always the final word, never the Service.</p>
       <p><b>Labels.</b> The Service sorts what is said into labels such as true, mostly true, misleading, false, inconclusive, opinion, value claim, prediction, hypothetical, case claim (Mock Trial), unverifiable, and to verify. These are an AI's best guess, not a finding. "Opinion," "unverifiable," and "inconclusive" mean the tool did not or could not decide — they are not a judgment that anything is right or wrong. The AI's knowledge ends before today's date, so it can mislabel recent events; for claims that look recent it may consult Wikipedia, which can itself be wrong, incomplete, or out of date.</p>
       <p><b>Automatic scoring.</b> While a turn is live, a confident true, mostly true, misleading, or false label can add or remove points for the speaker automatically (partial points for "mostly true" and "misleading"). Claims marked "to verify" are held back and checked at turn changes and after the round, so points can change — and the winner shown on the results page can change — after a turn has ended. In Online Debate, fallacy flags that meet the confidence threshold are also scored automatically; in a local round they are suggestions that a person accepts or ignores. Opinions, predictions, hypotheticals, case claims, and unverifiable statements are never scored. Automatic scores are tagged and can be reversed ("Wrong call?" or the undo tray). A limit on automatic checks applies to each round.</p>
       <p><b>Availability.</b> The Service depends on outside AI services that limit how much they can be used. When they are busy, checks may slow down, be retried, switch to a backup AI (whose accuracy may differ), be skipped, or pause, and listening may switch to a different method. We do not guarantee that any check will run, or run on time.</p>
@@ -2588,6 +2625,7 @@
       <p><b>High-accuracy transcription, and Upload mode.</b> The app records short clips from the microphone (about 3½ seconds each; longer if the service is busy; clips with no sound are skipped), or, in Upload mode, extracts the audio from the file you choose inside your browser and cuts it into chunks of up to about 2 minutes. Each clip or chunk is sent to our server, which forwards it to Groq's speech-to-text service and returns the text. Our server does not save the audio. Your browser may apply echo cancellation, noise suppression, and automatic gain to the microphone before capture; that happens on your device.</p>
       <p><b>Live fact-checks, labels, and fallacy flags.</b> The transcribed text is sent, through our server, to Groq: up to the 4 most recent sentences from the current speaker, up to 2 earlier sentences from the same speaker as context, and the debate topic. It does not include audio and does not include debater names. Groq returns a kind and verdict for each statement and any fallacies. If the main AI is busy, our server tries a backup AI from the same provider, and if that is busy too, the check is retried a little later.</p>
       <p><b>Wikipedia lookups.</b> For claims that look recent (for example they mention 2024 or later, or "recently" or "last year"), and for claims held back for the after-round check, your browser sends the claim text directly to Wikipedia's search (run by the Wikimedia Foundation), which can see your IP address and that text. The first Wikipedia excerpts that come back are added to the request sent to Groq.</p>
+      <p><b>Turn reviews.</b> When a turn ends (and the "Review every turn" option is on), the text of that turn, the opponent's previous turn if there was one, and the debate topic are sent through our server to Groq to produce coaching feedback. It does not include audio or debater names (the speaker is identified only by side, such as "Pro Team"). Reviews are kept in your browser's memory during the session, are shown on the results page, and are not saved anywhere when you leave. They never change the score. Turn reviews aren't run in Online Debate.</p>
       <p><b>Held-back claims.</b> Claims that need a real lookup are kept in your browser's memory during the round, verified at turn changes and after the round, and are not saved anywhere when you leave the page.</p>
       <p><b>AI judge, argument analysis, Case Checker, Case Builder, Respect Filter (when you turn it on), and the manual fact-check box.</b> The text you type, or the transcript of your round, plus the debater names and topic you entered where the feature uses them, is sent to Groq through our server. If in Setup you choose Anthropic or OpenAI and enter your own key for that account, those requests go from your browser straight to that company under its terms instead; your key is kept in your browser's memory for that session and is not saved by us.</p>
       <p><b>What you can switch off.</b> The microphone features only run after your browser's permission prompt. You can turn off Auto fact-check in Setup, leave the Respect Filter off (its default), and not enable High-accuracy transcription. If you do, text is sent only for the features you use.</p>
@@ -3057,6 +3095,12 @@ const TRANSLATIONS = {
     "debate.engine.whisperfailed": "High-accuracy listening isn't working right now, so we switched back to your browser's speech recognition.",
     "debate.engine.busy": "Listening is a little slow right now. A few words may be missed.",
     "debate.engine.stalled": "Your browser stopped hearing you, so we switched to high-accuracy listening.",
+    "setup.ai.turnreview": "Review every turn",
+    "setup.ai.turnreviewdesc": "When someone finishes speaking, get quick coaching on their argument: what they argued, what worked, what was missing, and one thing to try next. It never changes the score.",
+    "review.title": "Turn review", "review.working": "Reviewing the turn…", "review.retry": "Try again", "review.earlier": "Earlier reviews",
+    "review.worked": "What worked", "review.missing": "What was missing", "review.tip": "Try next turn:",
+    "review.clarity": "Clarity", "review.evidence": "Evidence", "review.response": "Response",
+    "review.ans.yes": "Answered the opponent's points", "review.ans.partly": "Answered some of the opponent's points", "review.ans.no": "Didn't answer the opponent's points",
     "verdict.true": "TRUE", "verdict.mostly_true": "MOSTLY TRUE", "verdict.misleading": "MISLEADING", "verdict.false": "FALSE",
     "verdict.inconclusive": "INCONCLUSIVE", "verdict.opinion": "OPINION", "verdict.value": "VALUE CLAIM", "verdict.prediction": "PREDICTION",
     "verdict.hypothetical": "HYPOTHETICAL", "verdict.testimony": "CASE CLAIM", "verdict.unverifiable": "UNVERIFIABLE", "verdict.pending": "TO VERIFY",
@@ -3236,6 +3280,7 @@ const TRANSLATIONS = {
     "how.s4.li1": "<b>True</b> or <b>mostly true</b> — screen flashes green, a short high tone plays, and the speaker gets <code>+fact</code> (partial points for mostly true).",
     "how.s4.li2": "<b>False</b> or <b>misleading</b> — screen flashes red, a low tone plays, and the speaker loses <code>−wrong</code> (partial for misleading).",
     "how.s4.li3": "<b>Opinion, value claim, prediction, hypothetical, case claim, unverifiable</b> or <b>inconclusive</b> — logged in the claim log with the reason, and no points move.",
+    "how.s4.p3": "After every turn, a short review appears: what the speaker argued, what worked, what was missing, whether they answered the other side, and one thing to try next. It's coaching only, and it never changes the score.",
     "how.s4.li4": "<b>To verify</b> — held back until a pause or the end of the round. If it turns out true or false, points are added or removed then and the results page marks it \"checked later.\"",
     "how.s4.p2": "A banner surfaces the claim in plain English, one line of reasoning, and whoever just got scored. Every one of these calls is tagged <code>· auto</code> in the undo tray, in case the machine got it wrong and you need to say so.",
     "how.s5.title": "Manual scoring & fallacies",
@@ -3253,7 +3298,7 @@ const TRANSLATIONS = {
     "how.table.r5.f": "<b>Parliamentary</b>", "how.table.r5.s": "Government vs Opposition", "how.table.r5.st": "PMC · LOC · MG · MO · LOR · PMR. Points of information expected.",
     "how.table.r6.f": "<b>Mock Trial</b>", "how.table.r6.s": "Prosecution vs Defense", "how.table.r6.st": "Openings · direct & cross exams per witness · closings · rebuttal.",
     "how.privacy.title": "Privacy",
-    "how.privacy.p": "Speech is turned into text first. By default your browser does that itself — in Chrome and Edge it's done by Google or Microsoft, not by us. In high-accuracy mode, and for uploaded files, short audio clips are sent to our transcription service, and we don't keep them. For fact-checks, only a few recent sentences and the topic go to our AI service — no audio and no names — and claims about recent events are looked up on Wikipedia. The AI judge and analysis also send the round's transcript and the names you entered. Nothing about a round is saved on our servers unless you sign in, enter a league code, or play an online room. If the AI service is busy, checks slow down or pause and you can keep scoring by hand. The Privacy Policy has every detail.",
+    "how.privacy.p": "Speech is turned into text first. By default your browser does that itself — in Chrome and Edge it's done by Google or Microsoft, not by us. In high-accuracy mode, and for uploaded files, short audio clips are sent to our transcription service, and we don't keep them. For fact-checks, only a few recent sentences and the topic go to our AI service — no audio and no names — and claims about recent events are looked up on Wikipedia. Turn reviews send that turn's text, the opponent's turn before it, and the topic, also without names. The AI judge and analysis also send the round's transcript and the names you entered. Nothing about a round is saved on our servers unless you sign in, enter a league code, or play an online room. If the AI service is busy, checks slow down or pause and you can keep scoring by hand. The Privacy Policy has every detail.",
     "how.overrule.title": "When to overrule the AI",
     "how.overrule.p": "It will get things wrong sometimes — statistics, very recent events, and anything that hinges on exact wording are where it stumbles. It's tuned to stay quiet unless it's genuinely confident, but \"genuinely confident\" still isn't \"certain.\" Watch the banner. If a call looks off, it probably is — <b>undo</b> is one click away in the tray, every time.",
     "how.backtosetup": "Back to setup",
@@ -3297,6 +3342,12 @@ const TRANSLATIONS = {
     "debate.engine.whisperfailed": "La escucha de alta precisión no funciona ahora mismo, así que volvimos al reconocimiento de voz de tu navegador.",
     "debate.engine.busy": "La escucha va un poco lenta ahora. Puede que se pierdan algunas palabras.",
     "debate.engine.stalled": "Tu navegador dejó de escucharte, así que cambiamos a la escucha de alta precisión.",
+    "setup.ai.turnreview": "Revisar cada turno",
+    "setup.ai.turnreviewdesc": "Cuando alguien termina de hablar, recibe un breve análisis de su argumento: qué argumentó, qué funcionó, qué faltó y algo para probar después. Nunca cambia el puntaje.",
+    "review.title": "Revisión del turno", "review.working": "Revisando el turno…", "review.retry": "Reintentar", "review.earlier": "Revisiones anteriores",
+    "review.worked": "Qué funcionó", "review.missing": "Qué faltó", "review.tip": "Prueba en el próximo turno:",
+    "review.clarity": "Claridad", "review.evidence": "Evidencia", "review.response": "Respuesta",
+    "review.ans.yes": "Respondió a los puntos del oponente", "review.ans.partly": "Respondió a algunos puntos del oponente", "review.ans.no": "No respondió a los puntos del oponente",
     "verdict.true": "VERDADERO", "verdict.mostly_true": "CASI CIERTO", "verdict.misleading": "ENGAÑOSO", "verdict.false": "FALSO",
     "verdict.inconclusive": "NO CONCLUYENTE", "verdict.opinion": "OPINIÓN", "verdict.value": "JUICIO DE VALOR", "verdict.prediction": "PREDICCIÓN",
     "verdict.hypothetical": "HIPOTÉTICO", "verdict.testimony": "HECHO DEL CASO", "verdict.unverifiable": "NO VERIFICABLE", "verdict.pending": "POR VERIFICAR",
@@ -3477,6 +3528,7 @@ const TRANSLATIONS = {
     "how.s4.li2": "<b>Falso</b> o <b>engañoso</b> — la pantalla destella en rojo, suena un tono grave, y el orador pierde <code>−wrong</code> (parcial si es engañoso).",
     "how.s4.li3": "<b>Opinión, juicio de valor, predicción, hipotético, hecho del caso, no verificable</b> o <b>no concluyente</b> — se registra en el registro de afirmaciones con el motivo, y no se mueven puntos.",
     "how.s4.li4": "<b>Por verificar</b> — se guarda hasta una pausa o el final de la ronda. Si resulta verdadero o falso, los puntos se suman o restan entonces y la página de resultados lo marca como \"verificado después\".",
+    "how.s4.p3": "Después de cada turno aparece una breve revisión: qué argumentó la persona, qué funcionó, qué faltó, si respondió al otro lado y algo para probar después. Es solo orientación y nunca cambia el puntaje.",
     "how.s4.p2": "Un banner muestra la afirmación en lenguaje sencillo, una línea de razonamiento y quién acaba de anotar. Cada una de estas decisiones queda etiquetada como <code>· auto</code> en la bandeja de deshacer, por si la máquina se equivocó y necesitas corregirlo.",
     "how.s5.title": "Puntuación manual y falacias",
     "how.s5.p1": "La IA no tiene la última palabra — la tienes tú. ¿Se te escapó una afirmación? Presiona <b>+fact</b> o <b>−wrong</b> tú mismo. ¿Escuchaste pasar un hombre de paja o una pendiente resbaladiza? El botón <b>−fallacy</b> despliega las 16 — elige la que corresponda y descuenta el punto, etiquetando la transcripción justo donde ocurrió.",
@@ -3493,7 +3545,7 @@ const TRANSLATIONS = {
     "how.table.r5.f": "<b>Parliamentary</b>", "how.table.r5.s": "Gobierno vs Oposición", "how.table.r5.st": "PMC · LOC · MG · MO · LOR · PMR. Se esperan puntos de información.",
     "how.table.r6.f": "<b>Mock Trial</b>", "how.table.r6.s": "Fiscalía vs Defensa", "how.table.r6.st": "Aperturas · interrogatorio directo y contrainterrogatorio por testigo · cierres · réplica.",
     "how.privacy.title": "Privacidad",
-    "how.privacy.p": "Primero el habla se convierte en texto. Por defecto lo hace tu propio navegador — en Chrome y Edge lo hace Google o Microsoft, no nosotros. En el modo de alta precisión, y con los archivos que subes, se envían clips cortos de audio a nuestro servicio de transcripción, y no los conservamos. Para verificar datos, solo unas pocas frases recientes y el tema van a nuestro servicio de IA — sin audio ni nombres — y las afirmaciones sobre hechos recientes se consultan en Wikipedia. El juez de IA y el análisis también envían la transcripción de la ronda y los nombres que escribiste. Nada de una ronda se guarda en nuestros servidores a menos que inicies sesión, uses un código de liga o juegues una sala en línea. Si el servicio de IA está ocupado, las verificaciones se vuelven más lentas o se pausan y puedes seguir puntuando a mano. La Política de privacidad tiene todos los detalles.",
+    "how.privacy.p": "Primero el habla se convierte en texto. Por defecto lo hace tu propio navegador — en Chrome y Edge lo hace Google o Microsoft, no nosotros. En el modo de alta precisión, y con los archivos que subes, se envían clips cortos de audio a nuestro servicio de transcripción, y no los conservamos. Para verificar datos, solo unas pocas frases recientes y el tema van a nuestro servicio de IA — sin audio ni nombres — y las afirmaciones sobre hechos recientes se consultan en Wikipedia. Las revisiones de turno envían el texto de ese turno, el turno anterior del oponente y el tema, también sin nombres. El juez de IA y el análisis también envían la transcripción de la ronda y los nombres que escribiste. Nada de una ronda se guarda en nuestros servidores a menos que inicies sesión, uses un código de liga o juegues una sala en línea. Si el servicio de IA está ocupado, las verificaciones se vuelven más lentas o se pausan y puedes seguir puntuando a mano. La Política de privacidad tiene todos los detalles.",
     "how.overrule.title": "Cuándo anular a la IA",
     "how.overrule.p": "A veces se equivocará — las estadísticas, los eventos muy recientes y todo lo que dependa de la redacción exacta son donde más tropieza. Está calibrado para quedarse callado a menos que esté genuinamente seguro, pero \"genuinamente seguro\" todavía no es \"certeza\". Presta atención al banner. Si una decisión parece incorrecta, probablemente lo sea — <b>deshacer</b> está a un clic de distancia en la bandeja, siempre.",
     "how.backtosetup": "Volver a configuración",
@@ -3648,6 +3700,7 @@ const state = {
 
   // Live claim log — every auto check this debate (verdict, claim, side, etc.)
   claimLog: [],
+  turnReview: true,     // coach every finished turn (see startTurnReview)
   backlog: [],          // claims held for the after-round check (same objects as in claimLog)
   backlogBusy: null,
   claimFilter: "all",
@@ -4020,6 +4073,7 @@ function startDebate() {
   state.aiProvider = document.getElementById("ai-provider").value;
   state.aiKey = document.getElementById("ai-key").value.trim();
   state.autoFactCheck = document.getElementById("auto-fc").checked;
+  state.turnReview = document.getElementById("turn-review-on")?.checked !== false;
   state.respectFilter = document.getElementById("respect-filter").checked;
   state.judgePersona = document.getElementById("judge-persona")?.value || "none";
   state.practiceMode = document.getElementById("practice-mode").checked;
@@ -4067,6 +4121,7 @@ function startDebate() {
   state.claimLog = [];
   state.backlog = [];
   state.claimFilter = "all";
+  renderTurnReviews();
   state.recentSentences = { a: [], b: [] };
   state.budgetUsed = 0;
   state.afcSeen = new Set();
@@ -4244,9 +4299,12 @@ function toggleTurn() {
         side: state.currentSide,
         phaseName: state.phases ? state.phases[state.phaseIndex].name : `Round ${state.currentRound}`,
         text: "",
-        events: []
+        events: [],
+        startedAt: Date.now()
       };
       clearSubs();
+      // keep the screen quiet while someone is speaking: fold the last review away
+      document.querySelectorAll("#turn-review > details.tr-card").forEach(d => { d.open = false; });
       // fresh turn → fresh dedupe memory for auto fact-check
       state.afcSeen = new Set();
       resetFactCheckBatch(state.afcBatch);
@@ -4280,9 +4338,12 @@ function pauseTimer() {
 
 function nextTurn(manual) {
   if (state.liveTurn) {
-    state.liveTurn.text = document.getElementById("subtitles").innerText.trim();
+    const subsEl = document.getElementById("subtitles");
+    state.liveTurn.text = subsEl.classList.contains("empty") ? "" : subsEl.innerText.trim();
     if (state.liveTurn.text || state.liveTurn.events.length) {
+      state.liveTurn.endedAt = Date.now();
       state.transcript.push(state.liveTurn);
+      startTurnReview(state.liveTurn);
     }
     state.liveTurn = null;
   }
@@ -8199,6 +8260,166 @@ function verifyBacklog() {
   return state.backlogBusy;
 }
 
+/* =========================================================================
+   TURN REVIEW — when a turn ends, coach that speaker on their argument.
+   One short AI call per finished turn (not per sentence). It never changes
+   the score; it just says what was argued, what worked, what was missing,
+   whether the opponent's points were answered, and one thing to try next.
+   ========================================================================= */
+function turnWords(text) { return String(text || "").split(/\s+/).filter(Boolean).length; }
+
+function turnSideName(t) { return t.side === "a" ? state.nameA : (t.side === "b" ? state.nameB : "Both sides"); }
+
+function buildTurnReviewPrompt(turn) {
+  const mode = DEBATE_MODES[state.mode] || {};
+  const trial = state.mode === "mockTrial";
+  const label = (mode.sideLabels && mode.sideLabels[turn.side]) || "the speaker";
+  const idx = state.transcript.indexOf(turn);
+  let opp = "";
+  for (let k = (idx === -1 ? state.transcript.length : idx) - 1; k >= 0; k--) {
+    const o = state.transcript[k];
+    if ((o.side === "a" || o.side === "b") && o.side !== turn.side && o.text) { opp = o.text.slice(0, 1400); break; }
+  }
+  const lang = currentUILang() === "es" ? "Spanish" : "English";
+  return [
+    `Coach one speaker after their turn in a ${trial ? "mock trial" : "debate"}. Be specific, kind, and brief. You are helping them improve, not ruling on who won.`,
+    "This is a live speech-to-text transcript: ignore small transcription mistakes, missing punctuation, and filler words. Refer to what they actually said.",
+    `Write in ${lang}.`,
+    "",
+    `Topic: "${(state.topic || "").replace(/"/g, "'")}"`,
+    `Speaker: ${label}${turn.phaseName ? " (" + turn.phaseName + ")" : ""}`,
+    opp ? `Opponent's previous turn, for context:\n"""${opp.replace(/"/g, "'")}"""` : "",
+    `This speaker's turn:\n"""${turn.text.replace(/"/g, "'")}"""`,
+    "",
+    'Return ONLY JSON: {"summary":str (<=140 chars: what they argued),"strengths":[str (<=110 chars each)] (1-2),"gaps":[str (<=110 chars each)] (1-2: missing evidence, unclear logic, or an opponent point left unanswered),"answered":"yes"|"partly"|"no"|"n/a" (did they respond to the opponent\'s points),"clarity":1-5,"evidence":1-5,"response":0-5 (0 if there was nothing to respond to),"tip":str (<=130 chars: one concrete thing to do next turn)}'
+  ].filter(x => x !== "").join("\n");
+}
+
+function normalizeReview(r) {
+  const str = (v, n) => String(v || "").trim().slice(0, n);
+  const list = (v) => (Array.isArray(v) ? v : []).map(x => str(x, 140)).filter(Boolean).slice(0, 2);
+  const num = (v, lo) => Math.max(lo, Math.min(5, Math.round(Number(v) || 0)));
+  const ans = String((r && r.answered) || "n/a").toLowerCase();
+  return {
+    summary: str(r && r.summary, 180),
+    strengths: list(r && r.strengths),
+    gaps: list(r && r.gaps),
+    answered: ["yes", "partly", "no", "n/a"].includes(ans) ? ans : "n/a",
+    clarity: num(r && r.clarity, 1),
+    evidence: num(r && r.evidence, 1),
+    response: num(r && r.response, 0),
+    tip: str(r && r.tip, 170)
+  };
+}
+
+function startTurnReview(turn) {
+  const cfg = window.APP_CONFIG || {};
+  if (!state.turnReview || !backlogAvailable()) return;
+  if (turn.side !== "a" && turn.side !== "b") return; // crossfire: can't tell who said what
+  if (turnWords(turn.text) < (cfg.TURN_REVIEW_MIN_WORDS ?? 25)) return; // too short to say anything useful
+  turn.review = { status: "working" };
+  renderTurnReviews();
+  runTurnReview(turn);
+}
+
+async function runTurnReview(turn) {
+  turn.review = { status: "working" };
+  renderTurnReviews();
+  let lastErr = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const raw = await groqJSON(
+        "You are a kind, sharp debate coach that responds with JSON only, no prose. " + todayRule(),
+        buildTurnReviewPrompt(turn), { maxTokens: 1500, effort: "low" });
+      turn.review = { status: "done", data: normalizeReview(raw) };
+      refreshTurnReviews();
+      return;
+    } catch (e) {
+      lastErr = e;
+      if (!isTransientCheckError(e.message || e)) break;
+      await new Promise(res => setTimeout(res, 3500 * (attempt + 1)));
+    }
+  }
+  turn.review = { status: "error", message: friendlyError(lastErr) };
+  refreshTurnReviews();
+}
+
+function retryTurnReview(idx) {
+  const t = state.transcript[idx];
+  if (t) runTurnReview(t);
+}
+
+function refreshTurnReviews() {
+  renderTurnReviews();
+  if (document.getElementById("screen-results")?.classList.contains("active")) renderHighlights();
+}
+
+/* What the live checks found during this turn, for the review header. */
+function turnCheckChips(t) {
+  const from = t.startedAt || 0, to = t.endedAt || Date.now();
+  const mine = state.claimLog.filter(c => c.side === t.side && c.ts >= from && c.ts <= to + 120000);
+  const count = {};
+  mine.forEach(c => { const v = c.verdict === "uncertain" ? "inconclusive" : c.verdict; count[v] = (count[v] || 0) + 1; });
+  const fall = (t.events || []).filter(e => e.type === "fallacy").length;
+  const chips = ["true", "mostly_true", "misleading", "false", "opinion", "value", "prediction", "unverifiable", "pending"]
+    .filter(v => count[v]).map(v => `<span class="rep-chip verdict-${v}">${escapeHtml(vlabel(v))} <b>${count[v]}</b></span>`);
+  if (fall) chips.push(`<span class="rep-chip verdict-misleading">${fall} ${fall === 1 ? "fallacy" : "fallacies"}</span>`);
+  return chips.join("");
+}
+
+function pipsHtml(n) {
+  let out = "";
+  for (let i = 1; i <= 5; i++) out += `<i class="${i <= n ? "on" : ""}"></i>`;
+  return `<span class="tr-pips" aria-label="${n} of 5">${out}</span>`;
+}
+
+function turnReviewHtml(turn, compact) {
+  const r = turn.review;
+  if (!r) return "";
+  const name = turnSideName(turn);
+  const head = `${escapeHtml(turn.phaseName || ("Round " + turn.round))} · ${escapeHtml(name)}`;
+  if (r.status === "working") {
+    return `<div class="tr-card working"><div class="tr-head">${escapeHtml(t("review.working"))} <span class="tr-who">${head}</span></div></div>`;
+  }
+  if (r.status === "error") {
+    const idx = state.transcript.indexOf(turn);
+    return `<div class="tr-card"><div class="tr-head">${escapeHtml(t("review.title"))} <span class="tr-who">${head}</span></div>
+      <div class="tr-gap">${escapeHtml(r.message || "")}</div>
+      <button type="button" class="btn btn-sm" onclick="retryTurnReview(${idx})">${escapeHtml(t("review.retry"))}</button></div>`;
+  }
+  const d = r.data;
+  const li = (arr) => arr.map(x => `<li>${escapeHtml(x)}</li>`).join("");
+  const ansLabel = { yes: t("review.ans.yes"), partly: t("review.ans.partly"), no: t("review.ans.no"), "n/a": "" }[d.answered];
+  const chips = turnCheckChips(turn);
+  const body = `
+      <div class="tr-sum">${escapeHtml(d.summary)}</div>
+      ${chips ? `<div class="rep-chips tr-chips">${chips}</div>` : ""}
+      <div class="tr-cols">
+        ${d.strengths.length ? `<div><div class="tr-h">${escapeHtml(t("review.worked"))}</div><ul>${li(d.strengths)}</ul></div>` : ""}
+        ${d.gaps.length ? `<div><div class="tr-h">${escapeHtml(t("review.missing"))}</div><ul>${li(d.gaps)}</ul></div>` : ""}
+      </div>
+      <div class="tr-rates">
+        <span>${escapeHtml(t("review.clarity"))} ${pipsHtml(d.clarity)}</span>
+        <span>${escapeHtml(t("review.evidence"))} ${pipsHtml(d.evidence)}</span>
+        ${d.response ? `<span>${escapeHtml(t("review.response"))} ${pipsHtml(d.response)}</span>` : ""}
+        ${ansLabel ? `<span class="tr-ans">${escapeHtml(ansLabel)}</span>` : ""}
+      </div>
+      ${d.tip ? `<div class="tr-tip"><b>${escapeHtml(t("review.tip"))}</b> ${escapeHtml(d.tip)}</div>` : ""}`;
+  const summary = `<summary class="tr-head">${escapeHtml(t("review.title"))} <span class="tr-who">${head}</span></summary>`;
+  return `<details class="tr-card"${compact ? "" : " open"}>${summary}${body}</details>`;
+}
+
+function renderTurnReviews() {
+  const el = document.getElementById("turn-review");
+  if (!el) return;
+  const list = state.transcript.filter(t => t.review);
+  if (!list.length) { el.innerHTML = ""; return; }
+  const latest = list[list.length - 1];
+  const earlier = list.slice(0, -1);
+  el.innerHTML = turnReviewHtml(latest, false) +
+    (earlier.length ? `<details class="tr-earlier"><summary>${escapeHtml(t("review.earlier"))} (${earlier.length})</summary>${earlier.slice().reverse().map(x => turnReviewHtml(x, true)).join("")}</details>` : "");
+}
+
 /* The results page: every statement from the round, grouped by what it is. */
 function renderClaimReport() {
   const el = document.getElementById("claim-report");
@@ -8521,8 +8742,13 @@ function googleIt(q) {
    ========================================================================= */
 function endDebate() {
   if (state.liveTurn) {
-    state.liveTurn.text = document.getElementById("subtitles").innerText.trim();
-    if (state.liveTurn.text || state.liveTurn.events.length) state.transcript.push(state.liveTurn);
+    const subsEl = document.getElementById("subtitles");
+    state.liveTurn.text = subsEl.classList.contains("empty") ? "" : subsEl.innerText.trim();
+    if (state.liveTurn.text || state.liveTurn.events.length) {
+      state.liveTurn.endedAt = Date.now();
+      state.transcript.push(state.liveTurn);
+      startTurnReview(state.liveTurn);
+    }
     state.liveTurn = null;
   }
   stopTimerTick();
@@ -8537,6 +8763,34 @@ function endDebate() {
   if (state.practiceMode && judged && typeof judged.then === "function") {
     judged.then(recordPracticeAttempt).catch(recordPracticeAttempt);
   }
+}
+
+function renderHighlights() {
+  const hi = document.getElementById("highlights-list");
+  if (!hi) return;
+  if (!state.transcript.length) {
+    hi.innerHTML = '<div class="fc-empty">No turns recorded.</div>';
+    return;
+  }
+  hi.innerHTML = "";
+  state.transcript.forEach(t => {
+    const name = t.side === "a" ? state.nameA : (t.side === "b" ? state.nameB : "Both sides");
+    const tagsHtml = (t.events || []).map(ev => {
+      const cls = ev.type === "fact" ? "fact" : ev.type === "wrong" ? "wrong" : "fallacy";
+      if (cls === "fallacy" && ev.fallacyName) {
+        return `<button type="button" class="tr-tag ${cls} tr-tag-link" onclick="openFallacyLibrary('${ev.fallacyName.replace(/'/g, "\\'")}')">${escapeHtml(ev.label)} · Learn</button>`;
+      }
+      return `<span class="tr-tag ${cls}">${escapeHtml(ev.label)}</span>`;
+    }).join("");
+    const div = document.createElement("div");
+    div.className = "transcript-round";
+    div.innerHTML = `
+      <div class="transcript-round-head">${escapeHtml(t.phaseName || ("Round " + t.round))} · ${escapeHtml(name)}</div>
+      ${t.text ? `<div class="transcript-quote">${escapeHtml(t.text)}</div>` : ""}
+      ${tagsHtml ? `<div class="transcript-tags">${tagsHtml}</div>` : ""}
+      ${turnReviewHtml(t, true)}`;
+    hi.appendChild(div);
+  });
 }
 
 function renderResults() {
@@ -8597,29 +8851,7 @@ function renderResultsRest() {
   const argAnalysisEl = document.getElementById("arg-analysis");
   if (argAnalysisEl) argAnalysisEl.innerHTML = "";
 
-  const hi = document.getElementById("highlights-list");
-  if (!state.transcript.length) {
-    hi.innerHTML = '<div class="fc-empty">No turns recorded.</div>';
-  } else {
-    hi.innerHTML = "";
-    state.transcript.forEach(t => {
-      const name = t.side === "a" ? state.nameA : (t.side === "b" ? state.nameB : "Both sides");
-      const tagsHtml = (t.events || []).map(ev => {
-        const cls = ev.type === "fact" ? "fact" : ev.type === "wrong" ? "wrong" : "fallacy";
-        if (cls === "fallacy" && ev.fallacyName) {
-          return `<button type="button" class="tr-tag ${cls} tr-tag-link" onclick="openFallacyLibrary('${ev.fallacyName.replace(/'/g, "\\'")}')">${escapeHtml(ev.label)} · Learn</button>`;
-        }
-        return `<span class="tr-tag ${cls}">${escapeHtml(ev.label)}</span>`;
-      }).join("");
-      const div = document.createElement("div");
-      div.className = "transcript-round";
-      div.innerHTML = `
-        <div class="transcript-round-head">${escapeHtml(t.phaseName || ("Round " + t.round))} · ${escapeHtml(name)}</div>
-        ${t.text ? `<div class="transcript-quote">${escapeHtml(t.text)}</div>` : ""}
-        ${tagsHtml ? `<div class="transcript-tags">${tagsHtml}</div>` : ""}`;
-      hi.appendChild(div);
-    });
-  }
+  renderHighlights();
 
   renderPracticeHistory();
 }
