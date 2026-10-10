@@ -1,4 +1,4 @@
-"""Verdict Debate AI backend — a single Flask app handling every /api/* route.
+"""Verdict Debate backend — a single Flask app handling every /api/* route.
 
 Deliberately one file, zero local imports between files: Vercel's Python
 runtime treats each file under /api/ as its own isolated serverless
@@ -1087,27 +1087,9 @@ SUGGESTIONS_TABLE = """
 TRACK_EVENTS = {"page_view", "debate_start", "debate_end", "feature_use", "ai_calls"}
 TRACK_NUMBERS = {"minutes": 600, "turns": 300, "n": 5000}
 TRACK_WORDS = {"page", "mode", "feature", "lane"}
-TRACK_BOOLS = {"practice", "visit"}
+TRACK_BOOLS = {"practice"}
 USAGE_RETENTION_DAYS = 400
 VISITOR_RE = re.compile(r"^[a-f0-9]{16,64}$")
-COUNTERS_TABLE = """
-    CREATE TABLE IF NOT EXISTS site_counters (
-        name TEXT PRIMARY KEY,
-        value BIGINT NOT NULL DEFAULT 0
-    );
-"""
-# First time only: start the totals from what was already recorded (ON CONFLICT keeps this a no-op afterwards).
-COUNTERS_SEED = """
-    INSERT INTO site_counters (name, value)
-    SELECT 'visits', COUNT(*) FROM (
-        SELECT DISTINCT visitor, ts::date FROM usage_events WHERE event = 'page_view'
-    ) v
-    ON CONFLICT (name) DO NOTHING;
-    INSERT INTO site_counters (name, value)
-    SELECT 'debates', COUNT(*) FROM usage_events WHERE event = 'debate_end' AND COALESCE((props->>'turns')::numeric, 0) >= 1
-    ON CONFLICT (name) DO NOTHING;
-"""
-_public_cache = {"at": 0, "data": None}
 SUGGESTION_CATEGORIES = {"idea", "problem", "other"}
 COACHING_FEATURES = ("turn_review", "case_checker", "case_builder", "ai_judge", "argument_analysis", "personal_lesson")
 _tables_ready = set()
@@ -1118,14 +1100,6 @@ def ensure_table(cur, name, ddl):
     if name not in _tables_ready:
         cur.execute(ddl)
         _tables_ready.add(name)
-
-
-def ensure_counters(cur):
-    if "counters" not in _tables_ready:
-        ensure_table(cur, "usage", USAGE_TABLE)
-        cur.execute(COUNTERS_TABLE)
-        cur.execute(COUNTERS_SEED)
-        _tables_ready.add("counters")
 
 
 def clean_event(raw):
@@ -1174,15 +1148,7 @@ def track():
     try:
         with conn.cursor() as cur:
             ensure_table(cur, "usage", USAGE_TABLE)
-            ensure_counters(cur)  # before inserting, so the one-time seed can't count these events twice
             cur.executemany("INSERT INTO usage_events (visitor, event, props) VALUES (%s, %s, %s::jsonb);", rows)
-            # A "visit" is the first page opened in a browser session; a "debate" is one that got at least one turn in.
-            visits = sum(1 for r in rows if r[1] == "page_view" and json.loads(r[2]).get("visit") is True)
-            debates = sum(1 for r in rows if r[1] == "debate_end" and json.loads(r[2]).get("turns", 0) >= 1)
-            for name, n in (("visits", visits), ("debates", debates)):
-                if n:
-                    cur.execute("INSERT INTO site_counters (name, value) VALUES (%s, %s) "
-                                "ON CONFLICT (name) DO UPDATE SET value = site_counters.value + EXCLUDED.value;", (name, n))
             if random.random() < 0.01:  # housekeeping: keep about 13 months
                 cur.execute("DELETE FROM usage_events WHERE ts < now() - (%s || ' days')::interval;", (str(USAGE_RETENTION_DAYS),))
     except Exception:
@@ -1227,31 +1193,6 @@ def suggestion():
         return jsonify({"ok": True})
     except Exception as e:
         return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
-    finally:
-        conn.close()
-
-
-@app.route("/api/public-stats", methods=["GET", "OPTIONS"])
-def public_stats():
-    """Two all-time totals for the small counter in the site footer. Public, anonymous, cached for a minute."""
-    if request.method == "OPTIONS":
-        return "", 204
-    now = time.time()
-    if _public_cache["data"] is not None and now - _public_cache["at"] < 60:
-        return jsonify(_public_cache["data"])
-    conn = get_conn()
-    if not conn:
-        return jsonify({"debates": 0, "visits": 0})
-    try:
-        with conn.cursor() as cur:
-            ensure_counters(cur)
-            cur.execute("SELECT name, value FROM site_counters WHERE name IN ('debates', 'visits');")
-            got = {name: int(value) for name, value in cur.fetchall()}
-        data = {"debates": got.get("debates", 0), "visits": got.get("visits", 0)}
-        _public_cache.update(at=now, data=data)
-        return jsonify(data)
-    except Exception:
-        return jsonify({"debates": 0, "visits": 0})
     finally:
         conn.close()
 
