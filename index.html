@@ -381,6 +381,22 @@ footer{
 .footer-right a{font-size:12px;color:rgba(250,250,248,0.25);transition:color 0.15s}
 .footer-right a:hover{color:rgba(250,250,248,0.6)}
 
+
+/* COACHES */
+.coach-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:28px 0 24px}
+.coach-step{border:1px solid var(--gray-5);border-radius:14px;padding:20px 20px 18px;background:var(--white)}
+.coach-step h4{font-size:16px;font-weight:600;margin:10px 0 6px;letter-spacing:-.2px}
+.coach-step p{font-size:14px;line-height:1.6;color:var(--gray-3)}
+.coach-n{display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;border-radius:50%;background:var(--black);color:var(--white);font:600 13px var(--font-body, Inter, sans-serif)}
+.coach-list{list-style:none;max-width:720px;margin:0 0 28px;padding:0}
+.coach-list li{padding:10px 0;border-bottom:1px solid var(--gray-5);font-size:15px;line-height:1.6;color:var(--gray-2)}
+.coach-list li b{color:var(--black)}
+.coach-cta{display:flex;flex-wrap:wrap;gap:12px}
+.coach-btn{display:inline-flex;align-items:center;padding:12px 24px;border-radius:999px;border:1px solid var(--black);font-size:14px;font-weight:600;color:var(--black);transition:background .15s,color .15s}
+.coach-btn:hover{background:var(--black);color:var(--white)}
+.coach-btn-solid{background:var(--black);color:var(--white)}
+.coach-btn-solid:hover{background:var(--gray-2)}
+
 /* BOOK A CALL */
 [hidden]{display:none!important}
 .sched-instant{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:28px;font-size:15px;color:var(--gray-3)}
@@ -446,6 +462,7 @@ footer{
   <div class="nav-right">
     <a href="#problem" class="nav-link">Why</a>
     <a href="#how" class="nav-link">How it works</a>
+    <a href="#coaches" class="nav-link">Coaches</a>
     <a href="#team" class="nav-link">Team</a>
     <a href="#schedule" class="nav-link">Book a call</a>
     <a href="#contact" class="nav-link">Contact</a>
@@ -608,6 +625,34 @@ footer{
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- COACHES -->
+<div class="section" id="coaches">
+  <div class="section-inner">
+    <div class="kicker">For coaches &amp; leagues</div>
+    <h2>Run your whole team from one link.</h2>
+    <p class="body-text">Start a league in a minute. Students join with a single link and no accounts. You see who practiced, what trips them up, and how they're improving, and you can post a weekly topic that shows up right in their setup screen.</p>
+
+    <div class="coach-steps">
+      <div class="coach-step"><span class="coach-n">1</span><h4>Create your league</h4><p>Name it and get a league code, a student link, and a private coach key. Free.</p></div>
+      <div class="coach-step"><span class="coach-n">2</span><h4>Send one link</h4><p>Students open it and the code is already filled in. Print a one-page handout if you prefer paper.</p></div>
+      <div class="coach-step"><span class="coach-n">3</span><h4>Coach with the data</h4><p>See each student's rounds, average score and most common fallacy. Post assignments, download CSVs, spot who needs help.</p></div>
+    </div>
+
+    <ul class="coach-list">
+      <li><b>Live feedback in every round:</b> fact-checks, fallacy flags, and a short review after every speech.</li>
+      <li><b>Study sets:</b> flashcards, quizzes, matching games, a spot-the-fallacy trainer and an objection trainer.</li>
+      <li><b>Mock Trial ready:</b> eight fictional case files (criminal and civil) with witnesses and exhibits, an objection log, and trial-specific coaching.</li>
+      <li><b>Online rounds:</b> debate a rival school on another device with voice that mutes you until your turn and a live transcript of your opponent.</li>
+      <li><b>Ten languages,</b> works in the browser, and no audio is stored.</li>
+    </ul>
+
+    <div class="coach-cta">
+      <a class="coach-btn coach-btn-solid" href="app.html#coach">Create your league (free)</a>
+      <a class="coach-btn" href="#schedule">Talk to Jeffrey first</a>
     </div>
   </div>
 </div>

@@ -84,7 +84,10 @@
   var LANES = { check: "Live fact-checks (main model)", feedback: "Turn reviews, judge, analysis (second model)", coach: "Case tools and lessons (second model)", listen: "Speech-to-text" };
   var FEATURES = { turn_review: "Turn reviews", case_checker: "Case Checker", case_builder: "Case Builder", ai_judge: "AI judge", argument_analysis: "Argument analysis",
     personal_lesson: "Personal lessons", manual_factcheck: "Manual fact-check box", upload: "Upload a debate", online_room: "Online Debate", league: "League submissions",
-    high_accuracy_listening: "High-accuracy listening", book_call: "Booked a call (landing page)" };
+    high_accuracy_listening: "High-accuracy listening", book_call: "Booked a call (landing page)",
+    study_flash: "Study: flashcards", study_learn: "Study: learn mode", study_test: "Study: tests", study_match: "Study: match game",
+    study_practice_spot: "Study: spot the fallacy", study_practice_objtrain: "Study: objection trainer", case_library: "Mock Trial case files",
+    trial_objection: "Mock Trial objection log", league_create: "Leagues created", league_dashboard: "League dashboards opened", league_assignment: "League assignments posted", ranked_match: "Ranked matches judged" };
   var MODES = { casual: "Casual", publicforum: "Public Forum", lincolndouglas: "Lincoln-Douglas", mocktrial: "Mock Trial", parliamentary: "Parliamentary", policy: "Policy" };
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
