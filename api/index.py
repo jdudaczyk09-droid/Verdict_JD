@@ -782,6 +782,29 @@ ONLINE_ROOMS_TABLE = """
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
 """
+# Voice setup messages (offer/answer between the two browsers) and the speaker's live text.
+# Neither carries audio: the voice itself goes directly between the two browsers.
+ROOM_EXTRA_TABLES = """
+    CREATE TABLE IF NOT EXISTS room_signals (
+        id BIGSERIAL PRIMARY KEY,
+        room_code TEXT NOT NULL,
+        from_side TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        ts TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS room_signals_room ON room_signals (room_code, id);
+    CREATE TABLE IF NOT EXISTS room_live (
+        room_code TEXT PRIMARY KEY,
+        side TEXT NOT NULL,
+        text TEXT NOT NULL DEFAULT '',
+        seq BIGINT NOT NULL DEFAULT 0,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+"""
+SIGNAL_KINDS = ("offer", "answer", "hello", "bye")
+MAX_SIGNAL_LEN = 12000
+MAX_LIVE_LEN = 4000
 ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O/1/I — easier to read aloud/type
 
 
@@ -954,9 +977,25 @@ def room_state():
         with conn.cursor() as cur:
             cur.execute(ONLINE_ROOMS_TABLE)
             row = fetch_room_for_participant(cur, room_code, payload.get("uid"))
+            extras = {}
+            if row and request.args.get("voice") == "1":
+                ensure_table(cur, "room_extras", ROOM_EXTRA_TABLES)
+                my_side = "a" if payload.get("uid") == row[3] else "b"
+                try:
+                    after = int(request.args.get("after") or 0)
+                except ValueError:
+                    after = 0
+                cur.execute("SELECT id, kind, payload, EXTRACT(EPOCH FROM (now() - ts)) FROM room_signals WHERE room_code = %s AND from_side <> %s AND id > %s ORDER BY id LIMIT 20;",
+                            (room_code, my_side, after))
+                extras["signals"] = [{"id": r[0], "kind": r[1], "payload": r[2], "age": float(r[3] or 0)} for r in cur.fetchall()]
+                cur.execute("SELECT COALESCE(MAX(id), 0) FROM room_signals WHERE room_code = %s;", (room_code,))
+                extras["sigNow"] = int(cur.fetchone()[0] or 0)
+                cur.execute("SELECT side, text, seq FROM room_live WHERE room_code = %s;", (room_code,))
+                live = cur.fetchone()
+                extras["live"] = {"side": live[0], "text": live[1], "seq": int(live[2])} if live else None
         if not row:
             return jsonify({"error": "Room not found, or you're not a participant in it."}), 404
-        return jsonify({"room": room_public_state(row, payload.get("uid"))})
+        return jsonify(dict({"room": room_public_state(row, payload.get("uid"))}, **extras))
     except Exception as e:
         return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
@@ -976,7 +1015,7 @@ def room_action():
     body = request.get_json(silent=True) or {}
     room_code = str(body.get("roomCode") or "").strip().upper()[:12]
     action = str(body.get("action") or "")
-    if not room_code or action not in ("start_turn", "pause_turn", "next_turn", "score", "end"):
+    if not room_code or action not in ("start_turn", "pause_turn", "next_turn", "score", "end", "signal", "live"):
         return jsonify({"error": "Invalid room action."}), 400
 
     conn = get_conn()
@@ -994,6 +1033,36 @@ def room_action():
              turn_remaining, turn_started_at, score_a, score_b, transcript, score_log) = row
             transcript = transcript if isinstance(transcript, list) else []
             score_log = score_log if isinstance(score_log, list) else []
+            my_side = "a" if uid == row[3] else "b"
+
+            if action == "signal":
+                kind = str(body.get("kind") or "")
+                data = str(body.get("payload") or "")
+                if kind not in SIGNAL_KINDS or len(data) > MAX_SIGNAL_LEN:
+                    return jsonify({"error": "Invalid voice message."}), 400
+                ensure_table(cur, "room_extras", ROOM_EXTRA_TABLES)
+                cur.execute("INSERT INTO room_signals (room_code, from_side, kind, payload) VALUES (%s, %s, %s, %s);", (room_code, my_side, kind, data))
+                cur.execute("DELETE FROM room_signals WHERE room_code = %s AND ts < now() - interval '15 minutes';", (room_code,))
+                return jsonify({"ok": True})
+
+            if action == "live":
+                text = str(body.get("text") or "")[:MAX_LIVE_LEN]
+                try:
+                    seq = int(body.get("seq") or 0)
+                except (TypeError, ValueError):
+                    seq = 0
+                ensure_table(cur, "room_extras", ROOM_EXTRA_TABLES)
+                cur.execute("""
+                    INSERT INTO room_live (room_code, side, text, seq, updated_at) VALUES (%s, %s, %s, %s, now())
+                    ON CONFLICT (room_code) DO UPDATE SET side = EXCLUDED.side, text = EXCLUDED.text, seq = EXCLUDED.seq, updated_at = now();
+                """, (room_code, my_side, text, seq))
+                return jsonify({"ok": True})
+
+            if action in ("next_turn", "end"):
+                ensure_table(cur, "room_extras", ROOM_EXTRA_TABLES)
+                cur.execute("DELETE FROM room_live WHERE room_code = %s;", (room_code,))  # live text only lives while someone is speaking
+                if action == "end":
+                    cur.execute("DELETE FROM room_signals WHERE room_code = %s;", (room_code,))
 
             if action == "start_turn":
                 if turn_started_at is None:

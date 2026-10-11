@@ -1098,6 +1098,23 @@
   .obj-label select { padding: 4px 6px; font-size: 14px; }
   .obj-count { font-family: var(--font-hand); font-size: 22px; color: var(--pen); }
   .tr-tag.objection { background: #7FD6D6; color: #000; }
+  /* ---------- Online voice + quiet notices ---------- */
+  .voice-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; margin-top: 12px; }
+  .voice-pill { display: inline-flex; align-items: center; gap: 7px; padding: 3px 10px; border: 2px solid var(--ink); background: #fff; font: 800 13px var(--font-body); }
+  .voice-pill[hidden], .voice-row [hidden] { display: none; }
+  .voice-pill.live { background: var(--hl-green); }
+  .voice-pill.warn { background: #FFE14D; }
+  .voice-dot { width: 9px; height: 9px; background: var(--ink); display: inline-block; }
+  .voice-pill.live .voice-dot { animation: miclive 1s steps(2, end) infinite; }
+  .voice-hear { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; }
+  .voice-tip { text-align: center; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 0; }
+  .live-who { font-family: var(--font-hand); font-size: 22px; color: var(--pen); margin-left: 10px; }
+  #quiet-notes { position: fixed; left: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 6px; z-index: 70; pointer-events: none; }
+  .quiet-note { background: rgba(255, 255, 255, 0.93); border-left: 5px solid var(--ink); padding: 5px 10px; font: 700 13px/1.35 var(--font-body); max-width: 320px; transition: opacity 0.3s; animation: qin 0.2s ease-out; }
+  .quiet-note.good { border-left-color: var(--hl-green); }
+  .quiet-note.bad { border-left-color: var(--margin); }
+  .quiet-note.warn { border-left-color: var(--hl-orange); }
+  @keyframes qin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   .lesson-lead { margin: 6px 0 10px; font-size: 15px; }
   .lesson-title { font-size: 22px; font-weight: 900; font-variation-settings: "wdth" 88; margin: 8px 0 4px; }
   .lesson-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 24px; }
@@ -2169,7 +2186,7 @@
       <div class="upload-wrap">
         <div class="eyebrow" data-i18n="online.eyebrow">Online Debate</div>
         <h1 data-i18n="online.title">Debate someone on another device.</h1>
-        <p class="upload-lead" data-i18n="online.lead">Two accounts, two devices, one shared round. There's no shared audio channel between devices yet — for crossfire or discussion phases, coordinate by call or in person; Verdict Debate syncs the turns, transcript, and scores between you.</p>
+        <p class="upload-lead" data-i18n="online.lead">Two accounts, two devices, one shared round. You can hear each other, but your mic is only live on your own turn, and you read your opponent's words as they speak. Verdict Debate syncs the turns, transcript, and scores between you.</p>
 
         <div class="card upload-card" id="online-loggedout" style="display:none;">
           <h3 data-i18n="online.signin">Sign in first</h3>
@@ -2235,6 +2252,15 @@
                 <div class="timer-label" id="online-timer-label">—</div>
                 <div class="timer" id="online-timer">00:00</div>
                 <div class="timer-bar"><div class="timer-fill" id="online-timer-fill"></div></div>
+                <div class="voice-row">
+                  <span id="online-voice-pill" class="voice-pill" hidden><i class="voice-dot"></i><span id="online-voice-text"></span></span>
+                  <button type="button" class="btn btn-sm" id="online-voice-mute" hidden onclick="OnlineVoice.toggleMute()"></button>
+                  <button type="button" class="btn btn-sm" id="online-voice-retry" hidden onclick="OnlineVoice.retry()" data-i18n="voice.retry">Retry voice</button>
+                  <button type="button" class="btn btn-sm" id="online-voice-tap" hidden onclick="OnlineVoice.enableSound()" data-i18n="voice.tap">Tap to turn on sound</button>
+                  <label class="voice-hear"><input type="checkbox" id="online-voice-hear" checked autocomplete="off" onchange="OnlineVoice.setHear(this.checked)"> <span data-i18n="voice.hear">Hear opponent</span></label>
+                </div>
+                <p class="voice-tip" data-i18n="voice.headphones">Tip: use headphones so your opponent's voice isn't picked up by your mic.</p>
+                <audio id="online-remote-audio" autoplay playsinline></audio>
                 <div class="controls" id="online-your-controls" style="display:none;">
                   <button class="btn" id="online-btn-start" onclick="startOnlineTurn()" data-i18n="debate.startturn">Start turn</button>
                   <button class="btn" id="online-btn-pause" onclick="pauseOnlineTurn()" disabled data-i18n="debate.pause">Pause</button>
@@ -2272,7 +2298,7 @@
 
             <div class="subtitles-wrap">
               <div class="subtitles-head">
-                <div class="sub-head-left"><span class="mic-indicator" id="online-mic-dot"></span><h3 data-i18n="online.live">Live</h3></div>
+                <div class="sub-head-left"><span class="mic-indicator" id="online-mic-dot"></span><h3 data-i18n="online.live">Live</h3><span class="live-who" id="online-live-who"></span></div>
               </div>
               <div class="subtitles empty" id="online-live-subtitles" data-i18n="online.nothingyet">Nothing yet.</div>
             </div>
@@ -3424,6 +3450,23 @@ const FALLACIES = [
    ========================================================================= */
 const TRANSLATIONS = {
   en: {
+    "online.note.fallacy": "{name}: {label}",
+    "online.note.wrong": "{name}: −1 wrong claim",
+    "online.note.fact": "{name}: +1 fact",
+    "voice.waiting": "Waiting for {name} to speak…",
+    "voice.oppsays": "{name} is speaking",
+    "voice.headphones": "Tip: use headphones so your opponent's voice isn't picked up by your mic.",
+    "voice.unmute": "Unmute me",
+    "voice.mute": "Mute me",
+    "voice.hear": "Hear opponent",
+    "voice.tap": "Tap to turn on sound",
+    "voice.retry": "Retry voice",
+    "voice.permission": "Allow the microphone to talk with your opponent.",
+    "voice.unavailable": "Voice couldn't connect on this network. The live transcript still works.",
+    "voice.mutedbyyou": "You muted yourself",
+    "voice.muted": "Mic muted until your turn",
+    "voice.live": "Your mic is live",
+    "voice.connecting": "Connecting voice…",
     "trial.casefile": "Case file",
     "trial.browse": "Browse all case files",
     "trial.casenote": "Pick a ready-made case file and its title becomes your topic. Each one lists the facts both sides agree on, the witnesses, the exhibits, and what must be proven.",
@@ -3604,7 +3647,7 @@ const TRANSLATIONS = {
     "league.lead": "For coaches and tournament directors. Enter a league code to see aggregate stats across everyone submitting under it.",
     "online.eyebrow": "Online Debate",
     "online.title": "Debate someone on another device.",
-    "online.lead": "Two accounts, two devices, one shared round. There's no shared audio channel between devices yet — for crossfire or discussion phases, coordinate by call or in person; Verdict Debate syncs the turns, transcript, and scores between you.",
+    "online.lead": "Two accounts, two devices, one shared round. You can hear each other, but your mic is only live on your own turn, and you read your opponent's words as they speak. Verdict Debate syncs the turns, transcript, and scores between you.",
 
     "setup.mode.format": "Format",
     "setup.practice.desc": "Solo practice against the clock — no opponent needed. Get a full AI judge feedback report after, then rerun the same speech to see if your score improves. Works with Casual mode (switches you there automatically).",
@@ -3792,6 +3835,23 @@ const TRANSLATIONS = {
     "cookie.gotit": "Got it",
   },
   es: {
+    "online.note.fallacy": "{name}: {label}",
+    "online.note.wrong": "{name}: −1 afirmación falsa",
+    "online.note.fact": "{name}: +1 dato",
+    "voice.waiting": "Esperando a que hable {name}…",
+    "voice.oppsays": "{name} está hablando",
+    "voice.headphones": "Consejo: usa audífonos para que tu micrófono no capte la voz de tu oponente.",
+    "voice.unmute": "Activar mi micrófono",
+    "voice.mute": "Silenciarme",
+    "voice.hear": "Oír al oponente",
+    "voice.tap": "Toca para activar el sonido",
+    "voice.retry": "Reintentar la voz",
+    "voice.permission": "Permite el micrófono para hablar con tu oponente.",
+    "voice.unavailable": "La voz no pudo conectarse en esta red. La transcripción en vivo sigue funcionando.",
+    "voice.mutedbyyou": "Te silenciaste",
+    "voice.muted": "Micrófono silenciado hasta tu turno",
+    "voice.live": "Tu micrófono está activo",
+    "voice.connecting": "Conectando la voz…",
     "trial.casefile": "Caso",
     "trial.browse": "Ver todos los casos",
     "trial.casenote": "Elige un caso preparado y su título será tu tema. Cada uno incluye los hechos acordados, los testigos, las pruebas y lo que debe probarse.",
@@ -3972,7 +4032,7 @@ const TRANSLATIONS = {
     "league.lead": "Para entrenadores y directores de torneo. Ingresa un código de liga para ver estadísticas agregadas de todos los que envían resultados con ese código.",
     "online.eyebrow": "Debate en línea",
     "online.title": "Debate con alguien en otro dispositivo.",
-    "online.lead": "Dos cuentas, dos dispositivos, una ronda compartida. Todavía no hay un canal de audio compartido entre dispositivos — para las fases de crossfire o discusión, coordínense por llamada o en persona; Verdict Debate sincroniza los turnos, la transcripción y los puntajes entre ustedes.",
+    "online.lead": "Dos cuentas, dos dispositivos, una ronda compartida. Se oyen entre ustedes, pero tu micrófono solo está activo en tu turno, y lees las palabras de tu oponente mientras habla. Verdict Debate sincroniza turnos, transcripción y puntuaciones entre ustedes.",
 
     "setup.mode.format": "Formato",
     "setup.practice.desc": "Práctica en solitario contra el reloj — no necesitas oponente. Obtén un informe completo de retroalimentación del juez de IA después, y vuelve a hacer el mismo discurso para ver si tu puntuación mejora. Funciona con el modo Casual (te cambia ahí automáticamente).",
@@ -4160,6 +4220,23 @@ const TRANSLATIONS = {
     "cookie.gotit": "Entendido",
   },
   fr: {
+    "online.note.fallacy": "{name} : {label}",
+    "online.note.wrong": "{name} : −1 affirmation fausse",
+    "online.note.fact": "{name} : +1 fait",
+    "voice.waiting": "En attente de la parole de {name}…",
+    "voice.oppsays": "{name} parle",
+    "voice.headphones": "Astuce : utilisez un casque pour que votre micro ne capte pas la voix de votre adversaire.",
+    "voice.unmute": "Réactiver mon micro",
+    "voice.mute": "Me couper le micro",
+    "voice.hear": "Entendre l'adversaire",
+    "voice.tap": "Touchez pour activer le son",
+    "voice.retry": "Réessayer la voix",
+    "voice.permission": "Autorisez le micro pour parler avec votre adversaire.",
+    "voice.unavailable": "La voix n'a pas pu se connecter sur ce réseau. La transcription en direct fonctionne toujours.",
+    "voice.mutedbyyou": "Vous vous êtes coupé le micro",
+    "voice.muted": "Micro coupé jusqu'à votre tour",
+    "voice.live": "Votre micro est actif",
+    "voice.connecting": "Connexion de la voix…",
     "trial.casefile": "Dossier",
     "trial.browse": "Parcourir tous les dossiers",
     "trial.casenote": "Choisissez un dossier prêt à l'emploi et son titre devient votre sujet. Chacun liste les faits admis, les témoins, les pièces et ce qu'il faut prouver.",
@@ -4403,7 +4480,7 @@ const TRANSLATIONS = {
     "league.lead": "Pour les entraîneurs et les directeurs de tournoi. Saisissez un code de ligue pour voir les statistiques cumulées de tous ceux qui envoient des résultats avec ce code.",
     "online.eyebrow": "Débat en ligne",
     "online.title": "Débattez avec quelqu'un sur un autre appareil.",
-    "online.lead": "Deux comptes, deux appareils, une seule manche partagée. Il n'y a pas encore de canal audio partagé entre les appareils — pour les phases de crossfire ou de discussion, coordonnez-vous par téléphone ou en personne ; Verdict Debate synchronise les tours, la transcription et les scores entre vous.",
+    "online.lead": "Deux comptes, deux appareils, une manche partagée. Vous vous entendez, mais votre micro n'est actif que pendant votre tour, et vous lisez les mots de votre adversaire pendant qu'il parle. Verdict Debate synchronise les tours, la transcription et les scores entre vous.",
     "setup.mode.format": "Format",
     "setup.practice.desc": "Entraînement en solo contre la montre — pas besoin d'adversaire. Recevez un rapport complet du juge IA ensuite, puis refaites le même discours pour voir si votre score progresse. Fonctionne avec le mode Casual (bascule automatique).",
     "setup.topic.customlabel": "Ou écrivez un sujet / une résolution personnalisé(e)",
@@ -4643,6 +4720,23 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russe",
   },
   de: {
+    "online.note.fallacy": "{name}: {label}",
+    "online.note.wrong": "{name}: −1 falsche Behauptung",
+    "online.note.fact": "{name}: +1 Fakt",
+    "voice.waiting": "Warten, bis {name} spricht…",
+    "voice.oppsays": "{name} spricht",
+    "voice.headphones": "Tipp: Nutze Kopfhörer, damit dein Mikrofon die Stimme deines Gegners nicht aufnimmt.",
+    "voice.unmute": "Stummschaltung aufheben",
+    "voice.mute": "Mich stummschalten",
+    "voice.hear": "Gegner hören",
+    "voice.tap": "Tippen, um den Ton einzuschalten",
+    "voice.retry": "Stimme erneut versuchen",
+    "voice.permission": "Erlaube das Mikrofon, um mit deinem Gegner zu sprechen.",
+    "voice.unavailable": "Die Stimme konnte in diesem Netzwerk nicht verbunden werden. Das Live-Transkript funktioniert weiter.",
+    "voice.mutedbyyou": "Du hast dich stummgeschaltet",
+    "voice.muted": "Mikrofon stumm bis zu deinem Beitrag",
+    "voice.live": "Dein Mikrofon ist an",
+    "voice.connecting": "Stimme wird verbunden…",
     "trial.casefile": "Falldatei",
     "trial.browse": "Alle Falldateien ansehen",
     "trial.casenote": "Wähle eine fertige Falldatei, und ihr Titel wird dein Thema. Jede listet unstrittige Tatsachen, Zeugen, Beweisstücke und das Beweisthema auf.",
@@ -4886,7 +4980,7 @@ const TRANSLATIONS = {
     "league.lead": "Für Trainer und Turnierleiter. Gib einen Ligacode ein, um die zusammengefassten Statistiken aller zu sehen, die unter diesem Code Ergebnisse einreichen.",
     "online.eyebrow": "Online-Debatte",
     "online.title": "Debattiere mit jemandem auf einem anderen Gerät.",
-    "online.lead": "Zwei Konten, zwei Geräte, eine gemeinsame Runde. Es gibt noch keinen gemeinsamen Audiokanal zwischen den Geräten — stimmt euch bei Crossfire- oder Diskussionsphasen per Anruf oder persönlich ab; Verdict Debate synchronisiert Redebeiträge, Transkript und Punktestände zwischen euch.",
+    "online.lead": "Zwei Konten, zwei Geräte, eine gemeinsame Runde. Ihr hört euch, aber dein Mikrofon ist nur in deinem Beitrag aktiv, und du liest die Worte deines Gegners, während er spricht. Verdict Debate synchronisiert Beiträge, Transkript und Punkte zwischen euch.",
     "setup.mode.format": "Format",
     "setup.practice.desc": "Solo-Training gegen die Uhr — kein Gegner nötig. Danach gibt es einen vollständigen KI-Richterbericht, und du kannst dieselbe Rede wiederholen, um zu sehen, ob sich deine Punktzahl verbessert. Funktioniert mit dem Casual-Modus (schaltet automatisch um).",
     "setup.topic.customlabel": "Oder schreibe ein eigenes Thema / eine eigene Resolution",
@@ -5126,6 +5220,23 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russisch",
   },
   it: {
+    "online.note.fallacy": "{name}: {label}",
+    "online.note.wrong": "{name}: −1 affermazione falsa",
+    "online.note.fact": "{name}: +1 fatto",
+    "voice.waiting": "In attesa che {name} parli…",
+    "voice.oppsays": "{name} sta parlando",
+    "voice.headphones": "Consiglio: usa le cuffie così il microfono non capta la voce dell'avversario.",
+    "voice.unmute": "Riattiva il mio microfono",
+    "voice.mute": "Disattiva il mio microfono",
+    "voice.hear": "Ascolta l'avversario",
+    "voice.tap": "Tocca per attivare l'audio",
+    "voice.retry": "Riprova la voce",
+    "voice.permission": "Consenti il microfono per parlare con il tuo avversario.",
+    "voice.unavailable": "La voce non è riuscita a connettersi su questa rete. La trascrizione in diretta funziona ancora.",
+    "voice.mutedbyyou": "Ti sei disattivato il microfono",
+    "voice.muted": "Microfono disattivato fino al tuo turno",
+    "voice.live": "Il tuo microfono è attivo",
+    "voice.connecting": "Connessione della voce…",
     "trial.casefile": "Fascicolo",
     "trial.browse": "Sfoglia tutti i fascicoli",
     "trial.casenote": "Scegli un fascicolo pronto e il suo titolo diventa il tuo argomento. Ognuno elenca i fatti concordati, i testimoni, le prove e ciò che va dimostrato.",
@@ -5369,7 +5480,7 @@ const TRANSLATIONS = {
     "league.lead": "Per allenatori e direttori di torneo. Inserisci un codice lega per vedere le statistiche aggregate di tutti coloro che inviano risultati con quel codice.",
     "online.eyebrow": "Dibattito online",
     "online.title": "Dibatti con qualcuno su un altro dispositivo.",
-    "online.lead": "Due account, due dispositivi, un unico round condiviso. Non c'è ancora un canale audio condiviso tra i dispositivi — per le fasi di crossfire o discussione, coordinatevi per telefono o di persona; Verdict Debate sincronizza interventi, trascrizione e punteggi tra voi.",
+    "online.lead": "Due account, due dispositivi, un unico round condiviso. Vi sentite a vicenda, ma il tuo microfono è attivo solo nel tuo turno, e leggi le parole dell'avversario mentre parla. Verdict Debate sincronizza interventi, trascrizione e punteggi tra voi.",
     "setup.mode.format": "Formato",
     "setup.practice.desc": "Allenamento da soli contro il tempo — non serve un avversario. Dopo ricevi un rapporto completo del giudice IA, poi ripeti lo stesso discorso per vedere se il punteggio migliora. Funziona con la modalità Casual (ci passa in automatico).",
     "setup.topic.customlabel": "Oppure scrivi un argomento / una risoluzione personalizzata",
@@ -5609,6 +5720,23 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pt: {
+    "online.note.fallacy": "{name}: {label}",
+    "online.note.wrong": "{name}: −1 afirmação falsa",
+    "online.note.fact": "{name}: +1 fato",
+    "voice.waiting": "Aguardando {name} falar…",
+    "voice.oppsays": "{name} está falando",
+    "voice.headphones": "Dica: use fones de ouvido para o microfone não captar a voz do adversário.",
+    "voice.unmute": "Reativar meu microfone",
+    "voice.mute": "Silenciar-me",
+    "voice.hear": "Ouvir o adversário",
+    "voice.tap": "Toque para ativar o som",
+    "voice.retry": "Tentar a voz de novo",
+    "voice.permission": "Permita o microfone para falar com seu adversário.",
+    "voice.unavailable": "A voz não conseguiu conectar nesta rede. A transcrição ao vivo continua funcionando.",
+    "voice.mutedbyyou": "Você se silenciou",
+    "voice.muted": "Microfone mudo até a sua vez",
+    "voice.live": "Seu microfone está ligado",
+    "voice.connecting": "Conectando a voz…",
     "trial.casefile": "Caso",
     "trial.browse": "Ver todos os casos",
     "trial.casenote": "Escolha um caso pronto e o título dele vira o seu tema. Cada um lista os fatos acordados, as testemunhas, as provas e o que deve ser provado.",
@@ -5852,7 +5980,7 @@ const TRANSLATIONS = {
     "league.lead": "Para treinadores e diretores de torneio. Digite um código de liga para ver as estatísticas agregadas de todos que enviam resultados com ele.",
     "online.eyebrow": "Debate online",
     "online.title": "Debata com alguém em outro dispositivo.",
-    "online.lead": "Duas contas, dois dispositivos, uma rodada compartilhada. Ainda não há canal de áudio compartilhado entre os dispositivos — nas fases de crossfire ou discussão, combinem por telefone ou pessoalmente; o Verdict Debate sincroniza turnos, transcrição e pontuações entre vocês.",
+    "online.lead": "Duas contas, dois dispositivos, uma rodada compartilhada. Vocês se ouvem, mas seu microfone só fica ligado na sua vez, e você lê as palavras do adversário enquanto ele fala. O Verdict Debate sincroniza turnos, transcrição e pontuações entre vocês.",
     "setup.mode.format": "Formato",
     "setup.practice.desc": "Prática solo contra o relógio — sem precisar de adversário. Depois você recebe um relatório completo do juiz de IA e pode repetir o mesmo discurso para ver se a pontuação melhora. Funciona com o modo Casual (muda automaticamente).",
     "setup.topic.customlabel": "Ou escreva um tema / resolução personalizado",
@@ -6092,6 +6220,23 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pl: {
+    "online.note.fallacy": "{name}: {label}",
+    "online.note.wrong": "{name}: −1 fałszywe twierdzenie",
+    "online.note.fact": "{name}: +1 fakt",
+    "voice.waiting": "Czekam, aż {name} zacznie mówić…",
+    "voice.oppsays": "{name} mówi",
+    "voice.headphones": "Wskazówka: używaj słuchawek, aby mikrofon nie łapał głosu przeciwnika.",
+    "voice.unmute": "Włącz mój mikrofon",
+    "voice.mute": "Wycisz mnie",
+    "voice.hear": "Słyszę przeciwnika",
+    "voice.tap": "Dotknij, aby włączyć dźwięk",
+    "voice.retry": "Spróbuj ponownie",
+    "voice.permission": "Zezwól na mikrofon, aby rozmawiać z przeciwnikiem.",
+    "voice.unavailable": "Nie udało się połączyć głosu w tej sieci. Transkrypcja na żywo nadal działa.",
+    "voice.mutedbyyou": "Wyciszyłeś się",
+    "voice.muted": "Mikrofon wyciszony do Twojej tury",
+    "voice.live": "Twój mikrofon jest włączony",
+    "voice.connecting": "Łączenie głosu…",
     "trial.casefile": "Akta sprawy",
     "trial.browse": "Przeglądaj wszystkie akta",
     "trial.casenote": "Wybierz gotową sprawę, a jej tytuł stanie się Twoim tematem. Każda zawiera uzgodnione fakty, świadków, dowody i to, co trzeba udowodnić.",
@@ -6335,7 +6480,7 @@ const TRANSLATIONS = {
     "league.lead": "Dla trenerów i dyrektorów turniejów. Wpisz kod ligi, aby zobaczyć zbiorcze statystyki wszystkich, którzy przesyłają wyniki pod tym kodem.",
     "online.eyebrow": "Debata online",
     "online.title": "Debatuj z kimś na innym urządzeniu.",
-    "online.lead": "Dwa konta, dwa urządzenia, jedna wspólna runda. Nie ma jeszcze wspólnego kanału audio między urządzeniami — w fazach crossfire lub dyskusji ustalajcie się przez telefon albo osobiście; Verdict Debate synchronizuje tury, transkrypcję i wyniki między Wami.",
+    "online.lead": "Dwa konta, dwa urządzenia, jedna wspólna runda. Słyszycie się nawzajem, ale Twój mikrofon jest włączony tylko w Twojej turze, a słowa przeciwnika czytasz na bieżąco, gdy mówi. Verdict Debate synchronizuje tury, transkrypcję i wyniki między Wami.",
     "setup.mode.format": "Format",
     "setup.practice.desc": "Samodzielny trening na czas — przeciwnik nie jest potrzebny. Potem dostajesz pełny raport sędziego AI i możesz powtórzyć to samo wystąpienie, by zobaczyć, czy wynik się poprawi. Działa z trybem Casual (przełącza się automatycznie).",
     "setup.topic.customlabel": "Albo wpisz własny temat / rezolucję",
@@ -6575,6 +6720,23 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Rosyjski",
   },
   ja: {
+    "online.note.fallacy": "{name}：{label}",
+    "online.note.wrong": "{name}：誤った主張 −1",
+    "online.note.fact": "{name}：事実 +1",
+    "voice.waiting": "{name}さんが話すのを待っています…",
+    "voice.oppsays": "{name}さんが話しています",
+    "voice.headphones": "ヒント：相手の声をマイクが拾わないよう、ヘッドホンを使ってください。",
+    "voice.unmute": "ミュート解除",
+    "voice.mute": "ミュートにする",
+    "voice.hear": "相手の声を聞く",
+    "voice.tap": "タップして音を出す",
+    "voice.retry": "音声を再試行",
+    "voice.permission": "対戦相手と話すにはマイクを許可してください。",
+    "voice.unavailable": "このネットワークでは音声に接続できませんでした。ライブ文字起こしは引き続き使えます。",
+    "voice.mutedbyyou": "自分でミュートしています",
+    "voice.muted": "あなたのターンまでマイクはミュート",
+    "voice.live": "マイクがオンです",
+    "voice.connecting": "音声を接続中…",
     "trial.casefile": "ケースファイル",
     "trial.browse": "すべてのケースファイルを見る",
     "trial.casenote": "用意されたケースファイルを選ぶと、そのタイトルが論題になります。各ケースには、合意された事実、証人、証拠物、立証すべき内容がまとめてあります。",
@@ -6818,7 +6980,7 @@ const TRANSLATIONS = {
     "league.lead": "コーチや大会運営者向け。リーグコードを入力すると、そのコードで結果を送った全員の集計統計が見られます。",
     "online.eyebrow": "オンラインディベート",
     "online.title": "別の端末にいる相手とディベート。",
-    "online.lead": "2つのアカウント、2台の端末、1つの共有ラウンド。端末間の共有音声チャンネルはまだありません — クロスファイアや議論の場面では、通話か対面で調整してください。Verdict Debate はターン・文字起こし・スコアを同期します。",
+    "online.lead": "2つのアカウント、2台の端末、1つの共有ラウンド。お互いの声は聞こえますが、マイクがオンになるのは自分のターンだけで、相手の言葉は話している間にそのまま読めます。Verdict Debate はターン・文字起こし・スコアを同期します。",
     "setup.mode.format": "形式",
     "setup.practice.desc": "時間制限つきの一人練習 — 相手は不要です。終了後に AI 審査員の完全なレポートが届き、同じスピーチをやり直してスコアが上がるか確認できます。Casual モードで動作します（自動で切り替わります）。",
     "setup.topic.customlabel": "または、独自の論題／決議を入力",
@@ -7058,6 +7220,23 @@ const TRANSLATIONS = {
     "upload.lang.ru": "ロシア語",
   },
   zh: {
+    "online.note.fallacy": "{name}：{label}",
+    "online.note.wrong": "{name}：错误论断 −1",
+    "online.note.fact": "{name}：事实 +1",
+    "voice.waiting": "等待 {name} 发言…",
+    "voice.oppsays": "{name} 正在发言",
+    "voice.headphones": "提示：请戴耳机，以免麦克风收录对手的声音。",
+    "voice.unmute": "取消静音",
+    "voice.mute": "将我静音",
+    "voice.hear": "听对手声音",
+    "voice.tap": "点击开启声音",
+    "voice.retry": "重试语音",
+    "voice.permission": "请允许使用麦克风，以便与对手交谈。",
+    "voice.unavailable": "此网络下无法连接语音。实时文字记录仍可使用。",
+    "voice.mutedbyyou": "你已将自己静音",
+    "voice.muted": "轮到你之前麦克风静音",
+    "voice.live": "你的麦克风已开启",
+    "voice.connecting": "正在连接语音…",
     "trial.casefile": "案卷",
     "trial.browse": "浏览所有案卷",
     "trial.casenote": "选择现成的案卷，其标题就成为你的辩题。每个案卷都列有双方认可的事实、证人、证物和必须证明的内容。",
@@ -7301,7 +7480,7 @@ const TRANSLATIONS = {
     "league.lead": "面向教练和赛事负责人。输入联赛代码，即可查看所有使用该代码提交结果的人的汇总统计。",
     "online.eyebrow": "在线辩论",
     "online.title": "与另一台设备上的人辩论。",
-    "online.lead": "两个账号、两台设备、同一轮共享比赛。设备之间暂时没有共享音频通道 — 在交叉质询或讨论环节，请通过电话或当面协调；Verdict Debate 会在你们之间同步回合、文字记录和分数。",
+    "online.lead": "两个账号、两台设备、同一轮共享比赛。你们可以互相听到，但麦克风只在你自己的回合开启，对手发言时你能实时读到他说的话。Verdict Debate 会在你们之间同步回合、文字记录和分数。",
     "setup.mode.format": "赛制",
     "setup.practice.desc": "与时间赛跑的单人练习 — 无需对手。结束后获得完整的 AI 评委反馈报告，然后重做同一场发言，看分数是否提高。适用于 Casual 模式（会自动切换）。",
     "setup.topic.customlabel": "或自己写一个辩题 / 决议",
@@ -7541,6 +7720,23 @@ const TRANSLATIONS = {
     "upload.lang.ru": "俄语",
   },
   ru: {
+    "online.note.fallacy": "{name}: {label}",
+    "online.note.wrong": "{name}: −1 ложное утверждение",
+    "online.note.fact": "{name}: +1 факт",
+    "voice.waiting": "Ждём, когда заговорит {name}…",
+    "voice.oppsays": "Говорит {name}",
+    "voice.headphones": "Совет: используйте наушники, чтобы микрофон не ловил голос оппонента.",
+    "voice.unmute": "Включить мой микрофон",
+    "voice.mute": "Отключить мой микрофон",
+    "voice.hear": "Слышать оппонента",
+    "voice.tap": "Нажмите, чтобы включить звук",
+    "voice.retry": "Повторить голос",
+    "voice.permission": "Разрешите микрофон, чтобы говорить с оппонентом.",
+    "voice.unavailable": "Не удалось подключить голос в этой сети. Живая расшифровка по-прежнему работает.",
+    "voice.mutedbyyou": "Вы отключили свой микрофон",
+    "voice.muted": "Микрофон выключен до вашего хода",
+    "voice.live": "Ваш микрофон включён",
+    "voice.connecting": "Подключаем голос…",
     "trial.casefile": "Материалы дела",
     "trial.browse": "Посмотреть все дела",
     "trial.casenote": "Выберите готовое дело — его название станет вашей темой. В каждом перечислены согласованные факты, свидетели, доказательства и то, что нужно доказать.",
@@ -7784,7 +7980,7 @@ const TRANSLATIONS = {
     "league.lead": "Для тренеров и организаторов турниров. Введите код лиги, чтобы увидеть сводную статистику всех, кто отправляет результаты с этим кодом.",
     "online.eyebrow": "Онлайн-дебаты",
     "online.title": "Дебатируйте с человеком на другом устройстве.",
-    "online.lead": "Два аккаунта, два устройства, один общий раунд. Общего аудиоканала между устройствами пока нет — для фаз crossfire или обсуждения договаривайтесь по телефону или лично; Verdict Debate синхронизирует между вами ходы, расшифровку и счёт.",
+    "online.lead": "Два аккаунта, два устройства, один общий раунд. Вы слышите друг друга, но ваш микрофон включён только в ваш ход, а слова оппонента вы читаете по мере того, как он говорит. Verdict Debate синхронизирует ходы, расшифровку и счёт между вами.",
     "setup.mode.format": "Формат",
     "setup.practice.desc": "Одиночная тренировка на время — оппонент не нужен. После вы получите полный отчёт ИИ-судьи, а затем сможете повторить то же выступление и увидеть, улучшился ли счёт. Работает в режиме Casual (переключится автоматически).",
     "setup.topic.customlabel": "Или напишите свою тему / резолюцию",
@@ -9706,6 +9902,7 @@ async function joinOnlineRoom() {
 function leaveOnlineRoom() {
   stopOnlinePolling();
   stopOnlineMic();
+  if (window.OnlineVoice) OnlineVoice.stop();
   state.onlineRoom = null;
   state.onlineLiveText = "";
   clearOnlineRoomCode();
@@ -9742,22 +9939,32 @@ async function tryRestoreOnlineRoom() {
 
 function startOnlinePolling() {
   stopOnlinePolling();
-  state.onlinePollTimer = setInterval(pollOnlineRoomState, 2000);
+  const gen = state.onlinePollGen = (state.onlinePollGen || 0) + 1;
+  const tick = async () => {
+    await pollOnlineRoomState();
+    if (gen !== state.onlinePollGen || !state.onlinePollTimer) return; // stopped or replaced meanwhile
+    // faster while the voice link is being set up or the opponent's text is coming through the server
+    state.onlinePollTimer = setTimeout(tick, window.OnlineVoice ? OnlineVoice.pollMs() : 2000);
+  };
+  state.onlinePollTimer = setTimeout(tick, 1200);
 }
 
 function stopOnlinePolling() {
-  if (state.onlinePollTimer) { clearInterval(state.onlinePollTimer); state.onlinePollTimer = null; }
+  state.onlinePollGen = (state.onlinePollGen || 0) + 1;
+  if (state.onlinePollTimer) { clearTimeout(state.onlinePollTimer); state.onlinePollTimer = null; }
 }
 
 async function pollOnlineRoomState() {
   if (!state.onlineRoom || !state.authToken) return;
   try {
-    const resp = await fetch("/api/room-state?code=" + encodeURIComponent(state.onlineRoom.roomCode), {
+    const after = window.OnlineVoice ? (OnlineVoice.state().lastSig || 0) : 0;
+    const resp = await fetch("/api/room-state?code=" + encodeURIComponent(state.onlineRoom.roomCode) + "&voice=1&after=" + after, {
       headers: { Authorization: "Bearer " + state.authToken },
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data?.error || "Room error");
     state.onlineRoom = data.room;
+    if (window.OnlineVoice) OnlineVoice.onPoll(data);
     renderOnlineRoom();
   } catch (e) {
     console.warn("Room poll failed:", e.message || e);
@@ -9775,6 +9982,33 @@ async function onlineRoomAction(body) {
   state.onlineRoom = data.room;
   renderOnlineRoom();
   return data.room;
+}
+
+/* Small, quiet notices (no flashes, no sounds) for score events: both debaters see both sides' events. */
+function quietNotice(msg, kind) {
+  let box = document.getElementById("quiet-notes");
+  if (!box) { box = document.createElement("div"); box.id = "quiet-notes"; box.setAttribute("aria-live", "polite"); document.body.appendChild(box); }
+  while (box.children.length >= 3) box.removeChild(box.firstChild);
+  const el = document.createElement("div");
+  el.className = "quiet-note " + (kind || "");
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 300); }, 3600);
+}
+
+function noteNewScores(room) {
+  const log = room.scoreLog || [];
+  const last = log.length ? log[log.length - 1].ts : "";
+  const seen = state.onlineNoteSeen;
+  if (!seen || seen.code !== room.roomCode) { state.onlineNoteSeen = { code: room.roomCode, ts: last }; return; } // history isn't re-announced
+  log.filter(e => e.ts > seen.ts).forEach(e => {
+    const name = e.side === "a" ? room.hostName : (room.guestName || "");
+    const label = String(e.label || "");
+    if (label === "fact") quietNotice(t("online.note.fact").replace("{name}", name), "good");
+    else if (label === "wrong") quietNotice(t("online.note.wrong").replace("{name}", name), "bad");
+    else quietNotice(t("online.note.fallacy").replace("{name}", name).replace("{label}", label), "warn");
+  });
+  seen.ts = last || seen.ts;
 }
 
 function currentOnlinePhaseName(room) {
@@ -9865,8 +10099,7 @@ async function runOneOnlineFactCheck(sentence, side, opts) {
     if (cfg.AUTO_FALLACY_DETECTION) {
       normalizeFallacies(combined).forEach(f => {
         if (f.confidence < (cfg.AUTO_FALLACY_MIN_CONF ?? 0.65)) return;
-        scoreOnline(side, "fallacy", -2, "fallacy: " + f.fallacy);
-        toast(`${f.fallacy} — ${f.explanation}`, "warn");
+        scoreOnline(side, "fallacy", -2, ("fallacy: " + f.fallacy + (f.explanation ? " — " + f.explanation : "")).slice(0, 118));
       });
     }
 
@@ -9874,15 +10107,8 @@ async function runOneOnlineFactCheck(sentence, side, opts) {
     const minConf = cfg.AUTO_FACTCHECK_CONFIDENCE ?? 0.7;
     claims.slice(0, 3).forEach(c => {
       if (c.confidence < minConf) return;
-      if (c.verdict === "true") {
-        flashScreen("green");
-        beepTone(880);
-        scoreOnline(side, "fact", 1, "fact");
-      } else if (c.verdict === "false") {
-        flashScreen("red");
-        beepTone(220);
-        scoreOnline(side, "wrong", -1, "wrong");
-      }
+      if (c.verdict === "true") scoreOnline(side, "fact", 1, "fact");
+      else if (c.verdict === "false") scoreOnline(side, "wrong", -1, "wrong");
     });
   } catch (e) {
     console.warn("Online fact-check failed:", e.message || e);
@@ -10001,6 +10227,7 @@ async function endOnlineTurn() {
   const next = computeNextOnlinePhase(room);
   const text = (state.onlineLiveText || "").trim();
   state.onlineLiveText = "";
+  if (window.OnlineVoice) OnlineVoice.sendLive("");
   try {
     await onlineRoomAction({
       action: "next_turn",
@@ -10035,6 +10262,7 @@ async function scoreOnline(side, type, delta, label) {
 async function endOnlineDebateNow() {
   if (!state.onlineRoom) return;
   stopOnlineMic();
+  if (window.OnlineVoice) OnlineVoice.sendLive("");
   try {
     await onlineRoomAction({ action: "end" });
     toast("Debate ended.", "warn");
@@ -10066,12 +10294,14 @@ function renderOnlineRoom() {
   endedEl.style.display = "none";
 
   if (room.status === "waiting") {
+    if (window.OnlineVoice) OnlineVoice.stop();
     waitingEl.style.display = "";
     document.getElementById("online-room-code-display").textContent = room.roomCode;
     return;
   }
 
   if (room.status === "ended") {
+    if (window.OnlineVoice) OnlineVoice.stop();
     endedEl.style.display = "";
     document.getElementById("online-final-score").textContent =
       `${room.hostName} ${room.scoreA} – ${room.scoreB} ${room.guestName || "Guest"}`;
@@ -10086,6 +10316,8 @@ function renderOnlineRoom() {
   // status === "active"
   activeEl.style.display = "";
   const mode = DEBATE_MODES[room.mode] || DEBATE_MODES.casual;
+  noteNewScores(room);
+  if (window.OnlineVoice) OnlineVoice.sync(room);
   state.onlineFlipSeen = state.onlineFlipSeen || {};
   if (room.yourSide && !state.onlineFlipSeen[room.roomCode]) {
     state.onlineFlipSeen[room.roomCode] = true;
@@ -10159,6 +10391,7 @@ function startOnlineMic() {
       const shown = (state.onlineLiveText + " " + interim).trim();
       subs.textContent = shown || "Listening…";
       subs.classList.toggle("empty", !shown);
+      if (window.OnlineVoice) OnlineVoice.sendLive(shown);
     }
   };
   r.onerror = (e) => {
@@ -14078,5 +14311,6 @@ init();
 <script src="mocktrial-data.js"></script>
 <script src="study.js"></script>
 <script src="mocktrial.js"></script>
+<script src="voice.js"></script>
 </body>
 </html>
