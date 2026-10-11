@@ -1010,6 +1010,94 @@
   .tr-earlier > summary { cursor: pointer; font-weight: 800; font-size: 14px; color: var(--ink-2); margin: 4px 0 8px; }
   .transcript-round .tr-card { margin: 10px 0 0; }
 
+
+  /* ---------- Study sets (Learn) ---------- */
+  .secret-field { -webkit-text-security: disc; text-security: disc; }
+  .learn-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+  .learn-tabs button { font: 800 15px var(--font-body); padding: 8px 16px; background: #fff; color: #000; border: 2px solid var(--ink); cursor: pointer; }
+  .learn-tabs button.on { background: #000; color: var(--paper); }
+  .study-lead, .trial-lead { margin: 0 0 12px; font-size: 15px; }
+  .study-top { margin-bottom: 12px; }
+  .study-streak { display: inline-block; font-family: var(--font-hand); font-size: 26px; color: var(--pen); }
+  .deck-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .deck-card { background: #fff; border: 2px solid var(--ink); border-left-width: 10px; padding: 12px 14px 14px; }
+  .deck-card h4 { margin: 0 0 2px; font-size: 20px; font-variation-settings: "wdth" 86; }
+  .deck-blurb { margin: 0 0 6px; font-size: 14px; color: var(--ink-2); }
+  .deck-meta { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .deck-bar { height: 8px; border: 2px solid var(--ink); background: #fff; margin: 4px 0 10px; }
+  .deck-bar i { display: block; height: 100%; background: var(--hl-green); }
+  .deck-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .deck-actions .btn { padding: 6px 12px; font-size: 14px; box-shadow: 2px 2px 0 var(--ink); }
+  .stage-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .stage-title { font-weight: 800; font-size: 15px; }
+  .flash-count { font-size: 13px; font-weight: 800; margin: 4px 0 8px; color: var(--ink-2); }
+  .flashcard { position: relative; display: block; width: 100%; min-height: 220px; padding: 26px 22px; background: #fff; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); text-align: center; cursor: pointer; font: inherit; color: #000; }
+  .flashcard .fc-face { display: block; font-size: clamp(24px, 4vw, 38px); font-weight: 900; font-variation-settings: "wdth" 84; line-height: 1.15; }
+  .flashcard .fc-face.small { font-size: 18px; font-weight: 600; font-variation-settings: normal; line-height: 1.45; }
+  .flashcard .fc-back { display: none; }
+  .flashcard.flipped .fc-front { display: none; }
+  .flashcard.flipped .fc-back { display: block; animation: flipin .18s ease-out; }
+  .flashcard .fc-extra { display: block; margin-top: 10px; font-style: normal; font-size: 15px; font-weight: 500; color: var(--ink-2); }
+  @keyframes flipin { from { transform: scaleX(.92); opacity: .4; } to { transform: none; opacity: 1; } }
+  .flash-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 16px 0 8px; }
+  .flash-tools { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .q-card { background: #fff; border: 2px solid var(--ink); padding: 16px 18px 18px; }
+  .q-label { font-size: 13px; font-weight: 800; text-transform: none; color: var(--ink-2); margin-bottom: 6px; }
+  .q-setting { font-family: var(--font-hand); font-size: 22px; color: var(--pen); line-height: 1.1; margin-bottom: 4px; }
+  .q-prompt { font-size: 24px; font-weight: 900; font-variation-settings: "wdth" 86; line-height: 1.2; margin: 4px 0 12px; }
+  .q-prompt.small { font-size: 17px; font-weight: 600; font-variation-settings: normal; line-height: 1.45; }
+  .q-prompt.scene { font-size: 19px; font-weight: 600; font-variation-settings: normal; line-height: 1.45; }
+  .choices { display: grid; gap: 8px; }
+  .choice { display: flex; gap: 10px; align-items: flex-start; text-align: left; padding: 10px 12px; background: var(--paper-pale); border: 2px solid var(--ink); font: 600 15px/1.4 var(--font-body); color: #000; cursor: pointer; }
+  .choice b { display: inline-block; min-width: 20px; height: 20px; text-align: center; background: #000; color: var(--paper); font-size: 12px; line-height: 20px; }
+  .choice:hover:not(:disabled) { background: #fff; }
+  .choice.right { background: var(--hl-green); }
+  .choice.wrong { background: #FF6A5E; }
+  .feedback { margin-top: 12px; font-size: 15px; line-height: 1.5; }
+  .feedback:empty { display: none; }
+  .feedback.ok { border-left: 6px solid var(--hl-green); padding-left: 10px; }
+  .feedback.no { border-left: 6px solid var(--margin); padding-left: 10px; }
+  .feedback .why { margin: 6px 0; }
+  .study-done { text-align: center; padding: 14px 8px; }
+  .study-done h3 { font-size: 28px; margin: 0 0 6px; }
+  .study-done .missed { text-align: left; max-width: 640px; margin: 10px auto; padding-left: 20px; font-size: 14.5px; line-height: 1.5; }
+  .match-hint { margin: 0 0 6px; font-size: 14px; }
+  .match-time { font-family: var(--font-hand); font-size: 30px; color: var(--pen); margin-bottom: 8px; }
+  .match-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .tile { min-height: 74px; padding: 8px 10px; background: #fff; border: 2px solid var(--ink); font: 700 14px/1.3 var(--font-body); color: #000; cursor: pointer; }
+  .tile.sel { background: #FFE14D; }
+  .tile.bad { background: #FF6A5E; animation: shake .3s; }
+  .tile.gone { visibility: hidden; }
+  @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+  /* ---------- Mock Trial ---------- */
+  .trial-quick { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+  .case-list { display: grid; gap: 8px; margin-bottom: 14px; }
+  .case-row { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; text-align: left; padding: 10px 12px; background: #fff; border: 2px solid var(--ink); font: 500 14px/1.4 var(--font-body); color: #000; cursor: pointer; }
+  .case-row span:last-child { grid-column: 2; color: var(--ink-2); }
+  .case-row.on { background: var(--paper-pale); border-left-width: 10px; }
+  .case-pill { font-size: 11px; font-weight: 900; padding: 1px 8px; border: 1.5px solid var(--ink); background: #fff; }
+  .case-pill.civil { background: #C7A4FF; }
+  .case-pill.criminal { background: #FFB4A8; }
+  .case-file { background: #fff; border: 2px solid var(--ink); padding: 14px 16px; line-height: 1.5; font-size: 14.5px; }
+  .case-file header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .case-file h3 { margin: 0; font-size: 26px; }
+  .case-file h4 { margin: 14px 0 4px; font-size: 16px; border-bottom: 2px solid var(--ink); }
+  .case-file ul { margin: 4px 0 6px; padding-left: 20px; }
+  .case-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 4px 24px; }
+  .witness { margin-bottom: 8px; }
+  .w-role { color: var(--ink-2); font-size: 13px; }
+  .case-note { font-size: 12.5px; color: var(--ink-2); margin-top: 12px; }
+  .case-hints summary { cursor: pointer; font-weight: 800; margin-top: 10px; }
+  .case-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .obj-sheet { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px; }
+  .obj-item { background: #fff; border: 2px solid var(--ink); padding: 8px 10px; font-size: 14px; display: grid; gap: 2px; }
+  .trial-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 14px; padding: 8px 0; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+  .trial-tools[hidden] { display: none; }
+  .obj-label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; }
+  .obj-label select { padding: 4px 6px; font-size: 14px; }
+  .obj-count { font-family: var(--font-hand); font-size: 22px; color: var(--pen); }
+  .tr-tag.objection { background: #7FD6D6; color: #000; }
   .lesson-lead { margin: 6px 0 10px; font-size: 15px; }
   .lesson-title { font-size: 22px; font-weight: 900; font-variation-settings: "wdth" 88; margin: 8px 0 4px; }
   .lesson-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 24px; }
@@ -1645,7 +1733,7 @@
           <div class="topic-list" id="topic-list"></div>
           <div class="field" style="margin-top: 14px;">
             <label data-i18n="setup.topic.customlabel">Or write a custom topic / resolution</label>
-            <textarea id="custom-topic" data-i18n-ph="setup.topic.customph" placeholder="e.g. Resolved: The United States federal government should significantly reform its immigration policy."></textarea>
+            <textarea id="custom-topic" data-i18n-ph="setup.topic.customph" placeholder="e.g. Resolved: The United States federal government should significantly reform its immigration policy." autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other"></textarea>
           </div>
         </div>
 
@@ -1676,14 +1764,22 @@
           </div>
         </div>
 
+        <div class="card" id="trial-setup-card" hidden style="grid-column: 1 / -1;">
+          <h3 data-i18n="trial.casetitle">Case library</h3>
+          <p class="note" data-i18n="trial.casenote">Pick a ready-made case file and its title becomes your topic. Each one lists the facts both sides agree on, the witnesses, the exhibits, and what must be proven.</p>
+          <div class="field"><select id="trial-case-select" autocomplete="off"></select></div>
+          <div id="trial-setup-case"></div>
+          <button type="button" class="btn btn-sm" style="margin-top:8px" onclick="navTo('screen-learn'); learnTab('trial')" data-i18n="trial.browse">Browse all case files</button>
+        </div>
+
         <div class="card">
           <h3 data-i18n="setup.debaters.title">Debaters</h3>
           <div class="debaters">
             <div class="debater-field" data-side="A" id="side-a-wrap">
-              <input type="text" id="name-a" data-i18n-ph="setup.debaters.phA" placeholder="Debater A" value="Debater A" />
+              <input type="text" id="name-a" data-i18n-ph="setup.debaters.phA" placeholder="Debater A" value="Debater A" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
             </div>
             <div class="debater-field" data-side="B" id="side-b-wrap">
-              <input type="text" id="name-b" data-i18n-ph="setup.debaters.phB" placeholder="Debater B" value="Debater B" />
+              <input type="text" id="name-b" data-i18n-ph="setup.debaters.phB" placeholder="Debater B" value="Debater B" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
             </div>
           </div>
           <div class="toggle-row" style="margin-top: 14px;">
@@ -1698,7 +1794,7 @@
           </div>
           <div class="field" style="margin-top: 14px;">
             <label data-i18n="setup.league.label">League code (optional)</label>
-            <input type="text" id="league-code" placeholder="e.g. NYCUDL-2026" maxlength="40" />
+            <input type="text" id="league-code" placeholder="e.g. NYCUDL-2026" maxlength="40" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
             <div class="note" data-i18n="setup.league.note">If your coach gave you a code, results get added to your league's dashboard. This isn't a password — anyone with the code can view or submit to it.</div>
           </div>
           <div class="field" style="margin-top: 14px;">
@@ -1865,7 +1961,7 @@
             </div>
             <div class="field">
               <label data-i18n="setup.ai.apikey">API key (leave blank to use the default)</label>
-              <input type="password" id="ai-key" data-i18n-ph="setup.ai.apikeyph" placeholder="Leave blank unless you're running your own key" />
+              <input type="text" id="ai-key" class="secret-field" name="vd-ai-key" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" data-i18n-ph="setup.ai.apikeyph" placeholder="Leave blank unless you're running your own key" />
               <div class="note" data-i18n="setup.ai.apikeynote">Most setups never need this — the app already comes wired up. Only fill this in if you're self-hosting with your own key.</div>
             </div>
           </div>
@@ -1920,6 +2016,15 @@
         <div class="undo-label" data-i18n="debate.undolabel">Click any mark to undo it</div>
         <div class="undo-list" id="undo-list"></div>
         <button class="btn btn-sm" onclick="undoAll()" data-i18n="debate.clearall">Clear all</button>
+      </div>
+
+      <div class="trial-tools" id="trial-tools" hidden>
+        <button type="button" class="btn btn-sm" id="trial-case-btn" onclick="openCaseFile()" data-i18n="trial.casefile">Case file</button>
+        <label class="obj-label"><span data-i18n="trial.objection">Objection</span>
+          <select id="obj-type" autocomplete="off"></select></label>
+        <button type="button" class="btn btn-sm" onclick="logObjection('sustained')" data-i18n="trial.ruling.sustained">Sustained</button>
+        <button type="button" class="btn btn-sm" onclick="logObjection('overruled')" data-i18n="trial.ruling.overruled">Overruled</button>
+        <span class="obj-count" id="obj-count"></span>
       </div>
 
       <div class="turn-review" id="turn-review" aria-live="polite"></div>
@@ -2012,7 +2117,7 @@
           <input type="text" id="fc-query"
                  data-i18n-ph="debate.factcheck.ph"
                  placeholder="Type a claim and hit Enter — flashes green/red like auto fact-check"
-                 onkeydown="if(event.key==='Enter'){event.preventDefault();factCheckQuery(this.value);}" />
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();factCheckQuery(this.value);}" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
           <button class="btn" onclick="factCheckQuery(document.getElementById('fc-query').value)" data-i18n="debate.search">Search</button>
           <button class="btn" onclick="googleIt(document.getElementById('fc-query').value)" data-i18n="debate.google">Google</button>
         </div>
@@ -2035,6 +2140,7 @@
 
       <div class="results-scores" id="results-scores"></div>
       <div class="claim-report" id="claim-report"></div>
+      <div id="objection-summary"></div>
 
       <div id="ai-verdicts"></div>
       <div style="margin: -6px 0 14px; display:flex; gap:8px; flex-wrap:wrap;">
@@ -2085,7 +2191,7 @@
               </div>
               <div class="field" style="grid-column: 1 / -1;">
                 <label data-i18n="online.topic">Topic</label>
-                <input type="text" id="online-topic" data-i18n-ph="online.topicph" placeholder="e.g. Resolved: The United States federal government should significantly reform its immigration policy." />
+                <input type="text" id="online-topic" data-i18n-ph="online.topicph" placeholder="e.g. Resolved: The United States federal government should significantly reform its immigration policy." autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
               </div>
             </div>
             <button class="btn btn-primary" onclick="hostOnlineRoom()" data-i18n="online.createroom">Create room</button>
@@ -2094,7 +2200,7 @@
             <h3 data-i18n="online.join">Join a room</h3>
             <div class="field">
               <label data-i18n="online.roomcode">Room code</label>
-              <input type="text" id="online-join-code" placeholder="e.g. K7P2QX" maxlength="12" style="text-transform:uppercase;" />
+              <input type="text" id="online-join-code" placeholder="e.g. K7P2QX" maxlength="12" style="text-transform:uppercase;" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
             </div>
             <button class="btn btn-primary" onclick="joinOnlineRoom()" data-i18n="online.joinbtn">Join</button>
           </div>
@@ -2284,17 +2390,40 @@
     <section class="screen" id="screen-learn">
       <div class="upload-wrap">
         <div class="eyebrow" data-i18n="learn.eyebrow">Coach layer</div>
-        <h1 data-i18n="learn.title">Fallacy library &amp; format vocabulary.</h1>
-        <p class="upload-lead" data-i18n="learn.lead">Every fallacy flagged during a debate deep-links here. Look one up mid-round, or browse ahead of time.</p>
+        <h1 data-i18n="learn.title">Study, practice, and learn the language of debate.</h1>
+        <p class="upload-lead" data-i18n="learn.lead">Flip cards, get quizzed, race the clock, and practice spotting fallacies and making objections. Every fallacy flagged in a round links here too.</p>
 
+        <div class="learn-tabs" role="tablist">
+          <button type="button" role="tab" id="learn-tab-study" class="on" aria-selected="true" onclick="learnTab('study')" data-i18n="study.tab.study">Study</button>
+          <button type="button" role="tab" id="learn-tab-library" aria-selected="false" onclick="learnTab('library')" data-i18n="study.tab.library">Fallacy library</button>
+          <button type="button" role="tab" id="learn-tab-vocab" aria-selected="false" onclick="learnTab('vocab')" data-i18n="study.tab.vocab">Vocabulary</button>
+          <button type="button" role="tab" id="learn-tab-trial" aria-selected="false" onclick="learnTab('trial')" data-i18n="study.tab.trial">Mock Trial</button>
+        </div>
+
+        <div id="learn-panel-study" role="tabpanel">
+          <div class="card upload-card">
+            <h3 data-i18n="study.title">Study sets</h3>
+            <p class="study-lead" data-i18n="study.lead">Learn the terms the way you'd learn any set: flip cards, get quizzed, race the clock.</p>
+            <div id="study-wrap"></div>
+          </div>
+        </div>
+        <div id="learn-panel-library" role="tabpanel" hidden>
         <div class="card upload-card">
           <h3 data-i18n="learn.fallacylib">Fallacy Library</h3>
           <div class="fallacy-lib-grid" id="fallacy-lib-grid"></div>
         </div>
-
+        </div>
+        <div id="learn-panel-vocab" role="tabpanel" hidden>
         <div class="card upload-card">
           <h3 data-i18n="learn.glossary">Format Vocabulary</h3>
           <div id="glossary-wrap"></div>
+        </div>
+        </div>
+        <div id="learn-panel-trial" role="tabpanel" hidden>
+          <div class="card upload-card">
+            <h3 data-i18n="study.tab.trial">Mock Trial</h3>
+            <div id="trial-wrap"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -2351,7 +2480,7 @@
           </div>
           <div class="field">
             <label data-i18n="casecheck.casetext">Case text</label>
-            <textarea id="cc-text" rows="12" data-i18n-ph="casecheck.casetextph" placeholder="Paste your constructive speech, case outline, or brief here..."></textarea>
+            <textarea id="cc-text" rows="12" data-i18n-ph="casecheck.casetextph" placeholder="Paste your constructive speech, case outline, or brief here..." autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other"></textarea>
           </div>
           <button id="cc-go" class="btn btn-primary" onclick="runCaseCheck()" data-i18n="casecheck.check">Check my case</button>
           <div id="cc-error" class="upload-error" style="display:none;"></div>
@@ -2383,7 +2512,7 @@
           <div class="form-grid two-col">
             <div class="field" style="grid-column: 1 / -1;">
               <label data-i18n="setup.league.label2">League code</label>
-              <input type="text" id="league-lookup-code" placeholder="e.g. NYCUDL-2026" maxlength="40" />
+              <input type="text" id="league-lookup-code" placeholder="e.g. NYCUDL-2026" maxlength="40" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
             </div>
           </div>
           <button id="league-go" class="btn btn-primary" onclick="loadLeagueDashboard()" data-i18n="league.load">Load dashboard</button>
@@ -2643,6 +2772,15 @@
   </div>
 </div>
 
+<!-- Mock Trial case file (in-round window) -->
+<div class="modal-wrap" id="case-modal">
+  <div class="modal tos-modal">
+    <h2 data-i18n="trial.casefile">Case file</h2>
+    <div class="tos-body" id="case-modal-body"></div>
+    <div class="modal-actions"><button class="btn btn-primary" onclick="closeCaseFile()" data-i18n="suggest.cancel">Close</button></div>
+  </div>
+</div>
+
 <!-- Suggestion box -->
 <div class="modal-wrap" id="suggest-modal">
   <div class="modal">
@@ -2759,17 +2897,18 @@
   <div class="modal">
     <h2 id="auth-modal-title" data-i18n="auth.login">Log in</h2>
     <div class="modal-sub" data-i18n="auth.optional">Optional — Verdict Debate works fully without an account. Signing in just syncs your progress across devices.</div>
+    <form id="auth-form" autocomplete="on" onsubmit="event.preventDefault(); submitAuth(); return false;">
     <div class="field" id="auth-name-field" style="display:none;">
       <label data-i18n="auth.displayname">Display name</label>
-      <input type="text" id="auth-name" data-i18n-ph="auth.displaynameph" placeholder="e.g. Jordan" maxlength="60" />
+      <input type="text" id="auth-name" name="nickname" autocomplete="nickname" data-i18n-ph="auth.displaynameph" placeholder="e.g. Jordan" maxlength="60" />
     </div>
     <div class="field">
       <label data-i18n="auth.email">Email</label>
-      <input type="email" id="auth-email" placeholder="you@example.com" />
+      <input type="email" id="auth-email" name="email" autocomplete="username" placeholder="you@example.com" />
     </div>
     <div class="field">
       <label data-i18n="auth.password">Password</label>
-      <input type="password" id="auth-password" data-i18n-ph="auth.passwordph" placeholder="At least 8 characters" onkeydown="if(event.key==='Enter'){event.preventDefault();submitAuth();}" />
+      <input type="password" id="auth-password" name="password" autocomplete="current-password" data-i18n-ph="auth.passwordph" placeholder="At least 8 characters" />
     </div>
     <div id="auth-error" class="upload-error" style="display:none;"></div>
     <div class="note" data-i18n-html="auth.agree">By continuing you agree to the <a href="javascript:void(0)" onclick="openTosModal()">Terms of Service</a> and <a href="javascript:void(0)" onclick="openPrivacyModal()">Privacy Policy</a>.</div>
@@ -2777,9 +2916,10 @@
       <button class="btn btn-ghost" type="button" onclick="toggleAuthMode()" id="auth-toggle-btn" data-i18n="auth.needsignup">Need an account? Sign up</button>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-ghost" type="button" onclick="closeAuthModal()" data-i18n="modal.cancel">Cancel</button>
-        <button class="btn btn-primary" type="button" id="auth-submit-btn" onclick="submitAuth()" data-i18n="auth.login">Log in</button>
+        <button class="btn btn-primary" type="submit" id="auth-submit-btn" data-i18n="auth.login">Log in</button>
       </div>
     </div>
+    </form>
   </div>
 </div>
 
@@ -2799,11 +2939,11 @@
     </div>
     <div class="field">
       <label data-i18n="auth.displayname">Display name</label>
-      <input type="text" id="profile-name" maxlength="60" />
+      <input type="text" id="profile-name" maxlength="60" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
     </div>
     <div class="field">
       <label data-i18n="profile.bio">Bio</label>
-      <textarea id="profile-bio" maxlength="500" rows="4" data-i18n-ph="profile.bioph" placeholder="A sentence or two — your events, your league, whatever you want."></textarea>
+      <textarea id="profile-bio" maxlength="500" rows="4" data-i18n-ph="profile.bioph" placeholder="A sentence or two — your events, your league, whatever you want." autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other"></textarea>
     </div>
     <div id="profile-error" class="upload-error" style="display:none;"></div>
     <div class="modal-actions">
@@ -3025,7 +3165,30 @@ const DEBATE_MODES = {
       { name: "Prosecution Rebuttal (Optional)",      side: "a", seconds: 240 },
     ],
   },
+  mockTrialCivil: {
+    name: "Mock Trial (Civil)",
+    description: "Civil courtroom simulation: plaintiff vs. defendant, witness exams, closings.",
+    sideLabels: { a: "Plaintiff", b: "Defendant" },
+    phases: [
+      { name: "Plaintiff Opening Statement",         side: "a", seconds: 300 },
+      { name: "Defendant Opening Statement",             side: "b", seconds: 300 },
+      { name: "Plaintiff Direct Exam — Witness 1",  side: "a", seconds: 600 },
+      { name: "Defendant Cross-Exam — Witness 1",       side: "b", seconds: 360 },
+      { name: "Plaintiff Direct Exam — Witness 2",  side: "a", seconds: 600 },
+      { name: "Defendant Cross-Exam — Witness 2",       side: "b", seconds: 360 },
+      { name: "Defendant Direct Exam — Witness 1",      side: "b", seconds: 600 },
+      { name: "Plaintiff Cross-Exam — Witness 1",   side: "a", seconds: 360 },
+      { name: "Defendant Direct Exam — Witness 2",      side: "b", seconds: 600 },
+      { name: "Plaintiff Cross-Exam — Witness 2",   side: "a", seconds: 360 },
+      { name: "Plaintiff Closing Argument",         side: "a", seconds: 540 },
+      { name: "Defendant Closing Argument",             side: "b", seconds: 540 },
+      { name: "Plaintiff Rebuttal (Optional)",      side: "a", seconds: 240 },
+    ],
+  },
 };
+
+/* Both courtroom formats share the same tools (objection log, case files, trial coaching). */
+function isTrialMode(key) { return key === "mockTrial" || key === "mockTrialCivil"; }
 
 /* =========================================================================
    PRESETS
@@ -3098,6 +3261,8 @@ const PRESET_TOPICS = {
     "State v. Patel — Arson of a commercial property after the business failed.",
     "State v. Williams — Identity theft and credit card fraud across three states.",
     "State v. Thompson — Assault and battery at a sports venue after an altercation.",
+    "Rivera v. Lakeside Apartments — Negligence claim after a fall on a broken stairway.",
+    "Hart v. Brightline Software — Breach of contract over a custom scheduling app.",
   ],
   "Fun & Weird": [
     "Is a hot dog a sandwich?",
@@ -3259,6 +3424,107 @@ const FALLACIES = [
    ========================================================================= */
 const TRANSLATIONS = {
   en: {
+    "trial.casefile": "Case file",
+    "trial.browse": "Browse all case files",
+    "trial.casenote": "Pick a ready-made case file and its title becomes your topic. Each one lists the facts both sides agree on, the witnesses, the exhibits, and what must be proven.",
+    "trial.casetitle": "Case library",
+    "trial.sustainedof": "{s} of {n} sustained",
+    "trial.raised": "{n} raised",
+    "trial.objsummary": "Objections",
+    "trial.badge": "Mock Trial",
+    "trial.objcount": "{n} objections: {s} sustained, {o} overruled",
+    "trial.ruling.overruled": "Overruled",
+    "trial.ruling.sustained": "Sustained",
+    "trial.objection": "Objection",
+    "trial.startfirst": "Start the turn first.",
+    "trial.nocase": "Pick a case file in Setup first.",
+    "trial.view": "View case file",
+    "trial.picktext": "Choose a case file…",
+    "trial.cheatsheet": "Objection cheat sheet",
+    "trial.cases": "Case files",
+    "trial.studyobj": "Objection flashcards",
+    "trial.studyterms": "Study trial terms",
+    "trial.practiceobj": "Practice objections",
+    "trial.lead": "Case files, an objection cheat sheet, and practice. Every case is fictional and has six witnesses (three per side), exhibits, and what each side must prove.",
+    "trial.popup": "Allow pop-ups to print the case file.",
+    "trial.chosen": "Case selected: {title}",
+    "trial.print": "Print case file",
+    "trial.use": "Use this case",
+    "trial.fiction": "All people, places and events in this case are fictional and made for practice.",
+    "trial.hints": "Coach's hints for each side",
+    "trial.exhibits": "Exhibits",
+    "trial.witnessesfor": "Witnesses for the {side}",
+    "trial.elements": "What must be proven",
+    "trial.stipulations": "Facts both sides agree on",
+    "trial.charge": "Charge",
+    "trial.claim": "Claim",
+    "trial.criminal": "Criminal",
+    "trial.civil": "Civil",
+    "study.noStar": "Star a few cards first (☆ on the flashcards).",
+    "study.nomissed": "You didn't miss any.",
+    "study.missed": "Missed",
+    "study.openlibrary": "Open in the library",
+    "study.counter": "How to counter it",
+    "study.example": "Example",
+    "study.whichobjection": "What's your objection?",
+    "study.whichfallacy": "Which fallacy is this?",
+    "study.matchhint": "Tap a term, then its definition. Wrong pairs add a second to your time.",
+    "study.newbest": "New best time!",
+    "study.best": "Best: {s}s",
+    "study.matchtime": "Time: {s}s",
+    "study.whichdef": "Which definition matches this term?",
+    "study.whichterm": "Which term matches this definition?",
+    "study.false": "False",
+    "study.true": "True",
+    "study.truefalse": "True or false?",
+    "study.score": "Score: {a} / {b}",
+    "study.q": "Question {i} of {n}",
+    "study.finish": "Finish",
+    "study.next": "Next",
+    "study.answer": "Answer:",
+    "study.incorrect": "Not quite",
+    "study.correct": "Correct",
+    "study.restart": "Start over",
+    "study.studymissed": "Study the ones I missed",
+    "study.keepgoing": "Keep going",
+    "study.round.done": "Round complete",
+    "study.done": "Nice work",
+    "study.card.n": "Card {i} of {n}",
+    "study.deffirst": "Show definition first",
+    "study.termfirst": "Show term first",
+    "study.star": "Star",
+    "study.again": "Still learning",
+    "study.known": "Got it",
+    "study.flip": "Flip",
+    "study.back": "Back to sets",
+    "study.mode.practice": "Practice",
+    "study.mode.match": "Match",
+    "study.mode.test": "Test",
+    "study.mode.learn": "Learn",
+    "study.mode.flash": "Flashcards",
+    "study.deck.objtrain.blurb": "Read the courtroom line: object or let it go?",
+    "study.deck.objtrain": "Objection trainer",
+    "study.deck.spot.blurb": "Read a statement, name the fallacy.",
+    "study.deck.spot": "Spot the fallacy",
+    "study.deck.objections.blurb": "When to object, and why.",
+    "study.deck.objections": "Mock Trial objections",
+    "study.deck.trial.blurb": "Courtroom vocabulary: evidence, procedure, standards.",
+    "study.deck.trial": "Mock Trial terms",
+    "study.deck.vocab.blurb": "Terms judges and coaches use.",
+    "study.deck.vocab": "Debate vocabulary",
+    "study.deck.fallacies.blurb": "Every fallacy flagged in a debate, with how to counter it.",
+    "study.deck.fallacies": "Logical fallacies",
+    "study.mastered": "{a} of {b} mastered",
+    "study.scenarios": "{n} scenarios",
+    "study.cards": "{n} cards",
+    "study.streak0": "Study today to start a streak",
+    "study.streak": "{n}-day study streak",
+    "study.lead": "Learn the terms the way you'd learn any set: flip cards, get quizzed, race the clock.",
+    "study.title": "Study sets",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "Vocabulary",
+    "study.tab.library": "Fallacy library",
+    "study.tab.study": "Study",
     "legal.note": "The legal text below is in English.",
     "nav.setup": "Setup", "nav.debate": "Debate", "nav.online": "Online", "nav.upload": "Upload", "nav.results": "Results",
     "nav.learn": "Learn", "nav.casebuilder": "Case Builder", "nav.casecheck": "Case Checker",
@@ -3320,8 +3586,8 @@ const TRANSLATIONS = {
     "setup.start": "Start debate",
     "results.highlights": "Highlights",
     "learn.eyebrow": "Coach layer",
-    "learn.title": "Fallacy library & format vocabulary.",
-    "learn.lead": "Every fallacy flagged during a debate deep-links here. Look one up mid-round, or browse ahead of time.",
+    "learn.title": "Study, practice, and learn the language of debate.",
+    "learn.lead": "Flip cards, get quizzed, race the clock, and practice spotting fallacies and making objections. Every fallacy flagged in a round links here too.",
     "learn.fallacylib": "Fallacy Library",
     "learn.glossary": "Format Vocabulary",
     "casebuilder.eyebrow": "Guided Case Builder",
@@ -3526,6 +3792,107 @@ const TRANSLATIONS = {
     "cookie.gotit": "Got it",
   },
   es: {
+    "trial.casefile": "Caso",
+    "trial.browse": "Ver todos los casos",
+    "trial.casenote": "Elige un caso preparado y su título será tu tema. Cada uno incluye los hechos acordados, los testigos, las pruebas y lo que debe probarse.",
+    "trial.casetitle": "Biblioteca de casos",
+    "trial.sustainedof": "{s} de {n} con lugar",
+    "trial.raised": "{n} planteadas",
+    "trial.objsummary": "Objeciones",
+    "trial.badge": "Mock Trial",
+    "trial.objcount": "{n} objeciones: {s} con lugar, {o} sin lugar",
+    "trial.ruling.overruled": "No ha lugar",
+    "trial.ruling.sustained": "Ha lugar",
+    "trial.objection": "Objeción",
+    "trial.startfirst": "Empieza primero el turno.",
+    "trial.nocase": "Elige primero un caso en Configuración.",
+    "trial.view": "Ver el caso",
+    "trial.picktext": "Elige un caso…",
+    "trial.cheatsheet": "Hoja de objeciones",
+    "trial.cases": "Casos",
+    "trial.studyobj": "Tarjetas de objeciones",
+    "trial.studyterms": "Estudiar términos",
+    "trial.practiceobj": "Practicar objeciones",
+    "trial.lead": "Casos completos, una hoja de objeciones y práctica. Todos son ficticios y tienen seis testigos (tres por lado), pruebas y lo que cada lado debe probar.",
+    "trial.popup": "Permite las ventanas emergentes para imprimir el caso.",
+    "trial.chosen": "Caso elegido: {title}",
+    "trial.print": "Imprimir el caso",
+    "trial.use": "Usar este caso",
+    "trial.fiction": "Todas las personas, lugares y hechos de este caso son ficticios y están hechos para practicar.",
+    "trial.hints": "Consejos del entrenador para cada lado",
+    "trial.exhibits": "Pruebas documentales",
+    "trial.witnessesfor": "Testigos de {side}",
+    "trial.elements": "Lo que debe probarse",
+    "trial.stipulations": "Hechos en los que ambas partes coinciden",
+    "trial.charge": "Cargo",
+    "trial.claim": "Demanda",
+    "trial.criminal": "Penal",
+    "trial.civil": "Civil",
+    "study.noStar": "Destaca algunas tarjetas primero (☆ en las tarjetas).",
+    "study.nomissed": "No fallaste ninguna.",
+    "study.missed": "Falladas",
+    "study.openlibrary": "Abrir en la biblioteca",
+    "study.counter": "Cómo contrarrestarla",
+    "study.example": "Ejemplo",
+    "study.whichobjection": "¿Cuál es tu objeción?",
+    "study.whichfallacy": "¿Qué falacia es esta?",
+    "study.matchhint": "Toca un término y luego su definición. Los errores suman un segundo.",
+    "study.newbest": "¡Nuevo mejor tiempo!",
+    "study.best": "Mejor: {s} s",
+    "study.matchtime": "Tiempo: {s} s",
+    "study.whichdef": "¿Qué definición corresponde a este término?",
+    "study.whichterm": "¿Qué término corresponde a esta definición?",
+    "study.false": "Falso",
+    "study.true": "Verdadero",
+    "study.truefalse": "¿Verdadero o falso?",
+    "study.score": "Puntuación: {a} / {b}",
+    "study.q": "Pregunta {i} de {n}",
+    "study.finish": "Terminar",
+    "study.next": "Siguiente",
+    "study.answer": "Respuesta:",
+    "study.incorrect": "No exactamente",
+    "study.correct": "Correcto",
+    "study.restart": "Empezar de nuevo",
+    "study.studymissed": "Estudiar las que fallé",
+    "study.keepgoing": "Seguir",
+    "study.round.done": "Ronda completada",
+    "study.done": "Buen trabajo",
+    "study.card.n": "Tarjeta {i} de {n}",
+    "study.deffirst": "Mostrar la definición primero",
+    "study.termfirst": "Mostrar el término primero",
+    "study.star": "Destacar",
+    "study.again": "Aún aprendiendo",
+    "study.known": "Lo sé",
+    "study.flip": "Voltear",
+    "study.back": "Volver a los sets",
+    "study.mode.practice": "Practicar",
+    "study.mode.match": "Emparejar",
+    "study.mode.test": "Prueba",
+    "study.mode.learn": "Aprender",
+    "study.mode.flash": "Tarjetas",
+    "study.deck.objtrain.blurb": "Lee la línea del tribunal: ¿objetar o dejarlo pasar?",
+    "study.deck.objtrain": "Entrenador de objeciones",
+    "study.deck.spot.blurb": "Lee una afirmación y nombra la falacia.",
+    "study.deck.spot": "Detecta la falacia",
+    "study.deck.objections.blurb": "Cuándo objetar y por qué.",
+    "study.deck.objections": "Objeciones de Mock Trial",
+    "study.deck.trial.blurb": "Vocabulario judicial: pruebas, procedimiento, estándares.",
+    "study.deck.trial": "Términos de Mock Trial",
+    "study.deck.vocab.blurb": "Términos que usan jueces y entrenadores.",
+    "study.deck.vocab": "Vocabulario de debate",
+    "study.deck.fallacies.blurb": "Cada falacia señalada en un debate, con cómo contrarrestarla.",
+    "study.deck.fallacies": "Falacias lógicas",
+    "study.mastered": "{a} de {b} dominadas",
+    "study.scenarios": "{n} escenarios",
+    "study.cards": "{n} tarjetas",
+    "study.streak0": "Estudia hoy para empezar una racha",
+    "study.streak": "Racha de estudio: {n} días",
+    "study.lead": "Aprende los términos como cualquier set: voltea tarjetas, responde pruebas y compite contra el reloj.",
+    "study.title": "Sets de estudio",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "Vocabulario",
+    "study.tab.library": "Biblioteca de falacias",
+    "study.tab.study": "Estudiar",
     "legal.note": "El texto legal que sigue está en inglés.",
     "nav.setup": "Configurar", "nav.debate": "Debate", "nav.online": "En línea", "nav.upload": "Subir", "nav.results": "Resultados",
     "nav.learn": "Aprender", "nav.casebuilder": "Construir caso", "nav.casecheck": "Revisar caso",
@@ -3587,8 +3954,8 @@ const TRANSLATIONS = {
     "setup.start": "Comenzar debate",
     "results.highlights": "Momentos destacados",
     "learn.eyebrow": "Capa de entrenamiento",
-    "learn.title": "Biblioteca de falacias y vocabulario del formato.",
-    "learn.lead": "Cada falacia señalada durante un debate enlaza directamente aquí. Consúltala a mitad de ronda o explórala con anticipación.",
+    "learn.title": "Estudia, practica y aprende el lenguaje del debate.",
+    "learn.lead": "Voltea tarjetas, responde pruebas, compite contra el reloj y practica cómo detectar falacias y hacer objeciones. Cada falacia señalada en una ronda también enlaza aquí.",
     "learn.fallacylib": "Biblioteca de falacias",
     "learn.glossary": "Vocabulario del formato",
     "casebuilder.eyebrow": "Constructor de casos guiado",
@@ -3793,6 +4160,107 @@ const TRANSLATIONS = {
     "cookie.gotit": "Entendido",
   },
   fr: {
+    "trial.casefile": "Dossier",
+    "trial.browse": "Parcourir tous les dossiers",
+    "trial.casenote": "Choisissez un dossier prêt à l'emploi et son titre devient votre sujet. Chacun liste les faits admis, les témoins, les pièces et ce qu'il faut prouver.",
+    "trial.casetitle": "Bibliothèque de dossiers",
+    "trial.sustainedof": "{s} sur {n} retenues",
+    "trial.raised": "{n} soulevées",
+    "trial.objsummary": "Objections",
+    "trial.badge": "Mock Trial",
+    "trial.objcount": "{n} objections : {s} retenues, {o} rejetées",
+    "trial.ruling.overruled": "Rejetée",
+    "trial.ruling.sustained": "Retenue",
+    "trial.objection": "Objection",
+    "trial.startfirst": "Lancez d'abord le tour.",
+    "trial.nocase": "Choisissez d'abord un dossier dans Configuration.",
+    "trial.view": "Voir le dossier",
+    "trial.picktext": "Choisissez un dossier…",
+    "trial.cheatsheet": "Aide-mémoire des objections",
+    "trial.cases": "Dossiers",
+    "trial.studyobj": "Cartes d'objections",
+    "trial.studyterms": "Étudier les termes",
+    "trial.practiceobj": "S'entraîner aux objections",
+    "trial.lead": "Dossiers, aide-mémoire des objections et entraînement. Chaque cas est fictif et comporte six témoins (trois par camp), des pièces et ce que chaque camp doit prouver.",
+    "trial.popup": "Autorisez les fenêtres pop-up pour imprimer le dossier.",
+    "trial.chosen": "Dossier choisi : {title}",
+    "trial.print": "Imprimer le dossier",
+    "trial.use": "Utiliser ce dossier",
+    "trial.fiction": "Toutes les personnes, tous les lieux et événements de ce dossier sont fictifs et créés pour s'entraîner.",
+    "trial.hints": "Conseils d'entraîneur pour chaque camp",
+    "trial.exhibits": "Pièces",
+    "trial.witnessesfor": "Témoins de {side}",
+    "trial.elements": "Ce qu'il faut prouver",
+    "trial.stipulations": "Faits sur lesquels les deux camps s'accordent",
+    "trial.charge": "Chef d'accusation",
+    "trial.claim": "Demande",
+    "trial.criminal": "Pénal",
+    "trial.civil": "Civil",
+    "study.noStar": "Ajoutez d'abord des cartes aux favoris (☆ sur les cartes).",
+    "study.nomissed": "Vous n'en avez raté aucune.",
+    "study.missed": "Ratées",
+    "study.openlibrary": "Ouvrir dans la bibliothèque",
+    "study.counter": "Comment y répondre",
+    "study.example": "Exemple",
+    "study.whichobjection": "Quelle est votre objection ?",
+    "study.whichfallacy": "De quel sophisme s'agit-il ?",
+    "study.matchhint": "Touchez un terme, puis sa définition. Chaque erreur ajoute une seconde.",
+    "study.newbest": "Nouveau record !",
+    "study.best": "Record : {s} s",
+    "study.matchtime": "Temps : {s} s",
+    "study.whichdef": "Quelle définition correspond à ce terme ?",
+    "study.whichterm": "Quel terme correspond à cette définition ?",
+    "study.false": "Faux",
+    "study.true": "Vrai",
+    "study.truefalse": "Vrai ou faux ?",
+    "study.score": "Score : {a} / {b}",
+    "study.q": "Question {i} sur {n}",
+    "study.finish": "Terminer",
+    "study.next": "Suivant",
+    "study.answer": "Réponse :",
+    "study.incorrect": "Pas tout à fait",
+    "study.correct": "Correct",
+    "study.restart": "Recommencer",
+    "study.studymissed": "Revoir celles que j'ai ratées",
+    "study.keepgoing": "Continuer",
+    "study.round.done": "Manche terminée",
+    "study.done": "Beau travail",
+    "study.card.n": "Carte {i} sur {n}",
+    "study.deffirst": "Afficher la définition d'abord",
+    "study.termfirst": "Afficher le terme d'abord",
+    "study.star": "Favori",
+    "study.again": "Encore à apprendre",
+    "study.known": "Je sais",
+    "study.flip": "Retourner",
+    "study.back": "Retour aux jeux",
+    "study.mode.practice": "S'entraîner",
+    "study.mode.match": "Associer",
+    "study.mode.test": "Test",
+    "study.mode.learn": "Apprendre",
+    "study.mode.flash": "Cartes",
+    "study.deck.objtrain.blurb": "Lisez la réplique : objecter ou laisser passer ?",
+    "study.deck.objtrain": "Entraîneur d'objections",
+    "study.deck.spot.blurb": "Lisez une affirmation, nommez le sophisme.",
+    "study.deck.spot": "Repérez le sophisme",
+    "study.deck.objections.blurb": "Quand objecter, et pourquoi.",
+    "study.deck.objections": "Objections du Mock Trial",
+    "study.deck.trial.blurb": "Vocabulaire judiciaire : preuves, procédure, normes.",
+    "study.deck.trial": "Termes du Mock Trial",
+    "study.deck.vocab.blurb": "Termes utilisés par les juges et les entraîneurs.",
+    "study.deck.vocab": "Vocabulaire du débat",
+    "study.deck.fallacies.blurb": "Chaque sophisme signalé en débat, avec la façon d'y répondre.",
+    "study.deck.fallacies": "Sophismes logiques",
+    "study.mastered": "{a} sur {b} maîtrisées",
+    "study.scenarios": "{n} scénarios",
+    "study.cards": "{n} cartes",
+    "study.streak0": "Étudiez aujourd'hui pour lancer une série",
+    "study.streak": "Série d'étude : {n} jours",
+    "study.lead": "Apprenez les termes comme n'importe quel jeu : retournez des cartes, faites des quiz, jouez contre la montre.",
+    "study.title": "Jeux d'étude",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "Vocabulaire",
+    "study.tab.library": "Bibliothèque des sophismes",
+    "study.tab.study": "Étudier",
     "legal.note": "Le texte juridique ci-dessous est en anglais.",
     "nav.setup": "Configuration",
     "nav.debate": "Débat",
@@ -3917,8 +4385,8 @@ const TRANSLATIONS = {
     "setup.start": "Lancer le débat",
     "results.highlights": "Moments forts",
     "learn.eyebrow": "Espace coaching",
-    "learn.title": "Bibliothèque des sophismes et vocabulaire des formats.",
-    "learn.lead": "Chaque sophisme signalé pendant un débat renvoie ici. Consultez-en un en pleine manche, ou parcourez à l'avance.",
+    "learn.title": "Étudiez, entraînez-vous et apprenez le langage du débat.",
+    "learn.lead": "Retournez des cartes, faites des quiz, jouez contre la montre et entraînez-vous à repérer les sophismes et à faire des objections. Chaque sophisme signalé en manche renvoie aussi ici.",
     "learn.fallacylib": "Bibliothèque des sophismes",
     "learn.glossary": "Vocabulaire des formats",
     "casebuilder.eyebrow": "Préparateur de dossier guidé",
@@ -4175,6 +4643,107 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russe",
   },
   de: {
+    "trial.casefile": "Falldatei",
+    "trial.browse": "Alle Falldateien ansehen",
+    "trial.casenote": "Wähle eine fertige Falldatei, und ihr Titel wird dein Thema. Jede listet unstrittige Tatsachen, Zeugen, Beweisstücke und das Beweisthema auf.",
+    "trial.casetitle": "Fallbibliothek",
+    "trial.sustainedof": "{s} von {n} stattgegeben",
+    "trial.raised": "{n} erhoben",
+    "trial.objsummary": "Einsprüche",
+    "trial.badge": "Mock Trial",
+    "trial.objcount": "{n} Einsprüche: {s} stattgegeben, {o} abgelehnt",
+    "trial.ruling.overruled": "Abgelehnt",
+    "trial.ruling.sustained": "Stattgegeben",
+    "trial.objection": "Einspruch",
+    "trial.startfirst": "Starte zuerst den Beitrag.",
+    "trial.nocase": "Wähle zuerst in der Einrichtung eine Falldatei.",
+    "trial.view": "Falldatei ansehen",
+    "trial.picktext": "Falldatei wählen…",
+    "trial.cheatsheet": "Einspruchs-Spickzettel",
+    "trial.cases": "Falldateien",
+    "trial.studyobj": "Einspruchs-Karteikarten",
+    "trial.studyterms": "Begriffe lernen",
+    "trial.practiceobj": "Einsprüche üben",
+    "trial.lead": "Falldateien, ein Einspruchs-Spickzettel und Übung. Jeder Fall ist erfunden und hat sechs Zeugen (drei pro Seite), Beweisstücke und was jede Seite beweisen muss.",
+    "trial.popup": "Erlaube Pop-ups, um die Falldatei zu drucken.",
+    "trial.chosen": "Fall gewählt: {title}",
+    "trial.print": "Falldatei drucken",
+    "trial.use": "Diesen Fall verwenden",
+    "trial.fiction": "Alle Personen, Orte und Ereignisse in diesem Fall sind erfunden und dienen nur der Übung.",
+    "trial.hints": "Trainer-Tipps für beide Seiten",
+    "trial.exhibits": "Beweisstücke",
+    "trial.witnessesfor": "Zeugen für {side}",
+    "trial.elements": "Was bewiesen werden muss",
+    "trial.stipulations": "Unstrittige Tatsachen",
+    "trial.charge": "Anklage",
+    "trial.claim": "Klage",
+    "trial.criminal": "Strafsache",
+    "trial.civil": "Zivil",
+    "study.noStar": "Markiere zuerst ein paar Karten (☆ bei den Karteikarten).",
+    "study.nomissed": "Du hast keine verpasst.",
+    "study.missed": "Verpasst",
+    "study.openlibrary": "In der Bibliothek öffnen",
+    "study.counter": "So konterst du",
+    "study.example": "Beispiel",
+    "study.whichobjection": "Was ist dein Einspruch?",
+    "study.whichfallacy": "Welcher Fehlschluss ist das?",
+    "study.matchhint": "Tippe einen Begriff, dann seine Definition. Fehler addieren eine Sekunde.",
+    "study.newbest": "Neue Bestzeit!",
+    "study.best": "Bestzeit: {s} s",
+    "study.matchtime": "Zeit: {s} s",
+    "study.whichdef": "Welche Definition passt zu diesem Begriff?",
+    "study.whichterm": "Welcher Begriff passt zu dieser Definition?",
+    "study.false": "Falsch",
+    "study.true": "Wahr",
+    "study.truefalse": "Wahr oder falsch?",
+    "study.score": "Ergebnis: {a} / {b}",
+    "study.q": "Frage {i} von {n}",
+    "study.finish": "Fertig",
+    "study.next": "Weiter",
+    "study.answer": "Antwort:",
+    "study.incorrect": "Nicht ganz",
+    "study.correct": "Richtig",
+    "study.restart": "Von vorn beginnen",
+    "study.studymissed": "Verpasste Karten lernen",
+    "study.keepgoing": "Weitermachen",
+    "study.round.done": "Runde abgeschlossen",
+    "study.done": "Gut gemacht",
+    "study.card.n": "Karte {i} von {n}",
+    "study.deffirst": "Definition zuerst zeigen",
+    "study.termfirst": "Begriff zuerst zeigen",
+    "study.star": "Markieren",
+    "study.again": "Noch am Lernen",
+    "study.known": "Gewusst",
+    "study.flip": "Wenden",
+    "study.back": "Zurück zu den Sets",
+    "study.mode.practice": "Üben",
+    "study.mode.match": "Zuordnen",
+    "study.mode.test": "Test",
+    "study.mode.learn": "Lernen",
+    "study.mode.flash": "Karteikarten",
+    "study.deck.objtrain.blurb": "Lies die Zeile aus dem Gerichtssaal: Einspruch oder durchlassen?",
+    "study.deck.objtrain": "Einspruchs-Training",
+    "study.deck.spot.blurb": "Lies eine Aussage und benenne den Fehlschluss.",
+    "study.deck.spot": "Fehlschluss erkennen",
+    "study.deck.objections.blurb": "Wann man Einspruch erhebt und warum.",
+    "study.deck.objections": "Einsprüche im Mock Trial",
+    "study.deck.trial.blurb": "Gerichtsvokabular: Beweise, Verfahren, Standards.",
+    "study.deck.trial": "Mock-Trial-Begriffe",
+    "study.deck.vocab.blurb": "Begriffe, die Richter und Trainer nutzen.",
+    "study.deck.vocab": "Debattier-Vokabular",
+    "study.deck.fallacies.blurb": "Jeder in Debatten markierte Fehlschluss, samt Konter.",
+    "study.deck.fallacies": "Logische Fehlschlüsse",
+    "study.mastered": "{a} von {b} gemeistert",
+    "study.scenarios": "{n} Szenarien",
+    "study.cards": "{n} Karten",
+    "study.streak0": "Lerne heute, um eine Serie zu starten",
+    "study.streak": "{n} Tage in Folge gelernt",
+    "study.lead": "Lerne die Begriffe wie jedes Set: Karten wenden, Quizze lösen, gegen die Uhr spielen.",
+    "study.title": "Lernsets",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "Vokabular",
+    "study.tab.library": "Fehlschluss-Bibliothek",
+    "study.tab.study": "Lernen",
     "legal.note": "Der folgende Rechtstext ist auf Englisch.",
     "nav.setup": "Einrichtung",
     "nav.debate": "Debatte",
@@ -4299,8 +4868,8 @@ const TRANSLATIONS = {
     "setup.start": "Debatte starten",
     "results.highlights": "Höhepunkte",
     "learn.eyebrow": "Coaching-Ebene",
-    "learn.title": "Fehlschluss-Bibliothek & Format-Vokabular.",
-    "learn.lead": "Jeder in einer Debatte markierte Fehlschluss verlinkt hierher. Schlag einen mitten in der Runde nach oder stöbere vorab.",
+    "learn.title": "Lerne, übe und beherrsche die Sprache der Debatte.",
+    "learn.lead": "Wende Karten, mach Quizze, spiele gegen die Uhr und übe, Fehlschlüsse zu erkennen und Einsprüche zu erheben. Jeder in einer Runde markierte Fehlschluss verlinkt ebenfalls hierher.",
     "learn.fallacylib": "Fehlschluss-Bibliothek",
     "learn.glossary": "Format-Vokabular",
     "casebuilder.eyebrow": "Geführter Fallbauer",
@@ -4557,6 +5126,107 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russisch",
   },
   it: {
+    "trial.casefile": "Fascicolo",
+    "trial.browse": "Sfoglia tutti i fascicoli",
+    "trial.casenote": "Scegli un fascicolo pronto e il suo titolo diventa il tuo argomento. Ognuno elenca i fatti concordati, i testimoni, le prove e ciò che va dimostrato.",
+    "trial.casetitle": "Libreria dei casi",
+    "trial.sustainedof": "{s} su {n} accolte",
+    "trial.raised": "{n} sollevate",
+    "trial.objsummary": "Obiezioni",
+    "trial.badge": "Mock Trial",
+    "trial.objcount": "{n} obiezioni: {s} accolte, {o} respinte",
+    "trial.ruling.overruled": "Respinta",
+    "trial.ruling.sustained": "Accolta",
+    "trial.objection": "Obiezione",
+    "trial.startfirst": "Avvia prima l'intervento.",
+    "trial.nocase": "Scegli prima un fascicolo nelle impostazioni.",
+    "trial.view": "Vedi il fascicolo",
+    "trial.picktext": "Scegli un fascicolo…",
+    "trial.cheatsheet": "Promemoria delle obiezioni",
+    "trial.cases": "Fascicoli",
+    "trial.studyobj": "Flashcard delle obiezioni",
+    "trial.studyterms": "Studia i termini",
+    "trial.practiceobj": "Esercitati con le obiezioni",
+    "trial.lead": "Fascicoli, un promemoria delle obiezioni ed esercizi. Ogni caso è fittizio e ha sei testimoni (tre per lato), prove e cosa deve dimostrare ogni parte.",
+    "trial.popup": "Consenti i pop-up per stampare il fascicolo.",
+    "trial.chosen": "Caso scelto: {title}",
+    "trial.print": "Stampa il fascicolo",
+    "trial.use": "Usa questo caso",
+    "trial.fiction": "Tutte le persone, i luoghi e gli eventi di questo caso sono fittizi e creati per esercitarsi.",
+    "trial.hints": "Suggerimenti dell'allenatore per ogni lato",
+    "trial.exhibits": "Prove documentali",
+    "trial.witnessesfor": "Testimoni per {side}",
+    "trial.elements": "Cosa deve essere provato",
+    "trial.stipulations": "Fatti su cui entrambe le parti concordano",
+    "trial.charge": "Capo d'accusa",
+    "trial.claim": "Pretesa",
+    "trial.criminal": "Penale",
+    "trial.civil": "Civile",
+    "study.noStar": "Prima aggiungi alcune carte alle preferite (☆ sulle carte).",
+    "study.nomissed": "Non ne hai sbagliata nessuna.",
+    "study.missed": "Sbagliate",
+    "study.openlibrary": "Apri nella libreria",
+    "study.counter": "Come rispondere",
+    "study.example": "Esempio",
+    "study.whichobjection": "Qual è la tua obiezione?",
+    "study.whichfallacy": "Quale fallacia è questa?",
+    "study.matchhint": "Tocca un termine, poi la sua definizione. Ogni errore aggiunge un secondo.",
+    "study.newbest": "Nuovo record!",
+    "study.best": "Migliore: {s} s",
+    "study.matchtime": "Tempo: {s} s",
+    "study.whichdef": "Quale definizione corrisponde a questo termine?",
+    "study.whichterm": "Quale termine corrisponde a questa definizione?",
+    "study.false": "Falso",
+    "study.true": "Vero",
+    "study.truefalse": "Vero o falso?",
+    "study.score": "Punteggio: {a} / {b}",
+    "study.q": "Domanda {i} di {n}",
+    "study.finish": "Fine",
+    "study.next": "Avanti",
+    "study.answer": "Risposta:",
+    "study.incorrect": "Non proprio",
+    "study.correct": "Corretto",
+    "study.restart": "Ricomincia",
+    "study.studymissed": "Studia quelle sbagliate",
+    "study.keepgoing": "Continua",
+    "study.round.done": "Round completato",
+    "study.done": "Ottimo lavoro",
+    "study.card.n": "Carta {i} di {n}",
+    "study.deffirst": "Mostra prima la definizione",
+    "study.termfirst": "Mostra prima il termine",
+    "study.star": "Preferita",
+    "study.again": "Ancora da studiare",
+    "study.known": "Fatto",
+    "study.flip": "Gira",
+    "study.back": "Torna ai set",
+    "study.mode.practice": "Esercitati",
+    "study.mode.match": "Abbina",
+    "study.mode.test": "Test",
+    "study.mode.learn": "Impara",
+    "study.mode.flash": "Flashcard",
+    "study.deck.objtrain.blurb": "Leggi la battuta in aula: obiettare o lasciar correre?",
+    "study.deck.objtrain": "Allenatore di obiezioni",
+    "study.deck.spot.blurb": "Leggi un'affermazione e nomina la fallacia.",
+    "study.deck.spot": "Riconosci la fallacia",
+    "study.deck.objections.blurb": "Quando sollevare obiezione e perché.",
+    "study.deck.objections": "Obiezioni del Mock Trial",
+    "study.deck.trial.blurb": "Vocabolario di tribunale: prove, procedura, standard.",
+    "study.deck.trial": "Termini del Mock Trial",
+    "study.deck.vocab.blurb": "Termini usati da giudici e allenatori.",
+    "study.deck.vocab": "Vocabolario del dibattito",
+    "study.deck.fallacies.blurb": "Ogni fallacia segnalata nei dibattiti, con come rispondere.",
+    "study.deck.fallacies": "Fallacie logiche",
+    "study.mastered": "{a} su {b} padroneggiate",
+    "study.scenarios": "{n} scenari",
+    "study.cards": "{n} carte",
+    "study.streak0": "Studia oggi per iniziare una serie",
+    "study.streak": "Serie di studio: {n} giorni",
+    "study.lead": "Impara i termini come con qualsiasi set: gira le carte, fai quiz, sfida il tempo.",
+    "study.title": "Set di studio",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "Vocabolario",
+    "study.tab.library": "Libreria delle fallacie",
+    "study.tab.study": "Studia",
     "legal.note": "Il testo legale qui sotto è in inglese.",
     "nav.setup": "Impostazioni",
     "nav.debate": "Dibattito",
@@ -4681,8 +5351,8 @@ const TRANSLATIONS = {
     "setup.start": "Avvia il dibattito",
     "results.highlights": "Momenti salienti",
     "learn.eyebrow": "Livello coaching",
-    "learn.title": "Libreria delle fallacie e vocabolario dei formati.",
-    "learn.lead": "Ogni fallacia segnalata durante un dibattito rimanda qui. Consultane una a metà round, o sfoglia in anticipo.",
+    "learn.title": "Studia, esercitati e impara il linguaggio del dibattito.",
+    "learn.lead": "Gira le carte, fai quiz, sfida il tempo ed esercitati a riconoscere le fallacie e a sollevare obiezioni. Anche ogni fallacia segnalata in un round rimanda qui.",
     "learn.fallacylib": "Libreria delle fallacie",
     "learn.glossary": "Vocabolario dei formati",
     "casebuilder.eyebrow": "Costruttore guidato di casi",
@@ -4939,6 +5609,107 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pt: {
+    "trial.casefile": "Caso",
+    "trial.browse": "Ver todos os casos",
+    "trial.casenote": "Escolha um caso pronto e o título dele vira o seu tema. Cada um lista os fatos acordados, as testemunhas, as provas e o que deve ser provado.",
+    "trial.casetitle": "Biblioteca de casos",
+    "trial.sustainedof": "{s} de {n} deferidas",
+    "trial.raised": "{n} levantadas",
+    "trial.objsummary": "Objeções",
+    "trial.badge": "Mock Trial",
+    "trial.objcount": "{n} objeções: {s} deferidas, {o} indeferidas",
+    "trial.ruling.overruled": "Indeferida",
+    "trial.ruling.sustained": "Deferida",
+    "trial.objection": "Objeção",
+    "trial.startfirst": "Inicie o turno primeiro.",
+    "trial.nocase": "Escolha um caso na Configuração primeiro.",
+    "trial.view": "Ver o caso",
+    "trial.picktext": "Escolha um caso…",
+    "trial.cheatsheet": "Cola de objeções",
+    "trial.cases": "Casos",
+    "trial.studyobj": "Cartões de objeções",
+    "trial.studyterms": "Estudar termos",
+    "trial.practiceobj": "Praticar objeções",
+    "trial.lead": "Casos completos, uma cola de objeções e prática. Cada caso é fictício e tem seis testemunhas (três por lado), provas e o que cada lado deve provar.",
+    "trial.popup": "Permita pop-ups para imprimir o caso.",
+    "trial.chosen": "Caso escolhido: {title}",
+    "trial.print": "Imprimir o caso",
+    "trial.use": "Usar este caso",
+    "trial.fiction": "Todas as pessoas, lugares e eventos deste caso são fictícios e feitos para prática.",
+    "trial.hints": "Dicas do treinador para cada lado",
+    "trial.exhibits": "Provas materiais",
+    "trial.witnessesfor": "Testemunhas de {side}",
+    "trial.elements": "O que deve ser provado",
+    "trial.stipulations": "Fatos com os quais ambos os lados concordam",
+    "trial.charge": "Acusação",
+    "trial.claim": "Pedido",
+    "trial.criminal": "Criminal",
+    "trial.civil": "Cível",
+    "study.noStar": "Favorite alguns cartões primeiro (☆ nos cartões).",
+    "study.nomissed": "Você não errou nenhuma.",
+    "study.missed": "Erradas",
+    "study.openlibrary": "Abrir na biblioteca",
+    "study.counter": "Como rebater",
+    "study.example": "Exemplo",
+    "study.whichobjection": "Qual é a sua objeção?",
+    "study.whichfallacy": "Que falácia é esta?",
+    "study.matchhint": "Toque em um termo e depois na definição. Erros somam um segundo.",
+    "study.newbest": "Novo recorde!",
+    "study.best": "Melhor: {s} s",
+    "study.matchtime": "Tempo: {s} s",
+    "study.whichdef": "Qual definição corresponde a este termo?",
+    "study.whichterm": "Qual termo corresponde a esta definição?",
+    "study.false": "Falso",
+    "study.true": "Verdadeiro",
+    "study.truefalse": "Verdadeiro ou falso?",
+    "study.score": "Pontuação: {a} / {b}",
+    "study.q": "Pergunta {i} de {n}",
+    "study.finish": "Concluir",
+    "study.next": "Próxima",
+    "study.answer": "Resposta:",
+    "study.incorrect": "Quase",
+    "study.correct": "Correto",
+    "study.restart": "Recomeçar",
+    "study.studymissed": "Estudar as que errei",
+    "study.keepgoing": "Continuar",
+    "study.round.done": "Rodada concluída",
+    "study.done": "Bom trabalho",
+    "study.card.n": "Cartão {i} de {n}",
+    "study.deffirst": "Mostrar a definição primeiro",
+    "study.termfirst": "Mostrar o termo primeiro",
+    "study.star": "Favoritar",
+    "study.again": "Ainda aprendendo",
+    "study.known": "Entendi",
+    "study.flip": "Virar",
+    "study.back": "Voltar aos conjuntos",
+    "study.mode.practice": "Praticar",
+    "study.mode.match": "Combinar",
+    "study.mode.test": "Teste",
+    "study.mode.learn": "Aprender",
+    "study.mode.flash": "Cartões",
+    "study.deck.objtrain.blurb": "Leia a fala do tribunal: objetar ou deixar passar?",
+    "study.deck.objtrain": "Treino de objeções",
+    "study.deck.spot.blurb": "Leia uma afirmação e nomeie a falácia.",
+    "study.deck.spot": "Identifique a falácia",
+    "study.deck.objections.blurb": "Quando objetar e por quê.",
+    "study.deck.objections": "Objeções de Mock Trial",
+    "study.deck.trial.blurb": "Vocabulário de tribunal: provas, procedimento, padrões.",
+    "study.deck.trial": "Termos de Mock Trial",
+    "study.deck.vocab.blurb": "Termos usados por juízes e treinadores.",
+    "study.deck.vocab": "Vocabulário de debate",
+    "study.deck.fallacies.blurb": "Cada falácia sinalizada em debates, com como rebatê-la.",
+    "study.deck.fallacies": "Falácias lógicas",
+    "study.mastered": "{a} de {b} dominadas",
+    "study.scenarios": "{n} cenários",
+    "study.cards": "{n} cartões",
+    "study.streak0": "Estude hoje para começar uma sequência",
+    "study.streak": "Sequência de estudo: {n} dias",
+    "study.lead": "Aprenda os termos como em qualquer conjunto: vire cartões, responda quizzes, corra contra o relógio.",
+    "study.title": "Conjuntos de estudo",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "Vocabulário",
+    "study.tab.library": "Biblioteca de falácias",
+    "study.tab.study": "Estudar",
     "legal.note": "O texto jurídico abaixo está em inglês.",
     "nav.setup": "Configuração",
     "nav.debate": "Debate",
@@ -5063,8 +5834,8 @@ const TRANSLATIONS = {
     "setup.start": "Iniciar debate",
     "results.highlights": "Destaques",
     "learn.eyebrow": "Camada de coaching",
-    "learn.title": "Biblioteca de falácias e vocabulário dos formatos.",
-    "learn.lead": "Toda falácia sinalizada durante um debate leva até aqui. Consulte uma no meio da rodada ou navegue antes.",
+    "learn.title": "Estude, pratique e aprenda a linguagem do debate.",
+    "learn.lead": "Vire cartões, responda quizzes, corra contra o relógio e pratique identificar falácias e fazer objeções. Cada falácia sinalizada em uma rodada também leva até aqui.",
     "learn.fallacylib": "Biblioteca de falácias",
     "learn.glossary": "Vocabulário dos formatos",
     "casebuilder.eyebrow": "Montador de caso guiado",
@@ -5321,6 +6092,107 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pl: {
+    "trial.casefile": "Akta sprawy",
+    "trial.browse": "Przeglądaj wszystkie akta",
+    "trial.casenote": "Wybierz gotową sprawę, a jej tytuł stanie się Twoim tematem. Każda zawiera uzgodnione fakty, świadków, dowody i to, co trzeba udowodnić.",
+    "trial.casetitle": "Biblioteka spraw",
+    "trial.sustainedof": "{s} z {n} podtrzymanych",
+    "trial.raised": "{n} zgłoszonych",
+    "trial.objsummary": "Sprzeciwy",
+    "trial.badge": "Mock Trial",
+    "trial.objcount": "{n} sprzeciwów: {s} podtrzymanych, {o} oddalonych",
+    "trial.ruling.overruled": "Oddalony",
+    "trial.ruling.sustained": "Podtrzymany",
+    "trial.objection": "Sprzeciw",
+    "trial.startfirst": "Najpierw rozpocznij turę.",
+    "trial.nocase": "Najpierw wybierz sprawę w ustawieniach.",
+    "trial.view": "Zobacz akta",
+    "trial.picktext": "Wybierz sprawę…",
+    "trial.cheatsheet": "Ściąga ze sprzeciwów",
+    "trial.cases": "Akta spraw",
+    "trial.studyobj": "Fiszki sprzeciwów",
+    "trial.studyterms": "Ucz się pojęć",
+    "trial.practiceobj": "Ćwicz sprzeciwy",
+    "trial.lead": "Akta spraw, ściąga ze sprzeciwów i ćwiczenia. Każda sprawa jest fikcyjna i ma sześciu świadków (po trzech na stronę), dowody oraz to, co musi wykazać każda strona.",
+    "trial.popup": "Zezwól na wyskakujące okna, aby wydrukować akta.",
+    "trial.chosen": "Wybrano sprawę: {title}",
+    "trial.print": "Drukuj akta sprawy",
+    "trial.use": "Użyj tej sprawy",
+    "trial.fiction": "Wszystkie osoby, miejsca i wydarzenia w tej sprawie są fikcyjne i służą do ćwiczeń.",
+    "trial.hints": "Wskazówki trenera dla obu stron",
+    "trial.exhibits": "Dowody rzeczowe",
+    "trial.witnessesfor": "Świadkowie strony: {side}",
+    "trial.elements": "Co trzeba udowodnić",
+    "trial.stipulations": "Fakty uzgodnione przez obie strony",
+    "trial.charge": "Zarzut",
+    "trial.claim": "Roszczenie",
+    "trial.criminal": "Karna",
+    "trial.civil": "Cywilna",
+    "study.noStar": "Najpierw oznacz kilka fiszek (☆ na fiszkach).",
+    "study.nomissed": "Nie pomyliłeś się ani razu.",
+    "study.missed": "Pomyłki",
+    "study.openlibrary": "Otwórz w bibliotece",
+    "study.counter": "Jak odpowiedzieć",
+    "study.example": "Przykład",
+    "study.whichobjection": "Jaki jest Twój sprzeciw?",
+    "study.whichfallacy": "Jaki to błąd logiczny?",
+    "study.matchhint": "Dotknij pojęcia, potem jego definicji. Błąd dodaje sekundę.",
+    "study.newbest": "Nowy rekord!",
+    "study.best": "Najlepszy: {s} s",
+    "study.matchtime": "Czas: {s} s",
+    "study.whichdef": "Która definicja pasuje do tego pojęcia?",
+    "study.whichterm": "Które pojęcie pasuje do tej definicji?",
+    "study.false": "Fałsz",
+    "study.true": "Prawda",
+    "study.truefalse": "Prawda czy fałsz?",
+    "study.score": "Wynik: {a} / {b}",
+    "study.q": "Pytanie {i} z {n}",
+    "study.finish": "Zakończ",
+    "study.next": "Dalej",
+    "study.answer": "Odpowiedź:",
+    "study.incorrect": "Niezupełnie",
+    "study.correct": "Dobrze",
+    "study.restart": "Zacznij od nowa",
+    "study.studymissed": "Powtórz te, które pomyliłem",
+    "study.keepgoing": "Dalej",
+    "study.round.done": "Runda zakończona",
+    "study.done": "Dobra robota",
+    "study.card.n": "Fiszka {i} z {n}",
+    "study.deffirst": "Najpierw definicja",
+    "study.termfirst": "Najpierw pojęcie",
+    "study.star": "Oznacz",
+    "study.again": "Jeszcze się uczę",
+    "study.known": "Umiem",
+    "study.flip": "Odwróć",
+    "study.back": "Wróć do zestawów",
+    "study.mode.practice": "Ćwicz",
+    "study.mode.match": "Dopasuj",
+    "study.mode.test": "Test",
+    "study.mode.learn": "Ucz się",
+    "study.mode.flash": "Fiszki",
+    "study.deck.objtrain.blurb": "Przeczytaj kwestię z sali sądowej: sprzeciw czy odpuścić?",
+    "study.deck.objtrain": "Trening sprzeciwów",
+    "study.deck.spot.blurb": "Przeczytaj wypowiedź i nazwij błąd.",
+    "study.deck.spot": "Wykryj błąd logiczny",
+    "study.deck.objections.blurb": "Kiedy zgłaszać sprzeciw i dlaczego.",
+    "study.deck.objections": "Sprzeciwy w Mock Trial",
+    "study.deck.trial.blurb": "Słownictwo sądowe: dowody, procedura, standardy.",
+    "study.deck.trial": "Pojęcia Mock Trial",
+    "study.deck.vocab.blurb": "Pojęcia używane przez sędziów i trenerów.",
+    "study.deck.vocab": "Słownictwo debaty",
+    "study.deck.fallacies.blurb": "Każdy błąd logiczny z debat wraz ze sposobem odpowiedzi.",
+    "study.deck.fallacies": "Błędy logiczne",
+    "study.mastered": "{a} z {b} opanowanych",
+    "study.scenarios": "{n} scenariuszy",
+    "study.cards": "{n} fiszek",
+    "study.streak0": "Ucz się dziś, aby zacząć serię",
+    "study.streak": "Seria nauki: {n} dni",
+    "study.lead": "Ucz się pojęć jak z każdego zestawu: odwracaj fiszki, rozwiązuj quizy, ścigaj się z czasem.",
+    "study.title": "Zestawy do nauki",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "Słownik",
+    "study.tab.library": "Biblioteka błędów",
+    "study.tab.study": "Nauka",
     "legal.note": "Poniższy tekst prawny jest w języku angielskim.",
     "nav.setup": "Ustawienia",
     "nav.debate": "Debata",
@@ -5445,8 +6317,8 @@ const TRANSLATIONS = {
     "setup.start": "Rozpocznij debatę",
     "results.highlights": "Najważniejsze momenty",
     "learn.eyebrow": "Warstwa coachingu",
-    "learn.title": "Biblioteka błędów logicznych i słownik formatów.",
-    "learn.lead": "Każdy błąd logiczny zgłoszony podczas debaty prowadzi tutaj. Sprawdź któryś w trakcie rundy albo przeglądaj z wyprzedzeniem.",
+    "learn.title": "Ucz się, ćwicz i poznaj język debaty.",
+    "learn.lead": "Odwracaj fiszki, rozwiązuj quizy, ścigaj się z czasem i ćwicz wykrywanie błędów logicznych oraz zgłaszanie sprzeciwów. Każdy błąd logiczny zgłoszony w rundzie również prowadzi tutaj.",
     "learn.fallacylib": "Biblioteka błędów logicznych",
     "learn.glossary": "Słownik formatów",
     "casebuilder.eyebrow": "Kreator argumentacji krok po kroku",
@@ -5703,6 +6575,107 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Rosyjski",
   },
   ja: {
+    "trial.casefile": "ケースファイル",
+    "trial.browse": "すべてのケースファイルを見る",
+    "trial.casenote": "用意されたケースファイルを選ぶと、そのタイトルが論題になります。各ケースには、合意された事実、証人、証拠物、立証すべき内容がまとめてあります。",
+    "trial.casetitle": "ケースライブラリ",
+    "trial.sustainedof": "{n}件中{s}件が認められた",
+    "trial.raised": "{n}件申し立て",
+    "trial.objsummary": "異議",
+    "trial.badge": "模擬裁判",
+    "trial.objcount": "異議{n}件：認める{s}、却下{o}",
+    "trial.ruling.overruled": "却下",
+    "trial.ruling.sustained": "認める",
+    "trial.objection": "異議",
+    "trial.startfirst": "先にターンを開始してください。",
+    "trial.nocase": "先に設定でケースファイルを選んでください。",
+    "trial.view": "ケースファイルを見る",
+    "trial.picktext": "ケースを選ぶ…",
+    "trial.cheatsheet": "異議チートシート",
+    "trial.cases": "ケースファイル",
+    "trial.studyobj": "異議フラッシュカード",
+    "trial.studyterms": "用語を学ぶ",
+    "trial.practiceobj": "異議の練習",
+    "trial.lead": "ケースファイル、異議のチートシート、練習問題。各ケースは架空で、6人の証人（各側3人）、証拠物、各側が立証すべき内容がそろっています。",
+    "trial.popup": "ケースファイルを印刷するにはポップアップを許可してください。",
+    "trial.chosen": "ケースを選択：{title}",
+    "trial.print": "ケースファイルを印刷",
+    "trial.use": "このケースを使う",
+    "trial.fiction": "このケースの人物・場所・出来事はすべて架空で、練習用に作られています。",
+    "trial.hints": "各側へのコーチのヒント",
+    "trial.exhibits": "証拠物",
+    "trial.witnessesfor": "{side}側の証人",
+    "trial.elements": "立証すべきこと",
+    "trial.stipulations": "双方が合意している事実",
+    "trial.charge": "訴因",
+    "trial.claim": "請求",
+    "trial.criminal": "刑事",
+    "trial.civil": "民事",
+    "study.noStar": "先にいくつかのカードにスターを付けてください（フラッシュカードの☆）。",
+    "study.nomissed": "全問正解です。",
+    "study.missed": "間違えたもの",
+    "study.openlibrary": "ライブラリで開く",
+    "study.counter": "反論のしかた",
+    "study.example": "例",
+    "study.whichobjection": "どの異議を唱える？",
+    "study.whichfallacy": "これはどの誤謬？",
+    "study.matchhint": "用語をタップし、次にその定義をタップ。間違えるとタイムに1秒加算されます。",
+    "study.newbest": "ベスト更新！",
+    "study.best": "ベスト：{s}秒",
+    "study.matchtime": "タイム：{s}秒",
+    "study.whichdef": "この用語に合う定義はどれ？",
+    "study.whichterm": "この定義に合う用語はどれ？",
+    "study.false": "間違い",
+    "study.true": "正しい",
+    "study.truefalse": "正しい？ 間違い？",
+    "study.score": "スコア：{a} / {b}",
+    "study.q": "問題 {i} / {n}",
+    "study.finish": "完了",
+    "study.next": "次へ",
+    "study.answer": "答え：",
+    "study.incorrect": "惜しい",
+    "study.correct": "正解",
+    "study.restart": "最初から",
+    "study.studymissed": "間違えたものを復習",
+    "study.keepgoing": "続ける",
+    "study.round.done": "ラウンド完了",
+    "study.done": "お疲れさま",
+    "study.card.n": "カード {i} / {n}",
+    "study.deffirst": "定義を先に表示",
+    "study.termfirst": "用語を先に表示",
+    "study.star": "スター",
+    "study.again": "まだ学習中",
+    "study.known": "覚えた",
+    "study.flip": "めくる",
+    "study.back": "セットに戻る",
+    "study.mode.practice": "練習",
+    "study.mode.match": "マッチ",
+    "study.mode.test": "テスト",
+    "study.mode.learn": "ラーン",
+    "study.mode.flash": "フラッシュカード",
+    "study.deck.objtrain.blurb": "法廷のやり取りを読んで、異議を唱えるか見送るか判断しよう。",
+    "study.deck.objtrain": "異議トレーナー",
+    "study.deck.spot.blurb": "発言を読んで、誤謬の名前を答えよう。",
+    "study.deck.spot": "誤謬を見抜く",
+    "study.deck.objections.blurb": "いつ異議を唱えるか、そしてその理由。",
+    "study.deck.objections": "模擬裁判の異議",
+    "study.deck.trial.blurb": "法廷用語：証拠、手続き、基準。",
+    "study.deck.trial": "模擬裁判の用語",
+    "study.deck.vocab.blurb": "審査員やコーチが使う用語。",
+    "study.deck.vocab": "ディベート用語",
+    "study.deck.fallacies.blurb": "ディベートで指摘されるすべての誤謬と、その反論のしかた。",
+    "study.deck.fallacies": "論理的誤謬",
+    "study.mastered": "{b}件中{a}件を習得",
+    "study.scenarios": "{n}件のシナリオ",
+    "study.cards": "{n}枚のカード",
+    "study.streak0": "今日学習して連続記録を始めましょう",
+    "study.streak": "学習連続{n}日",
+    "study.lead": "どのセットとも同じように用語を学びましょう：カードをめくり、クイズに答え、時間と競います。",
+    "study.title": "学習セット",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "用語集",
+    "study.tab.library": "誤謬ライブラリ",
+    "study.tab.study": "学習",
     "legal.note": "以下の法的文書は英語です。",
     "nav.setup": "設定",
     "nav.debate": "ディベート",
@@ -5827,8 +6800,8 @@ const TRANSLATIONS = {
     "setup.start": "ディベートを始める",
     "results.highlights": "ハイライト",
     "learn.eyebrow": "コーチング",
-    "learn.title": "誤謬ライブラリと形式用語集。",
-    "learn.lead": "ディベート中に指摘されたすべての誤謬はここにリンクされます。ラウンド中に調べても、事前に眺めてもOKです。",
+    "learn.title": "ディベートの言葉を学び、練習し、身につけよう。",
+    "learn.lead": "カードをめくり、クイズに答え、時間と競い、誤謬を見抜く練習や異議の申し立ての練習ができます。ラウンドで指摘された誤謬もここにリンクされます。",
     "learn.fallacylib": "誤謬ライブラリ",
     "learn.glossary": "形式用語集",
     "casebuilder.eyebrow": "ガイド付きケースビルダー",
@@ -6085,6 +7058,107 @@ const TRANSLATIONS = {
     "upload.lang.ru": "ロシア語",
   },
   zh: {
+    "trial.casefile": "案卷",
+    "trial.browse": "浏览所有案卷",
+    "trial.casenote": "选择现成的案卷，其标题就成为你的辩题。每个案卷都列有双方认可的事实、证人、证物和必须证明的内容。",
+    "trial.casetitle": "案例库",
+    "trial.sustainedof": "{n} 次中 {s} 次成立",
+    "trial.raised": "提出 {n} 次",
+    "trial.objsummary": "异议",
+    "trial.badge": "模拟法庭",
+    "trial.objcount": "{n} 次异议：成立 {s}，不成立 {o}",
+    "trial.ruling.overruled": "不成立",
+    "trial.ruling.sustained": "成立",
+    "trial.objection": "异议",
+    "trial.startfirst": "请先开始回合。",
+    "trial.nocase": "请先在设置中选择案例。",
+    "trial.view": "查看案卷",
+    "trial.picktext": "选择案例…",
+    "trial.cheatsheet": "异议速查表",
+    "trial.cases": "案卷",
+    "trial.studyobj": "异议闪卡",
+    "trial.studyterms": "学习术语",
+    "trial.practiceobj": "练习异议",
+    "trial.lead": "案卷、异议速查表和练习。每个案例均为虚构，含六名证人（每方三名）、证物以及各方必须证明的内容。",
+    "trial.popup": "请允许弹出窗口以打印案卷。",
+    "trial.chosen": "已选择案例：{title}",
+    "trial.print": "打印案卷",
+    "trial.use": "使用此案例",
+    "trial.fiction": "本案中的所有人物、地点和事件均为虚构，仅供练习。",
+    "trial.hints": "给双方的教练提示",
+    "trial.exhibits": "证物",
+    "trial.witnessesfor": "{side}方证人",
+    "trial.elements": "必须证明的内容",
+    "trial.stipulations": "双方同意的事实",
+    "trial.charge": "指控",
+    "trial.claim": "诉求",
+    "trial.criminal": "刑事",
+    "trial.civil": "民事",
+    "study.noStar": "请先给几张卡片加星标（闪卡上的 ☆）。",
+    "study.nomissed": "一个都没答错。",
+    "study.missed": "答错的",
+    "study.openlibrary": "在谬误库中打开",
+    "study.counter": "如何反驳",
+    "study.example": "示例",
+    "study.whichobjection": "你的异议是什么？",
+    "study.whichfallacy": "这是哪种谬误？",
+    "study.matchhint": "先点术语，再点它的定义。配错一次加 1 秒。",
+    "study.newbest": "新纪录！",
+    "study.best": "最佳：{s} 秒",
+    "study.matchtime": "用时：{s} 秒",
+    "study.whichdef": "哪个定义与这个术语匹配？",
+    "study.whichterm": "哪个术语与这个定义匹配？",
+    "study.false": "错",
+    "study.true": "对",
+    "study.truefalse": "对还是错？",
+    "study.score": "得分：{a} / {b}",
+    "study.q": "第 {i} 题，共 {n} 题",
+    "study.finish": "完成",
+    "study.next": "下一题",
+    "study.answer": "答案：",
+    "study.incorrect": "不太对",
+    "study.correct": "正确",
+    "study.restart": "重新开始",
+    "study.studymissed": "复习答错的",
+    "study.keepgoing": "继续",
+    "study.round.done": "本轮完成",
+    "study.done": "做得好",
+    "study.card.n": "第 {i} 张，共 {n} 张",
+    "study.deffirst": "先显示定义",
+    "study.termfirst": "先显示术语",
+    "study.star": "加星标",
+    "study.again": "还在学",
+    "study.known": "记住了",
+    "study.flip": "翻转",
+    "study.back": "返回学习集",
+    "study.mode.practice": "练习",
+    "study.mode.match": "配对",
+    "study.mode.test": "测试",
+    "study.mode.learn": "学习模式",
+    "study.mode.flash": "闪卡",
+    "study.deck.objtrain.blurb": "阅读法庭上的一句话：提出异议还是放过？",
+    "study.deck.objtrain": "异议训练",
+    "study.deck.spot.blurb": "阅读一句话，说出是哪种谬误。",
+    "study.deck.spot": "识别谬误",
+    "study.deck.objections.blurb": "何时提出异议，以及原因。",
+    "study.deck.objections": "模拟法庭异议",
+    "study.deck.trial.blurb": "法庭词汇：证据、程序、标准。",
+    "study.deck.trial": "模拟法庭术语",
+    "study.deck.vocab.blurb": "评委和教练使用的术语。",
+    "study.deck.vocab": "辩论词汇",
+    "study.deck.fallacies.blurb": "辩论中被标记的每个谬误及其反驳方法。",
+    "study.deck.fallacies": "逻辑谬误",
+    "study.mastered": "已掌握 {a}/{b}",
+    "study.scenarios": "{n} 个情景",
+    "study.cards": "{n} 张卡片",
+    "study.streak0": "今天学习以开始连续记录",
+    "study.streak": "已连续学习 {n} 天",
+    "study.lead": "像学习任何词集一样学习这些术语：翻转卡片、做测验、与时间赛跑。",
+    "study.title": "学习集",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "术语表",
+    "study.tab.library": "谬误库",
+    "study.tab.study": "学习",
     "legal.note": "以下法律文本为英文。",
     "nav.setup": "设置",
     "nav.debate": "辩论",
@@ -6209,8 +7283,8 @@ const TRANSLATIONS = {
     "setup.start": "开始辩论",
     "results.highlights": "精彩时刻",
     "learn.eyebrow": "指导层",
-    "learn.title": "谬误库与赛制术语。",
-    "learn.lead": "辩论中标记的每个谬误都会链接到这里。可在比赛中途查阅，也可提前浏览。",
+    "learn.title": "学习、练习，掌握辩论的语言。",
+    "learn.lead": "翻转卡片、做测验、与时间赛跑，练习识别谬误和提出异议。在比赛中被标记的每个谬误也会链接到这里。",
     "learn.fallacylib": "谬误库",
     "learn.glossary": "赛制术语",
     "casebuilder.eyebrow": "引导式论证构建器",
@@ -6467,6 +7541,107 @@ const TRANSLATIONS = {
     "upload.lang.ru": "俄语",
   },
   ru: {
+    "trial.casefile": "Материалы дела",
+    "trial.browse": "Посмотреть все дела",
+    "trial.casenote": "Выберите готовое дело — его название станет вашей темой. В каждом перечислены согласованные факты, свидетели, доказательства и то, что нужно доказать.",
+    "trial.casetitle": "Библиотека дел",
+    "trial.sustainedof": "принято {s} из {n}",
+    "trial.raised": "заявлено: {n}",
+    "trial.objsummary": "Возражения",
+    "trial.badge": "Mock Trial",
+    "trial.objcount": "Возражений: {n} (принято {s}, отклонено {o})",
+    "trial.ruling.overruled": "Отклонено",
+    "trial.ruling.sustained": "Принято",
+    "trial.objection": "Возражение",
+    "trial.startfirst": "Сначала начните ход.",
+    "trial.nocase": "Сначала выберите дело в настройках.",
+    "trial.view": "Открыть дело",
+    "trial.picktext": "Выберите дело…",
+    "trial.cheatsheet": "Шпаргалка по возражениям",
+    "trial.cases": "Дела",
+    "trial.studyobj": "Карточки возражений",
+    "trial.studyterms": "Учить термины",
+    "trial.practiceobj": "Тренировать возражения",
+    "trial.lead": "Дела, шпаргалка по возражениям и тренировки. Каждое дело вымышлено: шесть свидетелей (по три на сторону), доказательства и то, что должна доказать каждая сторона.",
+    "trial.popup": "Разрешите всплывающие окна, чтобы распечатать дело.",
+    "trial.chosen": "Выбрано дело: {title}",
+    "trial.print": "Распечатать дело",
+    "trial.use": "Использовать это дело",
+    "trial.fiction": "Все люди, места и события в этом деле вымышлены и созданы для тренировки.",
+    "trial.hints": "Подсказки тренера для каждой стороны",
+    "trial.exhibits": "Вещественные доказательства",
+    "trial.witnessesfor": "Свидетели стороны: {side}",
+    "trial.elements": "Что нужно доказать",
+    "trial.stipulations": "Факты, с которыми согласны обе стороны",
+    "trial.charge": "Обвинение",
+    "trial.claim": "Иск",
+    "trial.criminal": "Уголовное",
+    "trial.civil": "Гражданское",
+    "study.noStar": "Сначала отметьте несколько карточек (☆ на карточках).",
+    "study.nomissed": "Ни одной ошибки.",
+    "study.missed": "Ошибки",
+    "study.openlibrary": "Открыть в библиотеке",
+    "study.counter": "Как ответить",
+    "study.example": "Пример",
+    "study.whichobjection": "Какое ваше возражение?",
+    "study.whichfallacy": "Какая это ошибка?",
+    "study.matchhint": "Нажмите термин, затем его определение. Каждая ошибка добавляет секунду.",
+    "study.newbest": "Новый рекорд!",
+    "study.best": "Лучшее: {s} с",
+    "study.matchtime": "Время: {s} с",
+    "study.whichdef": "Какое определение соответствует этому термину?",
+    "study.whichterm": "Какой термин соответствует этому определению?",
+    "study.false": "Неверно",
+    "study.true": "Верно",
+    "study.truefalse": "Верно или неверно?",
+    "study.score": "Результат: {a} / {b}",
+    "study.q": "Вопрос {i} из {n}",
+    "study.finish": "Готово",
+    "study.next": "Далее",
+    "study.answer": "Ответ:",
+    "study.incorrect": "Не совсем",
+    "study.correct": "Верно",
+    "study.restart": "Начать заново",
+    "study.studymissed": "Повторить ошибки",
+    "study.keepgoing": "Продолжить",
+    "study.round.done": "Раунд завершён",
+    "study.done": "Отличная работа",
+    "study.card.n": "Карточка {i} из {n}",
+    "study.deffirst": "Сначала определение",
+    "study.termfirst": "Сначала термин",
+    "study.star": "В избранное",
+    "study.again": "Ещё учу",
+    "study.known": "Знаю",
+    "study.flip": "Перевернуть",
+    "study.back": "Назад к наборам",
+    "study.mode.practice": "Практика",
+    "study.mode.match": "Подбор",
+    "study.mode.test": "Тест",
+    "study.mode.learn": "Учить",
+    "study.mode.flash": "Карточки",
+    "study.deck.objtrain.blurb": "Прочитайте реплику в суде: возразить или пропустить?",
+    "study.deck.objtrain": "Тренажёр возражений",
+    "study.deck.spot.blurb": "Прочитайте высказывание и назовите ошибку.",
+    "study.deck.spot": "Найдите ошибку",
+    "study.deck.objections.blurb": "Когда возражать и почему.",
+    "study.deck.objections": "Возражения в Mock Trial",
+    "study.deck.trial.blurb": "Судебная лексика: доказательства, процедура, стандарты.",
+    "study.deck.trial": "Термины Mock Trial",
+    "study.deck.vocab.blurb": "Термины, которые используют судьи и тренеры.",
+    "study.deck.vocab": "Словарь дебатов",
+    "study.deck.fallacies.blurb": "Каждая ошибка, отмеченная в дебатах, и как на неё ответить.",
+    "study.deck.fallacies": "Логические ошибки",
+    "study.mastered": "Освоено {a} из {b}",
+    "study.scenarios": "{n} сценариев",
+    "study.cards": "{n} карточек",
+    "study.streak0": "Позанимайтесь сегодня, чтобы начать серию",
+    "study.streak": "Серия занятий: {n} дн.",
+    "study.lead": "Учите термины как в любом наборе: переворачивайте карточки, проходите тесты, соревнуйтесь со временем.",
+    "study.title": "Наборы для учёбы",
+    "study.tab.trial": "Mock Trial",
+    "study.tab.vocab": "Словарь",
+    "study.tab.library": "Библиотека ошибок",
+    "study.tab.study": "Учёба",
     "legal.note": "Юридический текст ниже написан на английском языке.",
     "nav.setup": "Настройка",
     "nav.debate": "Дебаты",
@@ -6591,8 +7766,8 @@ const TRANSLATIONS = {
     "setup.start": "Начать дебаты",
     "results.highlights": "Главные моменты",
     "learn.eyebrow": "Слой коучинга",
-    "learn.title": "Библиотека логических ошибок и словарь форматов.",
-    "learn.lead": "Каждая логическая ошибка, отмеченная в дебатах, ведёт сюда. Загляните в середине раунда или изучите заранее.",
+    "learn.title": "Учитесь, тренируйтесь и осваивайте язык дебатов.",
+    "learn.lead": "Переворачивайте карточки, проходите тесты, соревнуйтесь со временем и тренируйтесь замечать логические ошибки и заявлять возражения. Каждая ошибка, отмеченная в раунде, тоже ведёт сюда.",
     "learn.fallacylib": "Библиотека логических ошибок",
     "learn.glossary": "Словарь форматов",
     "casebuilder.eyebrow": "Пошаговый конструктор кейса",
@@ -7220,12 +8395,13 @@ function applyModeToUI(modeKey) {
   }
   renderJudgePersonaOptions();
   syncPracticeModeUI();
+  if (typeof syncTrialSetup === "function") syncTrialSetup(modeKey);
 }
 
 function renderJudgePersonaOptions() {
   const sel = document.getElementById("judge-persona");
   if (!sel) return;
-  const applies = state.mode === "mockTrial" ? "mockTrial" : "debate";
+  const applies = isTrialMode(state.mode) ? "mockTrial" : "debate";
   const prev = sel.value;
   sel.innerHTML = '<option value="none">None (default AI judge)</option>' +
     Object.entries(JUDGE_PERSONAS)
@@ -7401,6 +8577,7 @@ function startDebate() {
   state.practiceMode = document.getElementById("practice-mode").checked;
   flipSides();
   Stats.track("debate_start", { mode: state.mode, practice: !!state.practiceMode });
+  if (typeof renderTrialTools === "function") renderTrialTools();
   state.leagueCode = document.getElementById("league-code")?.value.trim() || "";
   if (state.practiceMode) {
     // Practice Mode's whole value is the post-round report — force both verdicts on.
@@ -7901,6 +9078,7 @@ function renderFallacyLibrary() {
    fallacy picker modal, results-screen tags, and the Progress screen. */
 function openFallacyLibrary(name) {
   navTo("screen-learn");
+  if (typeof learnTab === "function") learnTab("library");
   const id = "fallib-" + slugify(name);
   setTimeout(() => {
     const el = document.getElementById(id);
@@ -8251,6 +9429,8 @@ function toggleAuthMode() {
 
 function syncAuthModeUI() {
   const isSignup = authMode === "signup";
+  const pw = document.getElementById("auth-password");
+  if (pw) pw.setAttribute("autocomplete", isSignup ? "new-password" : "current-password");
   document.getElementById("auth-modal-title").textContent = isSignup ? t("auth.signup") : t("auth.login");
   document.getElementById("auth-name-field").style.display = isSignup ? "" : "none";
   document.getElementById("auth-submit-btn").textContent = isSignup ? t("auth.signup") : t("auth.login");
@@ -8719,7 +9899,7 @@ async function runOneOnlineFactCheck(sentence, side, opts) {
 function populateOnlineJudgePersonas(room) {
   const sel = document.getElementById("online-judge-persona");
   if (!sel) return;
-  const applies = room.mode === "mockTrial" ? "mockTrial" : "debate";
+  const applies = isTrialMode(room.mode) ? "mockTrial" : "debate";
   sel.innerHTML = '<option value="none">None (default AI judge)</option>' +
     Object.entries(JUDGE_PERSONAS)
       .filter(([_, p]) => p.appliesTo === applies)
@@ -11489,7 +12669,7 @@ async function runOneFactCheck(sentence, side, opts) {
       context: (opts && opts.context) || [],
       evidence,
       wantFallacies: !!cfg.AUTO_FALLACY_DETECTION,
-      trial: state.mode === "mockTrial"
+      trial: isTrialMode(state.mode)
     };
     console.log("[AFC] calling runCombinedCheck →", { promptOpts });
     const r = await runCombinedCheck(sentence, promptOpts);
@@ -11755,7 +12935,7 @@ function turnSideName(t) { return t.side === "a" ? state.nameA : (t.side === "b"
 
 function buildTurnReviewPrompt(turn) {
   const mode = DEBATE_MODES[state.mode] || {};
-  const trial = state.mode === "mockTrial";
+  const trial = isTrialMode(state.mode);
   const label = (mode.sideLabels && mode.sideLabels[turn.side]) || "the speaker";
   const idx = state.transcript.indexOf(turn);
   let opp = "";
@@ -11771,6 +12951,8 @@ function buildTurnReviewPrompt(turn) {
     "",
     `Topic: "${(state.topic || "").replace(/"/g, "'")}"`,
     `Speaker: ${label}${turn.phaseName ? " (" + turn.phaseName + ")" : ""}`,
+    trial && window.trialCaseContext ? window.trialCaseContext() : "",
+    trial && window.trialPhaseGuidance ? window.trialPhaseGuidance(turn.phaseName) : "",
     opp ? `Opponent's previous turn, for context:\n"""${opp.replace(/"/g, "'")}"""` : "",
     `This speaker's turn:\n"""${turn.text.replace(/"/g, "'")}"""`,
     "",
@@ -12270,7 +13452,7 @@ function renderHighlights() {
   state.transcript.forEach(t => {
     const name = t.side === "a" ? state.nameA : (t.side === "b" ? state.nameB : "Both sides");
     const tagsHtml = (t.events || []).map(ev => {
-      const cls = ev.type === "fact" ? "fact" : ev.type === "wrong" ? "wrong" : "fallacy";
+      const cls = ev.type === "fact" ? "fact" : ev.type === "wrong" ? "wrong" : ev.type === "objection" ? "objection" : "fallacy";
       if (cls === "fallacy" && ev.fallacyName) {
         return `<button type="button" class="tr-tag ${cls} tr-tag-link" onclick="openFallacyLibrary('${ev.fallacyName.replace(/'/g, "\\'")}')">${escapeHtml(ev.label)} · Learn</button>`;
       }
@@ -12290,6 +13472,7 @@ function renderHighlights() {
 function renderResults() {
   renderResultScores();
   renderClaimReport();
+  if (typeof renderObjectionSummary === "function") renderObjectionSummary();
   renderResultsRest();
 }
 
@@ -12619,7 +13802,7 @@ function heuristicJudge() {
    JUDGE SIMULATOR — compare-a-persona picker (Results screen)
    ========================================================================= */
 function openJudgeModal() {
-  const applies = state.mode === "mockTrial" ? "mockTrial" : "debate";
+  const applies = isTrialMode(state.mode) ? "mockTrial" : "debate";
   const list = document.getElementById("judge-list");
   list.innerHTML = "";
   Object.entries(JUDGE_PERSONAS)
@@ -12791,6 +13974,7 @@ function renderArgumentAnalysis(raw) {
 
 function restartSame() {
   flipSides(); // a rematch draws the sides again
+  if (typeof renderTrialTools === "function") renderTrialTools();
   state.currentRound = 1;
   state.currentSide = state.phases ? state.phases[0].side : "a";
   state.turnsInRound = 0;
@@ -12890,5 +14074,9 @@ function beep() {
 
 init();
 </script>
+<script src="learn-data.js"></script>
+<script src="mocktrial-data.js"></script>
+<script src="study.js"></script>
+<script src="mocktrial.js"></script>
 </body>
 </html>
