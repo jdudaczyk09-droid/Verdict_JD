@@ -59,6 +59,14 @@ To read them, add one environment variable in Vercel — `ADMIN_TOKEN`, any long
 
 Live fact-checks use `GROQ_MODEL` (default `openai/gpt-oss-120b`). Turn reviews, the AI judge, argument analysis, Case Checker, Case Builder, and personal lessons use `GROQ_COACH_MODEL` (default `openai/gpt-oss-20b`), which has its own free allowance. Each lane also has its own per-session cap (`LANE_BUDGETS` in `config.js`), and if one model is rate-limited the proxy falls back to the other.
 
+
+### Leagues, study sets, Mock Trial, and online voice
+
+- **League tools** (`league.js`; endpoints `league-create`, `league-assignment(s)`, `league-remove-student`, `league-stats`): a coach starts a league in the app (League tab or `app.html#coach`) and gets a code, a student link (`app.html?league=CODE`), and a private coach key shown once (stored server-side only as a bcrypt hash). The coach key unlocks posting assignments and deleting a student's rounds; reading the dashboard only needs the code. Students who open the link see the current assignment in Setup. Needs the same Postgres database as the other league features.
+- **Study sets** (`study.js`, `learn-data.js`): flashcards, learn, test, match, spot-the-fallacy, objection trainer. Progress is stored in the browser only.
+- **Mock Trial** (`mocktrial.js`, `mocktrial-data.js`): eight fictional case files (criminal and civil), a civil format, an objection log, and trial-specific turn reviews.
+- **Online voice** (`voice.js`): direct browser-to-browser audio (WebRTC) with the mic force-muted outside your own turn, plus the speaker's live transcript. The server only relays small connection messages and a backup copy of the live text (`room_signals` and `room_live` tables, created automatically). It uses Google's public STUN servers; there is no TURN server, so some strict networks can't connect voice (the transcript still works). If that matters for your users, add a TURN server in `voice.js` (`ICE`).
+
 ### Hobby tier note
 
 Vercel's Hobby tier caps request bodies at 4.5 MB. Upload mode chunks audio into 2-minute slices (~3.8 MB at 16 kHz mono) to stay under the cap. Local dev with `PROXY_MODE: false` can use bigger chunks via `UPLOAD_CHUNK_MINUTES` in `config.local.js`.

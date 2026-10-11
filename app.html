@@ -1115,6 +1115,42 @@
   .quiet-note.bad { border-left-color: var(--margin); }
   .quiet-note.warn { border-left-color: var(--hl-orange); }
   @keyframes qin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- League and coach tools ---------- */
+  .coach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-bottom: 18px; }
+  .league-note { margin: 0 0 10px; font-size: 14.5px; }
+  .league-created { margin-top: 14px; padding: 12px 14px; background: #fff; border: 2px solid var(--ink); border-left-width: 10px; border-left-color: var(--hl-green); }
+  .league-created h4 { margin: 0 0 8px; font-size: 18px; }
+  .lc-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .lc-label { font-size: 13px; font-weight: 800; color: var(--ink-2); }
+  .lc-big { font: 900 28px var(--font-body); letter-spacing: 2px; }
+  .lc-link, .lc-key code { font: 600 13px monospace; background: var(--paper-pale); padding: 2px 6px; word-break: break-all; }
+  .lc-key { margin: 10px 0; padding: 8px 10px; background: #FFE14D; border: 2px dashed var(--ink); font-size: 14px; }
+  .lc-warn { margin: 6px 0 0; font-size: 13px; }
+  .lc-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .league-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+  .league-head h3 { margin: 0; font-size: 28px; }
+  .league-head-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .coach-on { font-family: var(--font-hand); font-size: 22px; color: var(--pen); }
+  .league-h { margin: 12px 0 4px; font-size: 15px; }
+  .week-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding: 6px 4px 0; }
+  .week-bars .wk { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+  .week-bars .wk i { display: block; width: 100%; max-width: 38px; background: var(--pen); min-height: 2px; }
+  .week-bars .wk span { font-size: 11px; font-weight: 800; margin-top: 4px; color: var(--ink-2); }
+  .week-bars .wk b { font-size: 12px; order: -1; }
+  .table-wrap { overflow-x: auto; }
+  .league-table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; }
+  .league-table th, .league-table td { text-align: left; padding: 7px 10px; border-bottom: 1.5px solid var(--ink); }
+  .league-table th { font-size: 12px; background: var(--paper-pale); }
+  .league-table .n { text-align: right; font-variant-numeric: tabular-nums; }
+  .assign-item { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; padding: 8px 10px; margin-bottom: 8px; background: #fff; border: 2px solid var(--ink); border-left-width: 8px; }
+  .assign-item.past { opacity: 0.6; border-left-color: #999; }
+  .assign-item .ai-main { display: grid; gap: 2px; font-size: 14px; }
+  .assign-item small { color: var(--ink-2); font-weight: 700; }
+  .assign-form { display: grid; gap: 6px; max-width: 560px; }
+  .assign-banner { margin-top: 10px; padding: 10px 12px; background: #fff; border: 2px solid var(--ink); border-left: 10px solid var(--pen); display: grid; gap: 3px; font-size: 14px; }
+  .assign-banner small { color: var(--ink-2); font-weight: 700; }
+  .assign-banner .btn { justify-self: start; margin-top: 4px; }
   .lesson-lead { margin: 6px 0 10px; font-size: 15px; }
   .lesson-title { font-size: 22px; font-weight: 900; font-variation-settings: "wdth" 88; margin: 8px 0 4px; }
   .lesson-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 24px; }
@@ -1813,6 +1849,7 @@
             <label data-i18n="setup.league.label">League code (optional)</label>
             <input type="text" id="league-code" placeholder="e.g. NYCUDL-2026" maxlength="40" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
             <div class="note" data-i18n="setup.league.note">If your coach gave you a code, results get added to your league's dashboard. This isn't a password — anyone with the code can view or submit to it.</div>
+            <div id="league-assign-note"></div>
           </div>
           <div class="field" style="margin-top: 14px;">
             <label data-i18n="setup.lang.label">Language (speech recognition)</label>
@@ -2532,17 +2569,33 @@
       <div class="upload-wrap">
         <div class="eyebrow" data-i18n="league.eyebrow">League Dashboard</div>
         <h1 data-i18n="league.title">See how your whole league is doing.</h1>
-        <p class="upload-lead" data-i18n="league.lead">For coaches and tournament directors. Enter a league code to see aggregate stats across everyone submitting under it.</p>
+        <p class="upload-lead" data-i18n="league.lead">For coaches and tournament directors. Start a league in a minute, share one link with your students, and see who practiced, what they struggle with, and how they're improving. Free, and students don't need accounts.</p>
 
-        <div class="card upload-card">
-          <div class="form-grid two-col">
-            <div class="field" style="grid-column: 1 / -1;">
+        <div class="coach-grid">
+          <div class="card upload-card" id="league-create-card">
+            <h3 data-i18n="league.create.title">Start a league</h3>
+            <p class="league-note" data-i18n="league.create.desc">Name it, and you get a league code, a link to send students, and a private coach key for posting assignments.</p>
+            <div class="field">
+              <label data-i18n="league.create.name">League name</label>
+              <input type="text" id="league-new-name" maxlength="60" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" data-i18n-ph="league.create.nameph" placeholder="e.g. Lincoln High Debate Team">
+            </div>
+            <button id="league-create-btn" class="btn btn-primary" onclick="createLeague()" data-i18n="league.create.btn">Create league</button>
+            <div id="league-create-error" class="upload-error" style="display:none;"></div>
+            <div id="league-created"></div>
+          </div>
+          <div class="card upload-card" id="league-open-card">
+            <h3 data-i18n="league.open.title">Open a dashboard</h3>
+            <div class="field">
               <label data-i18n="setup.league.label2">League code</label>
               <input type="text" id="league-lookup-code" placeholder="e.g. NYCUDL-2026" maxlength="40" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
             </div>
+            <div class="field">
+              <label data-i18n="league.coachkey.label">Coach key (only if you're the coach)</label>
+              <input type="text" id="league-coach-key" class="secret-field" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other">
+            </div>
+            <button id="league-go" class="btn btn-primary" onclick="loadLeagueDashboard()" data-i18n="league.load">Load dashboard</button>
+            <div id="league-error" class="upload-error" style="display:none;"></div>
           </div>
-          <button id="league-go" class="btn btn-primary" onclick="loadLeagueDashboard()" data-i18n="league.load">Load dashboard</button>
-          <div id="league-error" class="upload-error" style="display:none;"></div>
         </div>
 
         <div id="league-results"></div>
@@ -2672,6 +2725,7 @@
           <p data-i18n="how.privacy.p">
             Speech is turned into text first. By default your browser does that itself — in Chrome and Edge it's done by Google or Microsoft, not by us. In high-accuracy mode, and for uploaded files, short audio clips are sent to our transcription service, and we don't keep them. For fact-checks, only a few recent sentences and the topic go to our AI service — no audio and no names — and claims about recent events are looked up on Wikipedia. Turn reviews send that turn's text, the opponent's turn before it, and the topic, also without names. The AI judge and analysis also send the round's transcript and the names you entered. Nothing about a round is saved on our servers unless you sign in, enter a league code, or play an online room. We also keep anonymous usage counts — which features get used and how long debates run — with no names, speech, or topics, and you can turn that off in the Privacy Policy. If the AI service is busy, checks slow down or pause and you can keep scoring by hand. The Privacy Policy has every detail.
           </p>
+          <p data-i18n="how.privacy.voice">In online debates, voice goes straight between the two debaters' browsers and we don't record it. Your mic is switched off except on your own turn.</p>
         </div>
 
         <div class="how-section">
@@ -2756,6 +2810,7 @@
 
       <h4>4. Microphone access &amp; data collection consent</h4>
       <p>Live-transcription features request access to your device's microphone. By granting that permission and using those features, you consent to your speech being processed for the sole purpose of generating a transcript and running the fact-check, fallacy-detection, and judging features you've enabled. That processing is done by your browser's built-in speech recognition (which in many browsers, including Chrome and Edge, is run by the browser's maker and may send audio to its servers under its own policy) or — in High-accuracy mode, in Upload mode, and automatically if your browser's speech recognition is unavailable or stops working — by short audio clips sent through our server to Groq for transcription. The resulting text is then sent to Groq (and, where described in the Privacy Policy, looked up on Wikipedia) to produce fact-checks, labels, and judging. Details are in the Privacy Policy. You are responsible for what you say while the microphone is active and for obtaining any consent required from other people present or recorded. Don't use the Service to capture or process anyone's speech without their knowledge where that's required by law.</p>
+      <p><b>Online voice.</b> In Online Debate your voice is sent directly to your opponent's device, only while it is your turn or crossfire. We don't record it, but the other person's device could. Don't record, share, or misuse anyone's voice without their permission, and don't use voice to harass anyone.</p>
 
       <h4>5. Assumption of risk</h4>
       <p>You use the Service, including any AI-generated feedback, scoring, or judging, entirely at your own risk. To the fullest extent permitted by law, you assume all risk of loss, inaccuracy, or harm — including reputational, academic, competitive, or emotional harm — that may result from reliance on the Service.</p>
@@ -2768,6 +2823,7 @@
 
       <h4>8. Your content &amp; data</h4>
       <p>Most of what you do in Verdict Debate without an account — practice history, progress summaries, saved settings, your language choice — lives only in your own browser's local storage; we never see it. What you say or type into an AI-powered feature is sent to third-party AI services to produce the result (see the Privacy Policy for exactly what goes where). If a League code is entered, each finished round's summary is shared with anyone who has that code — it's a shared classroom code, not a password, so don't treat it as private. If you create an account, your account details and synced round summaries are stored on our servers until you ask us to delete them. If you use Online Debate, the room — including a text transcript of what each side said — is stored on our servers and is not currently deleted automatically; you can ask us to delete it. By using these features you confirm you have the right to submit that content.</p>
+      <p><b>Coaches and leagues.</b> If you create a league or ask students to use a league code, you are responsible for having any permission needed (from students, parents, or your school) for their names and results to be collected and shown to anyone with that code, and for keeping your coach key private. Students should not type anything into a name field that they would not want a coach to see. Mock Trial case files are fictional practice materials, not real cases and not legal advice.</p>
 
       <p><b>Suggestions.</b> If you send us an idea or feedback, you agree we can use it however we like, without credit or payment, and without any obligation to you. <b>Usage counts.</b> We keep anonymous counts of how the Service is used, as described in the Privacy Policy.</p>
 
@@ -2863,19 +2919,22 @@
       <p><b>Turn reviews.</b> When a turn ends (and the "Review every turn" option is on), the text of that turn, the opponent's previous turn if there was one, and the debate topic are sent through our server to Groq to produce coaching feedback. It does not include audio or debater names (the speaker is identified only by side, such as "Pro Team"). Reviews are kept in your browser's memory during the session, are shown on the results page, and are not saved anywhere when you leave. They never change the score. Turn reviews aren't run in Online Debate.</p>
       <p><b>Personal lessons.</b> If you press "Make my lesson" on the Progress screen, the names and counts of your most frequent flagged fallacies (for example "Ad Hominem, 4 times") are sent through our server to Groq. Nothing else is sent: no speech, topics, or debater names. The lesson it writes is saved in your browser's local storage so it is still there next time, and you can replace it.</p>
       <p><b>Which AI model.</b> Live fact-checks use one Groq model; turn reviews, the AI judge, argument analysis, Case Checker, Case Builder, and personal lessons use a second Groq model, so coaching can't use up the live-check allowance. If one is at its limit, the other is used as a backup.</p>
+      <p><b>Online voice and live text.</b> In Online Debate the two debaters hear each other over a direct, browser-to-browser audio link (WebRTC). The voice does not pass through our servers and we do not record it. To set the link up, our server relays two short connection messages between the debaters (they contain network addresses and are deleted when the debate ends, and otherwise after about 15 minutes, with the cleanup running whenever a new connection message arrives), and Google's public STUN servers help the two browsers find a route, which means Google and the other debater can see your IP address. Your microphone is switched off by the app except on your own turn (and during crossfire), and you can also mute yourself. The other debater's device is able to record what it receives, so only debate people you trust. While someone is speaking, their live transcript text goes straight to the opponent over the same link; if that link isn't available, the text goes through our server as a backup, replacing the previous text every second or so and deleted when the turn ends. Some strict school or office networks block the direct link; the app then says voice isn't available and the live transcript still works.</p>
+      <p><b>Study sets and Mock Trial tools.</b> Flashcards, quizzes, matching games, and the objection and fallacy trainers run entirely in your browser; your progress is saved only in your browser's local storage. The Mock Trial case files are fictional practice material. The objection log is kept in your browser's memory for the round and shown on the results page; in Online Debate it is not shared.</p>
       <p><b>Held-back claims.</b> Claims that need a real lookup are kept in your browser's memory during the speech, verified when that person finishes speaking, and are not saved anywhere when you leave the page.</p>
       <p><b>AI judge, argument analysis, Case Checker, Case Builder, Respect Filter (when you turn it on), and the manual fact-check box.</b> The text you type, or the transcript of your round, plus the debater names and topic you entered where the feature uses them, is sent to Groq through our server. If in Setup you choose Anthropic or OpenAI and enter your own key for that account, those requests go from your browser straight to that company under its terms instead; your key is kept in your browser's memory for that session and is not saved by us.</p>
       <p><b>What you can switch off.</b> The microphone features only run after your browser's permission prompt. You can turn off Auto fact-check in Setup, leave the Respect Filter off (its default), and not enable High-accuracy transcription. If you do, text is sent only for the features you use.</p>
 
       <h4>3. What we store, and where</h4>
-      <p><b>In your browser (local storage), on your device only:</b> your language choice; that you dismissed the cookie notice; a login token, if you sign in (valid for 30 days); the code of an online room you are in, so you can rejoin; a progress log of up to 200 finished-round summaries (date, mode, topic, scores, fallacy names, judge persona); practice history of up to 20 attempts per topic (score, counts, word count); your latest personal lesson, if you made one; a random anonymous visitor ID used for usage counts (see below); and your choice if you opt out of those counts. Transcripts, claim logs, and held-back claims are not saved there. You can clear all of this in your browser settings.</p>
+      <p><b>In your browser (local storage), on your device only:</b> your language choice; that you dismissed the cookie notice; a login token, if you sign in (valid for 30 days); the code of an online room you are in, so you can rejoin; a progress log of up to 200 finished-round summaries (date, mode, topic, scores, fallacy names, judge persona); practice history of up to 20 attempts per topic (score, counts, word count); your latest personal lesson, if you made one; your study progress (which cards you know, your study streak, and best match times); the league code you entered, so you don't retype it; if you are a coach, the coach key and name of any league you created on this device; a random anonymous visitor ID used for usage counts (see below); and your choice if you opt out of those counts. Transcripts, claim logs, and held-back claims are not saved there. You can clear all of this in your browser settings.</p>
       <p><b>On our servers</b> (a database hosted through Vercel and provided by Neon), only if you use these features:</p>
       <ul>
         <li><b>Account:</b> email address, a bcrypt-hashed password (never the plain password), display name, optional bio (up to 500 characters) and profile picture (a small image your browser resizes), and sign-up date. If you are signed in, each finished round's summary (date, mode, topic, scores, judge persona, fallacy names) is also stored.</li>
-        <li><b>League code:</b> if you enter one in Setup, each finished round sends the code, the first name you typed in Setup, mode, topic, practice flag, judge persona, scores, and fallacy names. Anyone who has the code can see that league's data.</li>
+        <li><b>League code:</b> if you enter one in Setup (or open your coach's join link), each finished round sends the code, the first name you typed in Setup, mode, topic, practice flag, judge persona, scores, and fallacy names. Anyone who has the code can see that league's data, including the student list, averages, and recent rounds.</li>
+        <li><b>Coaches who start a league:</b> the league's name, its code, and a coach key that is stored only as a one-way hash (so it can't be shown again), plus any assignments the coach posts (title, topic, format, optional due date and note), which anyone with the league code can read. The coach key lets a coach post or delete assignments and delete a student's rounds from that league. CSV downloads are created in the coach's browser and are not stored by us.</li>
         <li><b>Online Debate</b> (requires an account): room code, mode, topic, the host's and guest's display names and account IDs, turn, timer and score state, the score log, and a text transcript of what each side said (up to 20,000 characters per turn). Only the host and the one person who joins with the room code can read it. Rooms are not currently deleted automatically.</li>
       </ul>
-      <p><b>Anonymous usage counts.</b> To see how the app is used, the app sends our server small events: that a page was opened (landing page or app), that a debate started or finished (mode, whether it was practice, minutes of speaking, number of turns), which features were used (for example turn review, Case Checker, Case Builder, AI judge, argument analysis, personal lesson, manual fact-check, upload, online room, league, high-accuracy listening), and how many AI calls were made in each category. Each event carries only the random visitor ID from your browser, a timestamp, and those few values. It never carries your name, email, speech, topics, transcripts, or IP address. Our code does not store IP addresses; the hosting provider's standard logs may (section 5). We honor Do Not Track and Global Privacy Control, and you can switch this off with the checkbox at the top of this policy; turning it off also deletes the visitor ID from your browser. These counts are deleted automatically after about 13 months (the cleanup runs as new events arrive).</p>
+      <p><b>Anonymous usage counts.</b> To see how the app is used, the app sends our server small events: that a page was opened (landing page or app), that a debate started or finished (mode, whether it was practice, minutes of speaking, number of turns), which features were used (for example turn review, Case Checker, Case Builder, AI judge, argument analysis, personal lesson, manual fact-check, upload, online room, league tools, study sets, Mock Trial case files and the objection log, high-accuracy listening), and how many AI calls were made in each category. Each event carries only the random visitor ID from your browser, a timestamp, and those few values. It never carries your name, email, speech, topics, transcripts, or IP address. Our code does not store IP addresses; the hosting provider's standard logs may (section 5). We honor Do Not Track and Global Privacy Control, and you can switch this off with the checkbox at the top of this policy; turning it off also deletes the visitor ID from your browser. These counts are deleted automatically after about 13 months (the cleanup runs as new events arrive).</p>
       <p><b>Suggestion box.</b> If you send a suggestion, we store its category, your message, and the email address if you choose to add one, until we delete it. Your browser's anonymous visitor ID is sent along only so we can limit spam; it is not saved with the suggestion. Don't put sensitive personal information in a suggestion.</p>
       <p>We do not store audio, fact-check results, claim logs, or held-back claims on our servers. Our own code does not write request logs; our hosting provider keeps standard logs (see section 5).</p>
 
@@ -2890,6 +2949,7 @@
         <li><b>Your browser's speech service</b> (for example Google in Chrome, Microsoft in Edge): may receive microphone audio during default live subtitles.</li>
         <li><b>Anthropic or OpenAI:</b> only if you choose them in Setup and enter your own key.</li>
         <li><b>Vercel</b> (hosting): serves the site and our server code and keeps standard request logs (such as IP address, browser, and pages requested). The app also loads Vercel's analytics script, which may record page views and basic device and location information in aggregate, in addition to our own anonymous usage counts described in section 3. Vercel also hosts the database provided by Neon.</li>
+        <li><b>Google STUN servers:</b> used only in Online Debate to help the two browsers connect for voice; they see the IP addresses involved.</li>
         <li><b>Google Fonts:</b> the pages load fonts from Google, so Google receives your IP address and browser information when a page loads.</li>
       </ul>
       <p>Don't speak or type sensitive personal information into an AI-powered feature; assume it will be processed by the outside services above.</p>
@@ -2901,7 +2961,7 @@
       <p>Verdict Debate is built for use in an educational setting — debate and Mock Trial practice — and is commonly used by students under 18 under a coach's or teacher's supervision. Accounts require you to be at least 13. We do not knowingly collect personal information directly from children under 13 without appropriate parental or school consent. If you believe a child has created an account without proper consent, contact us so we can remove it. Note that spoken words, and names entered into the app, can be personal information; adults supervising students should keep that in mind.</p>
 
       <h4>8. Data retention &amp; deletion</h4>
-      <p>Local browser data can be cleared at any time through your browser settings. Account data, League submissions, suggestions, and Online Debate rooms (including their transcripts) are kept until you ask us to delete them, because we do not yet delete them automatically. Anonymous usage counts are deleted automatically after about 13 months. Email us (section 11) and we will delete your account and its round summaries, and any room or League entry you point us to. Data held by the services in section 5 follows their own retention rules.</p>
+      <p>Local browser data can be cleared at any time through your browser settings. Account data, League submissions, league assignments, suggestions, and Online Debate rooms (including their transcripts) are kept until you ask us to delete them, because we do not yet delete them automatically. A coach can delete a student's rounds from their league with the coach key, and can delete assignments. Voice setup messages are deleted when a debate ends (or after about 15 minutes, when the cleanup next runs), and live text is deleted when a turn ends. Anonymous usage counts are deleted automatically after about 13 months. Email us (section 11) and we will delete your account and its round summaries, and any room or League entry you point us to. Data held by the services in section 5 follows their own retention rules.</p>
 
       <h4>9. Security</h4>
       <p>Passwords are stored only as one-way bcrypt hashes. The site is served over HTTPS. Our AI service keys stay on the server. No online service is perfectly secure, and a League code is not a password.</p>
@@ -3450,6 +3510,84 @@ const FALLACIES = [
    ========================================================================= */
 const TRANSLATIONS = {
   en: {
+    "how.privacy.voice": "In online debates, voice goes straight between the two debaters' browsers and we don't record it. Your mic is switched off except on your own turn.",
+    "league.open.title": "Open a dashboard",
+    "league.joined": "League code {code} added.",
+    "league.student.used": "Topic set from your coach's assignment.",
+    "league.student.use": "Use this topic",
+    "league.student.banner": "From your coach: {title}",
+    "league.assign.dueon": "Due {date}",
+    "league.assign.done": "{a} of {b} students have practiced this topic",
+    "league.assign.delete": "Delete",
+    "league.assign.posted": "Assignment posted.",
+    "league.assign.post": "Post assignment",
+    "league.assign.note": "Note to students (optional)",
+    "league.assign.due": "Due date (optional)",
+    "league.assign.mode": "Format",
+    "league.assign.topic": "Topic or resolution",
+    "league.assign.titlefield": "Title",
+    "league.assign.new": "New assignment",
+    "league.assign.none": "No assignments yet.",
+    "league.assign.title": "Assignments",
+    "league.copylink": "Copy student link",
+    "league.coach.forget": "Forget my coach key here",
+    "league.coach.on": "Coach tools are unlocked on this device.",
+    "league.recent": "Recent rounds",
+    "league.nopersonas": "No AI-judged rounds yet.",
+    "league.personas": "Scores by judge persona",
+    "league.practice": "Practice spotting fallacies",
+    "league.nofallacies": "No fallacies logged yet.",
+    "league.fallacies": "Most common fallacies",
+    "league.exportrounds": "Download all rounds (CSV)",
+    "league.exportstudents": "Download students (CSV)",
+    "league.col.last": "Last active",
+    "league.col.top": "Most common fallacy",
+    "league.col.avg": "Avg score",
+    "league.col.rounds": "Rounds",
+    "league.col.name": "Name",
+    "league.students": "Students",
+    "league.stats.week": "{n} this week",
+    "league.stats.students": "{n} students",
+    "league.stats.rounds": "{n} rounds",
+    "league.removed": "Removed {n} rounds.",
+    "league.remove.confirm": "Delete all of {name}'s rounds from this league? This can't be undone.",
+    "league.remove": "Remove",
+    "league.nrounds": "{n} rounds",
+    "league.avg": "avg {n} pts",
+    "league.nopersona": "No persona selected",
+    "league.learn": "Learn",
+    "league.empty": "No rounds submitted under \"{code}\" yet. Have students open your link, or add this code in Setup under League code.",
+    "league.thisweek": "now",
+    "league.weekly": "Rounds per week (last 8 weeks)",
+    "league.badge": "League",
+    "league.loadfail": "Couldn't load the dashboard.",
+    "league.coach.invalid": "That coach key doesn't match this league.",
+    "league.loading": "Loading league…",
+    "league.nocode": "Enter a league code first.",
+    "handout.privacy": "The coach sees your name as typed, scores, topics and fallacy names. No audio is shared.",
+    "handout.step3": "Practice. Your finished rounds show up on your coach's dashboard.",
+    "handout.step2": "Check that the league code is {code} (it's filled in if you used the link), and type your name.",
+    "handout.step1": "Open {link}",
+    "handout.sub": "Practice debate with live feedback. Your coach can see how the team is doing.",
+    "handout.title": "Join {name} on Verdict Debate",
+    "league.handout": "Print a student handout",
+    "league.opendash": "Open my dashboard",
+    "league.coachkey.label": "Coach key (only if you're the coach)",
+    "league.coachkey.download": "Download key file",
+    "league.coachkey.warn": "Save this now. We only show it once, and it unlocks assignments and removing students. It's saved on this device so you can come back, but keep a copy somewhere safe.",
+    "league.coachkey.title": "Coach key",
+    "league.link": "Student link",
+    "league.copyfail": "Couldn't copy. Select it and copy by hand.",
+    "league.copied": "Copied.",
+    "league.copy": "Copy",
+    "league.code": "League code",
+    "league.created": "{name} is ready",
+    "league.create.short": "Give your league a name (at least 3 characters).",
+    "league.create.btn": "Create league",
+    "league.create.nameph": "e.g. Lincoln High Debate Team",
+    "league.create.name": "League name",
+    "league.create.desc": "Name it, and you get a league code, a link to send students, and a private coach key for posting assignments.",
+    "league.create.title": "Start a league",
     "online.note.fallacy": "{name}: {label}",
     "online.note.wrong": "{name}: −1 wrong claim",
     "online.note.fact": "{name}: +1 fact",
@@ -3644,7 +3782,7 @@ const TRANSLATIONS = {
     "progress.lead": "Every debate you finish (live or practice) gets logged locally in this browser — no account needed. See which fallacies you keep running into and how different judge personas have scored you.",
     "league.eyebrow": "League Dashboard",
     "league.title": "See how your whole league is doing.",
-    "league.lead": "For coaches and tournament directors. Enter a league code to see aggregate stats across everyone submitting under it.",
+    "league.lead": "For coaches and tournament directors. Start a league in a minute, share one link with your students, and see who practiced, what they struggle with, and how they're improving. Free, and students don't need accounts.",
     "online.eyebrow": "Online Debate",
     "online.title": "Debate someone on another device.",
     "online.lead": "Two accounts, two devices, one shared round. You can hear each other, but your mic is only live on your own turn, and you read your opponent's words as they speak. Verdict Debate syncs the turns, transcript, and scores between you.",
@@ -3835,6 +3973,84 @@ const TRANSLATIONS = {
     "cookie.gotit": "Got it",
   },
   es: {
+    "how.privacy.voice": "En los debates en línea, la voz va directamente entre los navegadores de los dos debatientes y no la grabamos. Tu micrófono está apagado salvo en tu turno.",
+    "league.open.title": "Abrir un panel",
+    "league.joined": "Código de liga {code} añadido.",
+    "league.student.used": "Tema tomado de la tarea de tu entrenador.",
+    "league.student.use": "Usar este tema",
+    "league.student.banner": "De tu entrenador: {title}",
+    "league.assign.dueon": "Entrega: {date}",
+    "league.assign.done": "{a} de {b} estudiantes han practicado este tema",
+    "league.assign.delete": "Eliminar",
+    "league.assign.posted": "Tarea publicada.",
+    "league.assign.post": "Publicar tarea",
+    "league.assign.note": "Nota para los estudiantes (opcional)",
+    "league.assign.due": "Fecha de entrega (opcional)",
+    "league.assign.mode": "Formato",
+    "league.assign.topic": "Tema o resolución",
+    "league.assign.titlefield": "Título",
+    "league.assign.new": "Nueva tarea",
+    "league.assign.none": "Aún no hay tareas.",
+    "league.assign.title": "Tareas",
+    "league.copylink": "Copiar enlace para estudiantes",
+    "league.coach.forget": "Olvidar mi clave de entrenador aquí",
+    "league.coach.on": "Las herramientas de entrenador están activas en este dispositivo.",
+    "league.recent": "Rondas recientes",
+    "league.nopersonas": "Aún no hay rondas juzgadas por IA.",
+    "league.personas": "Puntuaciones por perfil de juez",
+    "league.practice": "Practicar detectando falacias",
+    "league.nofallacies": "Aún no hay falacias registradas.",
+    "league.fallacies": "Falacias más comunes",
+    "league.exportrounds": "Descargar todas las rondas (CSV)",
+    "league.exportstudents": "Descargar estudiantes (CSV)",
+    "league.col.last": "Última actividad",
+    "league.col.top": "Falacia más común",
+    "league.col.avg": "Prom. de puntos",
+    "league.col.rounds": "Rondas",
+    "league.col.name": "Nombre",
+    "league.students": "Estudiantes",
+    "league.stats.week": "{n} esta semana",
+    "league.stats.students": "{n} estudiantes",
+    "league.stats.rounds": "{n} rondas",
+    "league.removed": "Se eliminaron {n} rondas.",
+    "league.remove.confirm": "¿Eliminar todas las rondas de {name} de esta liga? No se puede deshacer.",
+    "league.remove": "Quitar",
+    "league.nrounds": "{n} rondas",
+    "league.avg": "prom. {n} pts",
+    "league.nopersona": "Sin perfil seleccionado",
+    "league.learn": "Aprender",
+    "league.empty": "Aún no hay rondas enviadas con \"{code}\". Pide a los estudiantes que abran tu enlace o que añadan este código en Configuración, en Código de liga.",
+    "league.thisweek": "ahora",
+    "league.weekly": "Rondas por semana (últimas 8 semanas)",
+    "league.badge": "Liga",
+    "league.loadfail": "No se pudo cargar el panel.",
+    "league.coach.invalid": "Esa clave de entrenador no corresponde a esta liga.",
+    "league.loading": "Cargando la liga…",
+    "league.nocode": "Escribe primero un código de liga.",
+    "handout.privacy": "El entrenador ve tu nombre tal como lo escribiste, puntuaciones, temas y nombres de falacias. No se comparte audio.",
+    "handout.step3": "Practica. Tus rondas terminadas aparecen en el panel de tu entrenador.",
+    "handout.step2": "Comprueba que el código de liga sea {code} (aparece ya escrito si usaste el enlace) y escribe tu nombre.",
+    "handout.step1": "Abre {link}",
+    "handout.sub": "Practica debate con comentarios en vivo. Tu entrenador puede ver cómo va el equipo.",
+    "handout.title": "Únete a {name} en Verdict Debate",
+    "league.handout": "Imprimir una hoja para estudiantes",
+    "league.opendash": "Abrir mi panel",
+    "league.coachkey.label": "Clave de entrenador (solo si eres el entrenador)",
+    "league.coachkey.download": "Descargar archivo de la clave",
+    "league.coachkey.warn": "Guárdala ahora. Solo se muestra una vez y desbloquea tareas y la eliminación de estudiantes. Queda guardada en este dispositivo, pero conserva una copia en un lugar seguro.",
+    "league.coachkey.title": "Clave de entrenador",
+    "league.link": "Enlace para estudiantes",
+    "league.copyfail": "No se pudo copiar. Selecciónalo y cópialo a mano.",
+    "league.copied": "Copiado.",
+    "league.copy": "Copiar",
+    "league.code": "Código de liga",
+    "league.created": "{name} está lista",
+    "league.create.short": "Ponle un nombre a tu liga (mínimo 3 caracteres).",
+    "league.create.btn": "Crear liga",
+    "league.create.nameph": "p. ej., Equipo de debate del Instituto Lincoln",
+    "league.create.name": "Nombre de la liga",
+    "league.create.desc": "Ponle nombre y recibirás un código de liga, un enlace para enviar a los estudiantes y una clave privada de entrenador para publicar tareas.",
+    "league.create.title": "Crear una liga",
     "online.note.fallacy": "{name}: {label}",
     "online.note.wrong": "{name}: −1 afirmación falsa",
     "online.note.fact": "{name}: +1 dato",
@@ -4029,7 +4245,7 @@ const TRANSLATIONS = {
     "progress.lead": "Cada debate que termines (en vivo o práctica) se registra localmente en este navegador — sin necesidad de cuenta. Mira qué falacias sigues cometiendo y cómo te han calificado los distintos perfiles de juez.",
     "league.eyebrow": "Panel de liga",
     "league.title": "Mira cómo le va a toda tu liga.",
-    "league.lead": "Para entrenadores y directores de torneo. Ingresa un código de liga para ver estadísticas agregadas de todos los que envían resultados con ese código.",
+    "league.lead": "Para entrenadores y directores de torneo. Crea una liga en un minuto, comparte un enlace con tus estudiantes y mira quién practicó, en qué les cuesta y cómo mejoran. Gratis, y los estudiantes no necesitan cuenta.",
     "online.eyebrow": "Debate en línea",
     "online.title": "Debate con alguien en otro dispositivo.",
     "online.lead": "Dos cuentas, dos dispositivos, una ronda compartida. Se oyen entre ustedes, pero tu micrófono solo está activo en tu turno, y lees las palabras de tu oponente mientras habla. Verdict Debate sincroniza turnos, transcripción y puntuaciones entre ustedes.",
@@ -4220,6 +4436,84 @@ const TRANSLATIONS = {
     "cookie.gotit": "Entendido",
   },
   fr: {
+    "how.privacy.voice": "Dans les débats en ligne, la voix passe directement entre les navigateurs des deux débatteurs et nous ne l'enregistrons pas. Votre micro est coupé sauf pendant votre tour.",
+    "league.open.title": "Ouvrir un tableau de bord",
+    "league.joined": "Code de ligue {code} ajouté.",
+    "league.student.used": "Sujet repris du devoir de votre entraîneur.",
+    "league.student.use": "Utiliser ce sujet",
+    "league.student.banner": "De votre entraîneur : {title}",
+    "league.assign.dueon": "Pour le {date}",
+    "league.assign.done": "{a} élèves sur {b} se sont entraînés sur ce sujet",
+    "league.assign.delete": "Supprimer",
+    "league.assign.posted": "Devoir publié.",
+    "league.assign.post": "Publier le devoir",
+    "league.assign.note": "Note pour les élèves (facultatif)",
+    "league.assign.due": "Date limite (facultatif)",
+    "league.assign.mode": "Format",
+    "league.assign.topic": "Sujet ou résolution",
+    "league.assign.titlefield": "Titre",
+    "league.assign.new": "Nouveau devoir",
+    "league.assign.none": "Aucun devoir pour l'instant.",
+    "league.assign.title": "Devoirs",
+    "league.copylink": "Copier le lien élèves",
+    "league.coach.forget": "Oublier ma clé d'entraîneur ici",
+    "league.coach.on": "Les outils d'entraîneur sont débloqués sur cet appareil.",
+    "league.recent": "Manches récentes",
+    "league.nopersonas": "Aucune manche jugée par l'IA pour l'instant.",
+    "league.personas": "Scores par profil de juge",
+    "league.practice": "S'entraîner à repérer les sophismes",
+    "league.nofallacies": "Aucun sophisme enregistré pour l'instant.",
+    "league.fallacies": "Sophismes les plus fréquents",
+    "league.exportrounds": "Télécharger toutes les manches (CSV)",
+    "league.exportstudents": "Télécharger les élèves (CSV)",
+    "league.col.last": "Dernière activité",
+    "league.col.top": "Sophisme le plus fréquent",
+    "league.col.avg": "Score moyen",
+    "league.col.rounds": "Manches",
+    "league.col.name": "Nom",
+    "league.students": "Élèves",
+    "league.stats.week": "{n} cette semaine",
+    "league.stats.students": "{n} élèves",
+    "league.stats.rounds": "{n} manches",
+    "league.removed": "{n} manches supprimées.",
+    "league.remove.confirm": "Supprimer toutes les manches de {name} de cette ligue ? Cette action est irréversible.",
+    "league.remove": "Retirer",
+    "league.nrounds": "{n} manches",
+    "league.avg": "moy. {n} pts",
+    "league.nopersona": "Aucun profil choisi",
+    "league.learn": "Apprendre",
+    "league.empty": "Aucune manche envoyée avec « {code} » pour l'instant. Demandez aux élèves d'ouvrir votre lien ou d'ajouter ce code dans Configuration, sous Code de ligue.",
+    "league.thisweek": "now",
+    "league.weekly": "Manches par semaine (8 dernières semaines)",
+    "league.badge": "Ligue",
+    "league.loadfail": "Impossible de charger le tableau de bord.",
+    "league.coach.invalid": "Cette clé d'entraîneur ne correspond pas à cette ligue.",
+    "league.loading": "Chargement de la ligue…",
+    "league.nocode": "Saisissez d'abord un code de ligue.",
+    "handout.privacy": "L'entraîneur voit votre nom tel que saisi, les scores, les sujets et les noms des sophismes. Aucun audio n'est partagé.",
+    "handout.step3": "Entraînez-vous. Vos manches terminées apparaissent sur le tableau de bord de votre entraîneur.",
+    "handout.step2": "Vérifiez que le code de ligue est {code} (il est prérempli si vous avez utilisé le lien) et saisissez votre nom.",
+    "handout.step1": "Ouvrez {link}",
+    "handout.sub": "Entraînez-vous au débat avec un retour en direct. Votre entraîneur voit comment va l'équipe.",
+    "handout.title": "Rejoignez {name} sur Verdict Debate",
+    "league.handout": "Imprimer une fiche pour les élèves",
+    "league.opendash": "Ouvrir mon tableau de bord",
+    "league.coachkey.label": "Clé d'entraîneur (seulement si vous êtes l'entraîneur)",
+    "league.coachkey.download": "Télécharger le fichier de la clé",
+    "league.coachkey.warn": "Enregistrez-la maintenant. Elle n'est affichée qu'une fois et débloque les devoirs et la suppression d'élèves. Elle est gardée sur cet appareil, mais conservez-en une copie en lieu sûr.",
+    "league.coachkey.title": "Clé d'entraîneur",
+    "league.link": "Lien pour les élèves",
+    "league.copyfail": "Copie impossible. Sélectionnez et copiez à la main.",
+    "league.copied": "Copié.",
+    "league.copy": "Copier",
+    "league.code": "Code de ligue",
+    "league.created": "{name} est prête",
+    "league.create.short": "Donnez un nom à votre ligue (3 caractères minimum).",
+    "league.create.btn": "Créer la ligue",
+    "league.create.nameph": "ex. : Équipe de débat du lycée Lincoln",
+    "league.create.name": "Nom de la ligue",
+    "league.create.desc": "Donnez-lui un nom et vous recevez un code de ligue, un lien à envoyer aux élèves et une clé d'entraîneur privée pour publier des devoirs.",
+    "league.create.title": "Créer une ligue",
     "online.note.fallacy": "{name} : {label}",
     "online.note.wrong": "{name} : −1 affirmation fausse",
     "online.note.fact": "{name} : +1 fait",
@@ -4477,7 +4771,7 @@ const TRANSLATIONS = {
     "progress.lead": "Chaque débat terminé (en direct ou entraînement) est enregistré localement dans ce navigateur — aucun compte nécessaire. Voyez quels sophismes reviennent sans cesse et comment les différents profils de juge vous ont noté.",
     "league.eyebrow": "Tableau de bord de la ligue",
     "league.title": "Voyez comment va toute votre ligue.",
-    "league.lead": "Pour les entraîneurs et les directeurs de tournoi. Saisissez un code de ligue pour voir les statistiques cumulées de tous ceux qui envoient des résultats avec ce code.",
+    "league.lead": "Pour les entraîneurs et directeurs de tournoi. Créez une ligue en une minute, partagez un lien avec vos élèves et voyez qui s'est entraîné, où ils bloquent et comment ils progressent. Gratuit, et les élèves n'ont pas besoin de compte.",
     "online.eyebrow": "Débat en ligne",
     "online.title": "Débattez avec quelqu'un sur un autre appareil.",
     "online.lead": "Deux comptes, deux appareils, une manche partagée. Vous vous entendez, mais votre micro n'est actif que pendant votre tour, et vous lisez les mots de votre adversaire pendant qu'il parle. Verdict Debate synchronise les tours, la transcription et les scores entre vous.",
@@ -4720,6 +5014,84 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russe",
   },
   de: {
+    "how.privacy.voice": "Bei Online-Debatten geht die Stimme direkt zwischen den Browsern der beiden Debattierenden, und wir nehmen sie nicht auf. Dein Mikrofon ist außer in deinem Beitrag ausgeschaltet.",
+    "league.open.title": "Dashboard öffnen",
+    "league.joined": "Ligacode {code} hinzugefügt.",
+    "league.student.used": "Thema aus der Aufgabe deines Trainers übernommen.",
+    "league.student.use": "Dieses Thema verwenden",
+    "league.student.banner": "Von deinem Trainer: {title}",
+    "league.assign.dueon": "Fällig am {date}",
+    "league.assign.done": "{a} von {b} Schülern haben dieses Thema geübt",
+    "league.assign.delete": "Löschen",
+    "league.assign.posted": "Aufgabe gestellt.",
+    "league.assign.post": "Aufgabe stellen",
+    "league.assign.note": "Hinweis an die Schüler (optional)",
+    "league.assign.due": "Fälligkeitsdatum (optional)",
+    "league.assign.mode": "Format",
+    "league.assign.topic": "Thema oder Resolution",
+    "league.assign.titlefield": "Titel",
+    "league.assign.new": "Neue Aufgabe",
+    "league.assign.none": "Noch keine Aufgaben.",
+    "league.assign.title": "Aufgaben",
+    "league.copylink": "Schüler-Link kopieren",
+    "league.coach.forget": "Meinen Trainerschlüssel hier vergessen",
+    "league.coach.on": "Trainer-Werkzeuge sind auf diesem Gerät freigeschaltet.",
+    "league.recent": "Letzte Runden",
+    "league.nopersonas": "Noch keine von der KI bewerteten Runden.",
+    "league.personas": "Punkte nach Richterprofil",
+    "league.practice": "Fehlschlüsse erkennen üben",
+    "league.nofallacies": "Noch keine Fehlschlüsse erfasst.",
+    "league.fallacies": "Häufigste Fehlschlüsse",
+    "league.exportrounds": "Alle Runden herunterladen (CSV)",
+    "league.exportstudents": "Schüler herunterladen (CSV)",
+    "league.col.last": "Zuletzt aktiv",
+    "league.col.top": "Häufigster Fehlschluss",
+    "league.col.avg": "Ø Punkte",
+    "league.col.rounds": "Runden",
+    "league.col.name": "Name",
+    "league.students": "Schüler",
+    "league.stats.week": "{n} diese Woche",
+    "league.stats.students": "{n} Schüler",
+    "league.stats.rounds": "{n} Runden",
+    "league.removed": "{n} Runden entfernt.",
+    "league.remove.confirm": "Alle Runden von {name} aus dieser Liga löschen? Das lässt sich nicht rückgängig machen.",
+    "league.remove": "Entfernen",
+    "league.nrounds": "{n} Runden",
+    "league.avg": "Ø {n} Pkt.",
+    "league.nopersona": "Kein Profil gewählt",
+    "league.learn": "Lernen",
+    "league.empty": "Noch keine Runden unter „{code}“. Lass Schüler deinen Link öffnen oder diesen Code in der Einrichtung unter Ligacode eintragen.",
+    "league.thisweek": "jetzt",
+    "league.weekly": "Runden pro Woche (letzte 8 Wochen)",
+    "league.badge": "Liga",
+    "league.loadfail": "Das Dashboard konnte nicht geladen werden.",
+    "league.coach.invalid": "Dieser Trainerschlüssel passt nicht zu dieser Liga.",
+    "league.loading": "Liga wird geladen…",
+    "league.nocode": "Gib zuerst einen Ligacode ein.",
+    "handout.privacy": "Der Trainer sieht deinen Namen wie eingegeben, Punkte, Themen und Fehlschluss-Namen. Es wird kein Audio geteilt.",
+    "handout.step3": "Übe. Deine abgeschlossenen Runden erscheinen im Dashboard deines Trainers.",
+    "handout.step2": "Prüfe, dass der Ligacode {code} lautet (er ist vorausgefüllt, wenn du den Link benutzt hast), und gib deinen Namen ein.",
+    "handout.step1": "Öffne {link}",
+    "handout.sub": "Übe Debatte mit Live-Feedback. Dein Trainer sieht, wie es dem Team geht.",
+    "handout.title": "Tritt {name} auf Verdict Debate bei",
+    "league.handout": "Schüler-Handzettel drucken",
+    "league.opendash": "Mein Dashboard öffnen",
+    "league.coachkey.label": "Trainerschlüssel (nur für Trainer)",
+    "league.coachkey.download": "Schlüsseldatei herunterladen",
+    "league.coachkey.warn": "Speichere ihn jetzt. Er wird nur einmal angezeigt und schaltet Aufgaben und das Entfernen von Schülern frei. Er bleibt auf diesem Gerät gespeichert, aber bewahre eine Kopie sicher auf.",
+    "league.coachkey.title": "Trainerschlüssel",
+    "league.link": "Schüler-Link",
+    "league.copyfail": "Kopieren fehlgeschlagen. Markiere es und kopiere von Hand.",
+    "league.copied": "Kopiert.",
+    "league.copy": "Kopieren",
+    "league.code": "Ligacode",
+    "league.created": "{name} ist bereit",
+    "league.create.short": "Gib deiner Liga einen Namen (mindestens 3 Zeichen).",
+    "league.create.btn": "Liga erstellen",
+    "league.create.nameph": "z. B. Debattierteam der Lincoln High",
+    "league.create.name": "Name der Liga",
+    "league.create.desc": "Gib ihr einen Namen und du bekommst einen Ligacode, einen Link für Schüler und einen privaten Trainerschlüssel zum Stellen von Aufgaben.",
+    "league.create.title": "Liga starten",
     "online.note.fallacy": "{name}: {label}",
     "online.note.wrong": "{name}: −1 falsche Behauptung",
     "online.note.fact": "{name}: +1 Fakt",
@@ -4977,7 +5349,7 @@ const TRANSLATIONS = {
     "progress.lead": "Jede abgeschlossene Debatte (live oder Übung) wird lokal in diesem Browser gespeichert — kein Konto nötig. Sieh, über welche Fehlschlüsse du immer wieder stolperst und wie verschiedene Richterprofile dich bewertet haben.",
     "league.eyebrow": "Liga-Dashboard",
     "league.title": "Sieh, wie es deiner ganzen Liga geht.",
-    "league.lead": "Für Trainer und Turnierleiter. Gib einen Ligacode ein, um die zusammengefassten Statistiken aller zu sehen, die unter diesem Code Ergebnisse einreichen.",
+    "league.lead": "Für Trainer und Turnierleiter. Starte in einer Minute eine Liga, teile einen Link mit deinen Schülern und sieh, wer geübt hat, wo es hakt und wie sie sich verbessern. Kostenlos, und Schüler brauchen kein Konto.",
     "online.eyebrow": "Online-Debatte",
     "online.title": "Debattiere mit jemandem auf einem anderen Gerät.",
     "online.lead": "Zwei Konten, zwei Geräte, eine gemeinsame Runde. Ihr hört euch, aber dein Mikrofon ist nur in deinem Beitrag aktiv, und du liest die Worte deines Gegners, während er spricht. Verdict Debate synchronisiert Beiträge, Transkript und Punkte zwischen euch.",
@@ -5220,6 +5592,84 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russisch",
   },
   it: {
+    "how.privacy.voice": "Nei dibattiti online la voce passa direttamente tra i browser dei due dibattenti e non la registriamo. Il tuo microfono è spento tranne nel tuo turno.",
+    "league.open.title": "Apri una dashboard",
+    "league.joined": "Codice lega {code} aggiunto.",
+    "league.student.used": "Argomento preso dal compito del tuo allenatore.",
+    "league.student.use": "Usa questo argomento",
+    "league.student.banner": "Dal tuo allenatore: {title}",
+    "league.assign.dueon": "Scadenza: {date}",
+    "league.assign.done": "{a} studenti su {b} si sono esercitati su questo argomento",
+    "league.assign.delete": "Elimina",
+    "league.assign.posted": "Compito pubblicato.",
+    "league.assign.post": "Pubblica il compito",
+    "league.assign.note": "Nota per gli studenti (facoltativa)",
+    "league.assign.due": "Scadenza (facoltativa)",
+    "league.assign.mode": "Formato",
+    "league.assign.topic": "Argomento o risoluzione",
+    "league.assign.titlefield": "Titolo",
+    "league.assign.new": "Nuovo compito",
+    "league.assign.none": "Nessun compito.",
+    "league.assign.title": "Compiti",
+    "league.copylink": "Copia il link per gli studenti",
+    "league.coach.forget": "Dimentica la mia chiave allenatore qui",
+    "league.coach.on": "Gli strumenti da allenatore sono attivi su questo dispositivo.",
+    "league.recent": "Round recenti",
+    "league.nopersonas": "Nessun round giudicato dall'IA.",
+    "league.personas": "Punteggi per profilo di giudice",
+    "league.practice": "Esercitati a riconoscere le fallacie",
+    "league.nofallacies": "Nessuna fallacia registrata.",
+    "league.fallacies": "Fallacie più comuni",
+    "league.exportrounds": "Scarica tutti i round (CSV)",
+    "league.exportstudents": "Scarica gli studenti (CSV)",
+    "league.col.last": "Ultima attività",
+    "league.col.top": "Fallacia più comune",
+    "league.col.avg": "Punteggio medio",
+    "league.col.rounds": "Round",
+    "league.col.name": "Nome",
+    "league.students": "Studenti",
+    "league.stats.week": "{n} questa settimana",
+    "league.stats.students": "{n} studenti",
+    "league.stats.rounds": "{n} round",
+    "league.removed": "Rimossi {n} round.",
+    "league.remove.confirm": "Eliminare tutti i round di {name} da questa lega? L'operazione è irreversibile.",
+    "league.remove": "Rimuovi",
+    "league.nrounds": "{n} round",
+    "league.avg": "media {n} pt",
+    "league.nopersona": "Nessun profilo selezionato",
+    "league.learn": "Impara",
+    "league.empty": "Nessun round inviato con «{code}» per ora. Fai aprire il tuo link agli studenti o inserire questo codice in Impostazioni, sotto Codice lega.",
+    "league.thisweek": "ora",
+    "league.weekly": "Round a settimana (ultime 8 settimane)",
+    "league.badge": "Lega",
+    "league.loadfail": "Impossibile caricare la dashboard.",
+    "league.coach.invalid": "Questa chiave allenatore non corrisponde a questa lega.",
+    "league.loading": "Caricamento della lega…",
+    "league.nocode": "Inserisci prima un codice lega.",
+    "handout.privacy": "L'allenatore vede il tuo nome come scritto, i punteggi, gli argomenti e i nomi delle fallacie. Non viene condiviso alcun audio.",
+    "handout.step3": "Esercitati. I round completati compaiono nella dashboard del tuo allenatore.",
+    "handout.step2": "Controlla che il codice lega sia {code} (è già inserito se hai usato il link) e scrivi il tuo nome.",
+    "handout.step1": "Apri {link}",
+    "handout.sub": "Esercitati nel dibattito con feedback in diretta. Il tuo allenatore vede come va la squadra.",
+    "handout.title": "Unisciti a {name} su Verdict Debate",
+    "league.handout": "Stampa un foglio per gli studenti",
+    "league.opendash": "Apri la mia dashboard",
+    "league.coachkey.label": "Chiave allenatore (solo se sei l'allenatore)",
+    "league.coachkey.download": "Scarica il file della chiave",
+    "league.coachkey.warn": "Salvala ora. Viene mostrata una sola volta e sblocca compiti e rimozione degli studenti. Resta salvata su questo dispositivo, ma conserva una copia in un posto sicuro.",
+    "league.coachkey.title": "Chiave allenatore",
+    "league.link": "Link per gli studenti",
+    "league.copyfail": "Impossibile copiare. Selezionalo e copialo a mano.",
+    "league.copied": "Copiato.",
+    "league.copy": "Copia",
+    "league.code": "Codice lega",
+    "league.created": "{name} è pronta",
+    "league.create.short": "Dai un nome alla tua lega (almeno 3 caratteri).",
+    "league.create.btn": "Crea lega",
+    "league.create.nameph": "es. Squadra di dibattito del Liceo Lincoln",
+    "league.create.name": "Nome della lega",
+    "league.create.desc": "Dalle un nome e ricevi un codice lega, un link da inviare agli studenti e una chiave allenatore privata per pubblicare compiti.",
+    "league.create.title": "Crea una lega",
     "online.note.fallacy": "{name}: {label}",
     "online.note.wrong": "{name}: −1 affermazione falsa",
     "online.note.fact": "{name}: +1 fatto",
@@ -5477,7 +5927,7 @@ const TRANSLATIONS = {
     "progress.lead": "Ogni dibattito che concludi (dal vivo o di allenamento) viene salvato localmente in questo browser — non serve un account. Scopri su quali fallacie inciampi e come ti hanno valutato i diversi profili di giudice.",
     "league.eyebrow": "Dashboard della lega",
     "league.title": "Guarda come sta andando tutta la tua lega.",
-    "league.lead": "Per allenatori e direttori di torneo. Inserisci un codice lega per vedere le statistiche aggregate di tutti coloro che inviano risultati con quel codice.",
+    "league.lead": "Per allenatori e direttori di torneo. Crea una lega in un minuto, condividi un link con gli studenti e vedi chi si è esercitato, dove fanno fatica e come migliorano. Gratis, e gli studenti non hanno bisogno di account.",
     "online.eyebrow": "Dibattito online",
     "online.title": "Dibatti con qualcuno su un altro dispositivo.",
     "online.lead": "Due account, due dispositivi, un unico round condiviso. Vi sentite a vicenda, ma il tuo microfono è attivo solo nel tuo turno, e leggi le parole dell'avversario mentre parla. Verdict Debate sincronizza interventi, trascrizione e punteggi tra voi.",
@@ -5720,6 +6170,84 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pt: {
+    "how.privacy.voice": "Nos debates online, a voz vai direto entre os navegadores dos dois debatedores e não a gravamos. Seu microfone fica desligado, exceto na sua vez.",
+    "league.open.title": "Abrir um painel",
+    "league.joined": "Código de liga {code} adicionado.",
+    "league.student.used": "Tema definido a partir da tarefa do seu treinador.",
+    "league.student.use": "Usar este tema",
+    "league.student.banner": "Do seu treinador: {title}",
+    "league.assign.dueon": "Entrega: {date}",
+    "league.assign.done": "{a} de {b} alunos praticaram este tema",
+    "league.assign.delete": "Excluir",
+    "league.assign.posted": "Tarefa publicada.",
+    "league.assign.post": "Publicar tarefa",
+    "league.assign.note": "Nota para os alunos (opcional)",
+    "league.assign.due": "Data de entrega (opcional)",
+    "league.assign.mode": "Formato",
+    "league.assign.topic": "Tema ou resolução",
+    "league.assign.titlefield": "Título",
+    "league.assign.new": "Nova tarefa",
+    "league.assign.none": "Nenhuma tarefa ainda.",
+    "league.assign.title": "Tarefas",
+    "league.copylink": "Copiar link dos alunos",
+    "league.coach.forget": "Esquecer minha chave de treinador aqui",
+    "league.coach.on": "As ferramentas de treinador estão liberadas neste dispositivo.",
+    "league.recent": "Rodadas recentes",
+    "league.nopersonas": "Nenhuma rodada julgada por IA ainda.",
+    "league.personas": "Pontuações por perfil de juiz",
+    "league.practice": "Praticar identificar falácias",
+    "league.nofallacies": "Nenhuma falácia registrada ainda.",
+    "league.fallacies": "Falácias mais comuns",
+    "league.exportrounds": "Baixar todas as rodadas (CSV)",
+    "league.exportstudents": "Baixar alunos (CSV)",
+    "league.col.last": "Última atividade",
+    "league.col.top": "Falácia mais comum",
+    "league.col.avg": "Pontuação média",
+    "league.col.rounds": "Rodadas",
+    "league.col.name": "Nome",
+    "league.students": "Alunos",
+    "league.stats.week": "{n} esta semana",
+    "league.stats.students": "{n} alunos",
+    "league.stats.rounds": "{n} rodadas",
+    "league.removed": "{n} rodadas removidas.",
+    "league.remove.confirm": "Excluir todas as rodadas de {name} desta liga? Isso não pode ser desfeito.",
+    "league.remove": "Remover",
+    "league.nrounds": "{n} rodadas",
+    "league.avg": "méd. {n} pts",
+    "league.nopersona": "Nenhum perfil selecionado",
+    "league.learn": "Aprender",
+    "league.empty": "Nenhuma rodada enviada com \"{code}\" ainda. Peça aos alunos que abram seu link ou que adicionem este código em Configuração, em Código da liga.",
+    "league.thisweek": "agora",
+    "league.weekly": "Rodadas por semana (últimas 8 semanas)",
+    "league.badge": "Liga",
+    "league.loadfail": "Não foi possível carregar o painel.",
+    "league.coach.invalid": "Essa chave de treinador não corresponde a esta liga.",
+    "league.loading": "Carregando a liga…",
+    "league.nocode": "Digite primeiro um código de liga.",
+    "handout.privacy": "O treinador vê seu nome como digitado, pontuações, temas e nomes de falácias. Nenhum áudio é compartilhado.",
+    "handout.step3": "Pratique. Suas rodadas concluídas aparecem no painel do seu treinador.",
+    "handout.step2": "Confira se o código da liga é {code} (já vem preenchido se você usou o link) e digite seu nome.",
+    "handout.step1": "Abra {link}",
+    "handout.sub": "Pratique debate com feedback ao vivo. Seu treinador vê como a equipe está indo.",
+    "handout.title": "Entre em {name} no Verdict Debate",
+    "league.handout": "Imprimir folha para os alunos",
+    "league.opendash": "Abrir meu painel",
+    "league.coachkey.label": "Chave de treinador (só se você for o treinador)",
+    "league.coachkey.download": "Baixar arquivo da chave",
+    "league.coachkey.warn": "Salve agora. Ela só aparece uma vez e libera tarefas e a remoção de alunos. Fica salva neste dispositivo, mas guarde uma cópia em local seguro.",
+    "league.coachkey.title": "Chave de treinador",
+    "league.link": "Link para os alunos",
+    "league.copyfail": "Não foi possível copiar. Selecione e copie manualmente.",
+    "league.copied": "Copiado.",
+    "league.copy": "Copiar",
+    "league.code": "Código da liga",
+    "league.created": "{name} está pronta",
+    "league.create.short": "Dê um nome à sua liga (pelo menos 3 caracteres).",
+    "league.create.btn": "Criar liga",
+    "league.create.nameph": "ex.: Equipe de debate da Lincoln High",
+    "league.create.name": "Nome da liga",
+    "league.create.desc": "Dê um nome e você recebe um código de liga, um link para enviar aos alunos e uma chave de treinador privada para publicar tarefas.",
+    "league.create.title": "Criar uma liga",
     "online.note.fallacy": "{name}: {label}",
     "online.note.wrong": "{name}: −1 afirmação falsa",
     "online.note.fact": "{name}: +1 fato",
@@ -5977,7 +6505,7 @@ const TRANSLATIONS = {
     "progress.lead": "Cada debate que você termina (ao vivo ou de prática) fica salvo localmente neste navegador — sem precisar de conta. Veja em quais falácias você sempre cai e como diferentes perfis de juiz avaliaram você.",
     "league.eyebrow": "Painel da liga",
     "league.title": "Veja como vai toda a sua liga.",
-    "league.lead": "Para treinadores e diretores de torneio. Digite um código de liga para ver as estatísticas agregadas de todos que enviam resultados com ele.",
+    "league.lead": "Para treinadores e diretores de torneio. Crie uma liga em um minuto, compartilhe um link com seus alunos e veja quem praticou, onde têm dificuldade e como estão melhorando. Grátis, e os alunos não precisam de conta.",
     "online.eyebrow": "Debate online",
     "online.title": "Debata com alguém em outro dispositivo.",
     "online.lead": "Duas contas, dois dispositivos, uma rodada compartilhada. Vocês se ouvem, mas seu microfone só fica ligado na sua vez, e você lê as palavras do adversário enquanto ele fala. O Verdict Debate sincroniza turnos, transcrição e pontuações entre vocês.",
@@ -6220,6 +6748,84 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pl: {
+    "how.privacy.voice": "W debatach online głos idzie bezpośrednio między przeglądarkami dwóch debatantów i go nie nagrywamy. Twój mikrofon jest wyłączony poza Twoją turą.",
+    "league.open.title": "Otwórz panel",
+    "league.joined": "Dodano kod ligi {code}.",
+    "league.student.used": "Temat ustawiony z zadania trenera.",
+    "league.student.use": "Użyj tego tematu",
+    "league.student.banner": "Od Twojego trenera: {title}",
+    "league.assign.dueon": "Termin: {date}",
+    "league.assign.done": "{a} z {b} uczniów ćwiczyło ten temat",
+    "league.assign.delete": "Usuń",
+    "league.assign.posted": "Zadanie opublikowane.",
+    "league.assign.post": "Opublikuj zadanie",
+    "league.assign.note": "Notatka dla uczniów (opcjonalnie)",
+    "league.assign.due": "Termin (opcjonalnie)",
+    "league.assign.mode": "Format",
+    "league.assign.topic": "Temat lub rezolucja",
+    "league.assign.titlefield": "Tytuł",
+    "league.assign.new": "Nowe zadanie",
+    "league.assign.none": "Brak zadań.",
+    "league.assign.title": "Zadania",
+    "league.copylink": "Kopiuj link dla uczniów",
+    "league.coach.forget": "Zapomnij mój klucz trenera tutaj",
+    "league.coach.on": "Narzędzia trenera są odblokowane na tym urządzeniu.",
+    "league.recent": "Ostatnie rundy",
+    "league.nopersonas": "Brak rund ocenionych przez AI.",
+    "league.personas": "Wyniki według profilu sędziego",
+    "league.practice": "Ćwicz wykrywanie błędów logicznych",
+    "league.nofallacies": "Nie zapisano jeszcze błędów logicznych.",
+    "league.fallacies": "Najczęstsze błędy logiczne",
+    "league.exportrounds": "Pobierz wszystkie rundy (CSV)",
+    "league.exportstudents": "Pobierz uczniów (CSV)",
+    "league.col.last": "Ostatnia aktywność",
+    "league.col.top": "Najczęstszy błąd",
+    "league.col.avg": "Śr. wynik",
+    "league.col.rounds": "Rundy",
+    "league.col.name": "Imię",
+    "league.students": "Uczniowie",
+    "league.stats.week": "{n} w tym tygodniu",
+    "league.stats.students": "{n} uczniów",
+    "league.stats.rounds": "{n} rund",
+    "league.removed": "Usunięto rund: {n}.",
+    "league.remove.confirm": "Usunąć wszystkie rundy ucznia {name} z tej ligi? Tego nie można cofnąć.",
+    "league.remove": "Usuń",
+    "league.nrounds": "{n} rund",
+    "league.avg": "śr. {n} pkt",
+    "league.nopersona": "Nie wybrano profilu",
+    "league.learn": "Ucz się",
+    "league.empty": "Nie przesłano jeszcze rund z kodem „{code}”. Poproś uczniów o otwarcie linku lub wpisanie tego kodu w Ustawieniach w polu Kod ligi.",
+    "league.thisweek": "teraz",
+    "league.weekly": "Rundy tygodniowo (ostatnie 8 tygodni)",
+    "league.badge": "Liga",
+    "league.loadfail": "Nie udało się wczytać panelu.",
+    "league.coach.invalid": "Ten klucz trenera nie pasuje do tej ligi.",
+    "league.loading": "Wczytywanie ligi…",
+    "league.nocode": "Najpierw wpisz kod ligi.",
+    "handout.privacy": "Trener widzi Twoje imię tak, jak je wpisano, wyniki, tematy i nazwy błędów. Dźwięk nie jest udostępniany.",
+    "handout.step3": "Ćwicz. Zakończone rundy pojawią się w panelu trenera.",
+    "handout.step2": "Sprawdź, czy kod ligi to {code} (jest wpisany, jeśli użyłeś linku), i wpisz swoje imię.",
+    "handout.step1": "Otwórz {link}",
+    "handout.sub": "Ćwicz debatę z informacją zwrotną na żywo. Trener widzi, jak radzi sobie zespół.",
+    "handout.title": "Dołącz do {name} w Verdict Debate",
+    "league.handout": "Drukuj ulotkę dla uczniów",
+    "league.opendash": "Otwórz mój panel",
+    "league.coachkey.label": "Klucz trenera (tylko dla trenera)",
+    "league.coachkey.download": "Pobierz plik z kluczem",
+    "league.coachkey.warn": "Zapisz go teraz. Pokazujemy go tylko raz, a odblokowuje zadania i usuwanie uczniów. Jest zapamiętany na tym urządzeniu, ale zachowaj kopię w bezpiecznym miejscu.",
+    "league.coachkey.title": "Klucz trenera",
+    "league.link": "Link dla uczniów",
+    "league.copyfail": "Nie udało się skopiować. Zaznacz i skopiuj ręcznie.",
+    "league.copied": "Skopiowano.",
+    "league.copy": "Kopiuj",
+    "league.code": "Kod ligi",
+    "league.created": "{name} jest gotowa",
+    "league.create.short": "Nadaj lidze nazwę (co najmniej 3 znaki).",
+    "league.create.btn": "Utwórz ligę",
+    "league.create.nameph": "np. Drużyna debatancka Lincoln High",
+    "league.create.name": "Nazwa ligi",
+    "league.create.desc": "Nadaj jej nazwę, a otrzymasz kod ligi, link dla uczniów i prywatny klucz trenera do zadawania zadań.",
+    "league.create.title": "Załóż ligę",
     "online.note.fallacy": "{name}: {label}",
     "online.note.wrong": "{name}: −1 fałszywe twierdzenie",
     "online.note.fact": "{name}: +1 fakt",
@@ -6477,7 +7083,7 @@ const TRANSLATIONS = {
     "progress.lead": "Każda zakończona debata (na żywo lub ćwiczebna) zapisuje się lokalnie w tej przeglądarce — konto nie jest potrzebne. Zobacz, w jakie błędy logiczne ciągle wpadasz i jak oceniały Cię różne profile sędziów.",
     "league.eyebrow": "Panel ligi",
     "league.title": "Zobacz, jak radzi sobie cała Twoja liga.",
-    "league.lead": "Dla trenerów i dyrektorów turniejów. Wpisz kod ligi, aby zobaczyć zbiorcze statystyki wszystkich, którzy przesyłają wyniki pod tym kodem.",
+    "league.lead": "Dla trenerów i dyrektorów turniejów. Załóż ligę w minutę, udostępnij uczniom jeden link i zobacz, kto ćwiczył, z czym ma trudności i jak robi postępy. Za darmo, a uczniowie nie potrzebują kont.",
     "online.eyebrow": "Debata online",
     "online.title": "Debatuj z kimś na innym urządzeniu.",
     "online.lead": "Dwa konta, dwa urządzenia, jedna wspólna runda. Słyszycie się nawzajem, ale Twój mikrofon jest włączony tylko w Twojej turze, a słowa przeciwnika czytasz na bieżąco, gdy mówi. Verdict Debate synchronizuje tury, transkrypcję i wyniki między Wami.",
@@ -6720,6 +7326,84 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Rosyjski",
   },
   ja: {
+    "how.privacy.voice": "オンラインディベートでは、音声は2人のブラウザの間で直接やり取りされ、当社は録音しません。マイクは自分のターン以外はオフになります。",
+    "league.open.title": "ダッシュボードを開く",
+    "league.joined": "リーグコード {code} を追加しました。",
+    "league.student.used": "コーチの課題から論題を設定しました。",
+    "league.student.use": "この論題を使う",
+    "league.student.banner": "コーチから：{title}",
+    "league.assign.dueon": "締め切り：{date}",
+    "league.assign.done": "{b}人中{a}人がこの論題を練習済み",
+    "league.assign.delete": "削除",
+    "league.assign.posted": "課題を投稿しました。",
+    "league.assign.post": "課題を投稿",
+    "league.assign.note": "生徒へのメモ（任意）",
+    "league.assign.due": "締め切り（任意）",
+    "league.assign.mode": "形式",
+    "league.assign.topic": "論題または決議",
+    "league.assign.titlefield": "タイトル",
+    "league.assign.new": "新しい課題",
+    "league.assign.none": "課題はまだありません。",
+    "league.assign.title": "課題",
+    "league.copylink": "生徒用リンクをコピー",
+    "league.coach.forget": "この端末のコーチキーを忘れる",
+    "league.coach.on": "この端末ではコーチ機能が使えます。",
+    "league.recent": "最近のラウンド",
+    "league.nopersonas": "AI審査のラウンドはまだありません。",
+    "league.personas": "審査員タイプ別スコア",
+    "league.practice": "誤謬を見抜く練習",
+    "league.nofallacies": "まだ誤謬の記録はありません。",
+    "league.fallacies": "よく出る誤謬",
+    "league.exportrounds": "全ラウンドをダウンロード（CSV）",
+    "league.exportstudents": "生徒一覧をダウンロード（CSV）",
+    "league.col.last": "最終活動",
+    "league.col.top": "最も多い誤謬",
+    "league.col.avg": "平均スコア",
+    "league.col.rounds": "ラウンド",
+    "league.col.name": "名前",
+    "league.students": "生徒",
+    "league.stats.week": "今週{n}件",
+    "league.stats.students": "生徒{n}人",
+    "league.stats.rounds": "{n}ラウンド",
+    "league.removed": "{n}ラウンドを削除しました。",
+    "league.remove.confirm": "{name} のラウンドをこのリーグからすべて削除しますか？ 元に戻せません。",
+    "league.remove": "削除",
+    "league.nrounds": "{n}ラウンド",
+    "league.avg": "平均{n}点",
+    "league.nopersona": "審査員タイプ未選択",
+    "league.learn": "学ぶ",
+    "league.empty": "「{code}」で送信されたラウンドはまだありません。生徒にリンクを開いてもらうか、設定の「リーグコード」にこのコードを入力してもらってください。",
+    "league.thisweek": "今週",
+    "league.weekly": "週ごとのラウンド数（直近8週間）",
+    "league.badge": "リーグ",
+    "league.loadfail": "ダッシュボードを読み込めませんでした。",
+    "league.coach.invalid": "このコーチキーはこのリーグのものではありません。",
+    "league.loading": "リーグを読み込み中…",
+    "league.nocode": "先にリーグコードを入力してください。",
+    "handout.privacy": "コーチには、入力した名前、スコア、論題、誤謬名が表示されます。音声は共有されません。",
+    "handout.step3": "練習しましょう。終えたラウンドはコーチのダッシュボードに表示されます。",
+    "handout.step2": "リーグコードが {code} になっていることを確認し（リンクから開いた場合は入力済み）、名前を入力します。",
+    "handout.step1": "{link} を開く",
+    "handout.sub": "ライブフィードバック付きでディベートを練習しましょう。コーチはチームの様子を確認できます。",
+    "handout.title": "Verdict Debate で {name} に参加しよう",
+    "league.handout": "生徒用の配布資料を印刷",
+    "league.opendash": "ダッシュボードを開く",
+    "league.coachkey.label": "コーチキー（コーチの場合のみ）",
+    "league.coachkey.download": "キーファイルをダウンロード",
+    "league.coachkey.warn": "今すぐ保存してください。表示されるのは一度だけで、課題の投稿や生徒の削除に必要です。この端末にも保存されますが、安全な場所にコピーを控えておいてください。",
+    "league.coachkey.title": "コーチキー",
+    "league.link": "生徒用リンク",
+    "league.copyfail": "コピーできませんでした。選択して手動でコピーしてください。",
+    "league.copied": "コピーしました。",
+    "league.copy": "コピー",
+    "league.code": "リーグコード",
+    "league.created": "{name} の準備ができました",
+    "league.create.short": "リーグに名前をつけてください（3文字以上）。",
+    "league.create.btn": "リーグを作成",
+    "league.create.nameph": "例：リンカーン高校ディベート部",
+    "league.create.name": "リーグ名",
+    "league.create.desc": "名前をつけると、リーグコード、生徒に送るリンク、課題を出すための非公開のコーチキーが手に入ります。",
+    "league.create.title": "リーグを作る",
     "online.note.fallacy": "{name}：{label}",
     "online.note.wrong": "{name}：誤った主張 −1",
     "online.note.fact": "{name}：事実 +1",
@@ -6977,7 +7661,7 @@ const TRANSLATIONS = {
     "progress.lead": "終えたディベート（ライブでも練習でも）はこのブラウザにローカル保存されます — アカウントは不要です。どの誤謬を繰り返しているか、審査員タイプごとにどう採点されたかを確認できます。",
     "league.eyebrow": "リーグダッシュボード",
     "league.title": "リーグ全体の様子を確認しよう。",
-    "league.lead": "コーチや大会運営者向け。リーグコードを入力すると、そのコードで結果を送った全員の集計統計が見られます。",
+    "league.lead": "コーチや大会運営者向け。1分でリーグを作り、リンクを1つ生徒に共有すれば、誰が練習したか、何に苦戦しているか、どれだけ上達しているかが分かります。無料で、生徒のアカウントは不要です。",
     "online.eyebrow": "オンラインディベート",
     "online.title": "別の端末にいる相手とディベート。",
     "online.lead": "2つのアカウント、2台の端末、1つの共有ラウンド。お互いの声は聞こえますが、マイクがオンになるのは自分のターンだけで、相手の言葉は話している間にそのまま読めます。Verdict Debate はターン・文字起こし・スコアを同期します。",
@@ -7220,6 +7904,84 @@ const TRANSLATIONS = {
     "upload.lang.ru": "ロシア語",
   },
   zh: {
+    "how.privacy.voice": "在线辩论中，语音直接在两位辩手的浏览器之间传输，我们不会录音。除你自己的回合外，麦克风保持关闭。",
+    "league.open.title": "打开面板",
+    "league.joined": "已添加联赛代码 {code}。",
+    "league.student.used": "已根据教练的作业设置辩题。",
+    "league.student.use": "使用此辩题",
+    "league.student.banner": "来自教练：{title}",
+    "league.assign.dueon": "截止：{date}",
+    "league.assign.done": "{b} 名学生中有 {a} 人练习过此辩题",
+    "league.assign.delete": "删除",
+    "league.assign.posted": "作业已发布。",
+    "league.assign.post": "发布作业",
+    "league.assign.note": "给学生的留言（可选）",
+    "league.assign.due": "截止日期（可选）",
+    "league.assign.mode": "赛制",
+    "league.assign.topic": "辩题或决议",
+    "league.assign.titlefield": "标题",
+    "league.assign.new": "新作业",
+    "league.assign.none": "暂无作业。",
+    "league.assign.title": "作业",
+    "league.copylink": "复制学生链接",
+    "league.coach.forget": "在此设备上忘记我的教练密钥",
+    "league.coach.on": "此设备已解锁教练工具。",
+    "league.recent": "最近的轮次",
+    "league.nopersonas": "尚无 AI 评判的轮次。",
+    "league.personas": "按评委类型的得分",
+    "league.practice": "练习识别谬误",
+    "league.nofallacies": "尚无谬误记录。",
+    "league.fallacies": "最常见的谬误",
+    "league.exportrounds": "下载全部轮次（CSV）",
+    "league.exportstudents": "下载学生名单（CSV）",
+    "league.col.last": "最近活动",
+    "league.col.top": "最常见谬误",
+    "league.col.avg": "平均分",
+    "league.col.rounds": "轮数",
+    "league.col.name": "姓名",
+    "league.students": "学生",
+    "league.stats.week": "本周 {n} 轮",
+    "league.stats.students": "{n} 名学生",
+    "league.stats.rounds": "{n} 轮",
+    "league.removed": "已删除 {n} 轮。",
+    "league.remove.confirm": "要从该联赛中删除 {name} 的全部轮次吗？此操作无法撤销。",
+    "league.remove": "移除",
+    "league.nrounds": "{n} 轮",
+    "league.avg": "平均 {n} 分",
+    "league.nopersona": "未选择评委类型",
+    "league.learn": "学习",
+    "league.empty": "尚无以“{code}”提交的轮次。请让学生打开你的链接，或在设置的“联赛代码”中填入此代码。",
+    "league.thisweek": "本周",
+    "league.weekly": "每周轮数（最近 8 周）",
+    "league.badge": "联赛",
+    "league.loadfail": "无法加载面板。",
+    "league.coach.invalid": "此教练密钥与该联赛不匹配。",
+    "league.loading": "正在加载联赛…",
+    "league.nocode": "请先输入联赛代码。",
+    "handout.privacy": "教练能看到你输入的姓名、分数、辩题和谬误名称。不会共享任何音频。",
+    "handout.step3": "开始练习。完成的轮次会显示在教练的面板中。",
+    "handout.step2": "确认联赛代码为 {code}（通过链接打开时已自动填好），并输入你的姓名。",
+    "handout.step1": "打开 {link}",
+    "handout.sub": "在实时反馈下练习辩论。教练可以看到团队的情况。",
+    "handout.title": "加入 Verdict Debate 上的 {name}",
+    "league.handout": "打印学生须知",
+    "league.opendash": "打开我的面板",
+    "league.coachkey.label": "教练密钥（仅教练填写）",
+    "league.coachkey.download": "下载密钥文件",
+    "league.coachkey.warn": "请现在保存。它只显示一次，用于发布作业和移除学生。它会保存在此设备上，但请另存一份到安全的地方。",
+    "league.coachkey.title": "教练密钥",
+    "league.link": "学生链接",
+    "league.copyfail": "无法复制。请选中后手动复制。",
+    "league.copied": "已复制。",
+    "league.copy": "复制",
+    "league.code": "联赛代码",
+    "league.created": "{name} 已创建",
+    "league.create.short": "请为联赛起个名字（至少 3 个字符）。",
+    "league.create.btn": "创建联赛",
+    "league.create.nameph": "例如：林肯高中辩论队",
+    "league.create.name": "联赛名称",
+    "league.create.desc": "为它起个名字，你会得到联赛代码、发给学生的链接，以及用于发布作业的私密教练密钥。",
+    "league.create.title": "创建联赛",
     "online.note.fallacy": "{name}：{label}",
     "online.note.wrong": "{name}：错误论断 −1",
     "online.note.fact": "{name}：事实 +1",
@@ -7477,7 +8239,7 @@ const TRANSLATIONS = {
     "progress.lead": "你完成的每场辩论（实战或练习）都会保存在此浏览器本地 — 无需账号。查看你反复出现的谬误，以及不同评委类型对你的评分。",
     "league.eyebrow": "联赛面板",
     "league.title": "查看整个联赛的情况。",
-    "league.lead": "面向教练和赛事负责人。输入联赛代码，即可查看所有使用该代码提交结果的人的汇总统计。",
+    "league.lead": "面向教练和赛事负责人。一分钟创建联赛，把一个链接分享给学生，就能看到谁练习了、在哪里吃力、进步如何。免费，学生无需账号。",
     "online.eyebrow": "在线辩论",
     "online.title": "与另一台设备上的人辩论。",
     "online.lead": "两个账号、两台设备、同一轮共享比赛。你们可以互相听到，但麦克风只在你自己的回合开启，对手发言时你能实时读到他说的话。Verdict Debate 会在你们之间同步回合、文字记录和分数。",
@@ -7720,6 +8482,84 @@ const TRANSLATIONS = {
     "upload.lang.ru": "俄语",
   },
   ru: {
+    "how.privacy.voice": "В онлайн-дебатах голос идёт напрямую между браузерами двух дебатёров, и мы его не записываем. Ваш микрофон выключен, кроме вашего хода.",
+    "league.open.title": "Открыть панель",
+    "league.joined": "Код лиги {code} добавлен.",
+    "league.student.used": "Тема взята из задания тренера.",
+    "league.student.use": "Использовать эту тему",
+    "league.student.banner": "От вашего тренера: {title}",
+    "league.assign.dueon": "Срок: {date}",
+    "league.assign.done": "{a} из {b} учеников тренировали эту тему",
+    "league.assign.delete": "Удалить",
+    "league.assign.posted": "Задание опубликовано.",
+    "league.assign.post": "Опубликовать задание",
+    "league.assign.note": "Заметка ученикам (необязательно)",
+    "league.assign.due": "Срок (необязательно)",
+    "league.assign.mode": "Формат",
+    "league.assign.topic": "Тема или резолюция",
+    "league.assign.titlefield": "Название",
+    "league.assign.new": "Новое задание",
+    "league.assign.none": "Заданий пока нет.",
+    "league.assign.title": "Задания",
+    "league.copylink": "Копировать ссылку для учеников",
+    "league.coach.forget": "Забыть мой ключ тренера здесь",
+    "league.coach.on": "Инструменты тренера разблокированы на этом устройстве.",
+    "league.recent": "Недавние раунды",
+    "league.nopersonas": "Раундов с оценкой ИИ пока нет.",
+    "league.personas": "Счёт по типам судей",
+    "league.practice": "Тренироваться находить ошибки",
+    "league.nofallacies": "Ошибок пока не записано.",
+    "league.fallacies": "Частые логические ошибки",
+    "league.exportrounds": "Скачать все раунды (CSV)",
+    "league.exportstudents": "Скачать учеников (CSV)",
+    "league.col.last": "Последняя активность",
+    "league.col.top": "Частая ошибка",
+    "league.col.avg": "Ср. счёт",
+    "league.col.rounds": "Раунды",
+    "league.col.name": "Имя",
+    "league.students": "Ученики",
+    "league.stats.week": "{n} на этой неделе",
+    "league.stats.students": "учеников: {n}",
+    "league.stats.rounds": "раундов: {n}",
+    "league.removed": "Удалено раундов: {n}.",
+    "league.remove.confirm": "Удалить все раунды {name} из этой лиги? Это нельзя отменить.",
+    "league.remove": "Удалить",
+    "league.nrounds": "раундов: {n}",
+    "league.avg": "в среднем {n} очк.",
+    "league.nopersona": "Тип судьи не выбран",
+    "league.learn": "Изучить",
+    "league.empty": "Раундов с кодом «{code}» пока нет. Попросите учеников открыть вашу ссылку или ввести этот код в Настройке в поле «Код лиги».",
+    "league.thisweek": "сейчас",
+    "league.weekly": "Раундов в неделю (последние 8 недель)",
+    "league.badge": "Лига",
+    "league.loadfail": "Не удалось загрузить панель.",
+    "league.coach.invalid": "Этот ключ тренера не подходит к этой лиге.",
+    "league.loading": "Загружаем лигу…",
+    "league.nocode": "Сначала введите код лиги.",
+    "handout.privacy": "Тренер видит ваше имя как введено, счёт, темы и названия ошибок. Аудио не передаётся.",
+    "handout.step3": "Тренируйтесь. Завершённые раунды появятся на панели тренера.",
+    "handout.step2": "Проверьте, что код лиги — {code} (при переходе по ссылке он уже вписан), и введите своё имя.",
+    "handout.step1": "Откройте {link}",
+    "handout.sub": "Тренируйте дебаты с обратной связью в реальном времени. Тренер видит, как идут дела у команды.",
+    "handout.title": "Присоединяйтесь к {name} на Verdict Debate",
+    "league.handout": "Распечатать памятку для учеников",
+    "league.opendash": "Открыть мою панель",
+    "league.coachkey.label": "Ключ тренера (только для тренера)",
+    "league.coachkey.download": "Скачать файл ключа",
+    "league.coachkey.warn": "Сохраните сейчас. Он показывается только один раз и открывает задания и удаление учеников. Он запоминается на этом устройстве, но сохраните копию в надёжном месте.",
+    "league.coachkey.title": "Ключ тренера",
+    "league.link": "Ссылка для учеников",
+    "league.copyfail": "Не удалось скопировать. Выделите и скопируйте вручную.",
+    "league.copied": "Скопировано.",
+    "league.copy": "Копировать",
+    "league.code": "Код лиги",
+    "league.created": "{name} готова",
+    "league.create.short": "Дайте лиге название (не короче 3 символов).",
+    "league.create.btn": "Создать лигу",
+    "league.create.nameph": "напр.: Дебатная команда школы Линкольн",
+    "league.create.name": "Название лиги",
+    "league.create.desc": "Дайте ей название — и вы получите код лиги, ссылку для учеников и личный ключ тренера для публикации заданий.",
+    "league.create.title": "Создать лигу",
     "online.note.fallacy": "{name}: {label}",
     "online.note.wrong": "{name}: −1 ложное утверждение",
     "online.note.fact": "{name}: +1 факт",
@@ -7977,7 +8817,7 @@ const TRANSLATIONS = {
     "progress.lead": "Каждые завершённые дебаты (живые или тренировочные) сохраняются локально в этом браузере — аккаунт не нужен. Смотрите, в какие логические ошибки вы попадаете чаще всего и как вас оценивали разные типы судей.",
     "league.eyebrow": "Панель лиги",
     "league.title": "Смотрите, как идут дела у всей вашей лиги.",
-    "league.lead": "Для тренеров и организаторов турниров. Введите код лиги, чтобы увидеть сводную статистику всех, кто отправляет результаты с этим кодом.",
+    "league.lead": "Для тренеров и организаторов турниров. Создайте лигу за минуту, поделитесь одной ссылкой с учениками и смотрите, кто тренировался, что даётся тяжело и как идёт прогресс. Бесплатно, аккаунты ученикам не нужны.",
     "online.eyebrow": "Онлайн-дебаты",
     "online.title": "Дебатируйте с человеком на другом устройстве.",
     "online.lead": "Два аккаунта, два устройства, один общий раунд. Вы слышите друг друга, но ваш микрофон включён только в ваш ход, а слова оппонента вы читаете по мере того, как он говорит. Verdict Debate синхронизирует ходы, расшифровку и счёт между вами.",
@@ -10726,85 +11566,6 @@ async function makePersonalLesson() {
    Backed by api/league-stats.js. No real auth: a code is a shared classroom
    code, not a password.
    ========================================================================= */
-async function loadLeagueDashboard() {
-  const code = document.getElementById("league-lookup-code").value.trim();
-  const errEl = document.getElementById("league-error");
-  const resEl = document.getElementById("league-results");
-  errEl.style.display = "none";
-  if (!code) {
-    errEl.textContent = "Enter a league code first.";
-    errEl.style.display = "";
-    return;
-  }
-  const btn = document.getElementById("league-go");
-  btn.disabled = true;
-  resEl.innerHTML = `<div class="verdict-card"><div class="verdict-loading"><div class="spinner"></div>Loading league stats…</div></div>`;
-  try {
-    const resp = await fetch("/api/league-stats?code=" + encodeURIComponent(code));
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data?.error || `Request failed (${resp.status})`);
-    renderLeagueDashboard(data);
-  } catch (e) {
-    resEl.innerHTML = "";
-    errEl.textContent = "Couldn't load the dashboard. " + friendlyError(e);
-    errEl.style.display = "";
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-function renderLeagueDashboard(data) {
-  const resEl = document.getElementById("league-results");
-  if (!data.totalRounds) {
-    resEl.innerHTML = `<div class="fc-empty">No rounds submitted under "${escapeHtml(data.leagueCode || "")}" yet. Have students add this code in Setup → League code.</div>`;
-    return;
-  }
-
-  const fallacyRows = Object.entries(data.fallacyCounts || {})
-    .sort((a, b) => b[1] - a[1]).slice(0, 8)
-    .map(([name, count]) => `
-      <div class="ph-row">
-        <span class="ph-n">${escapeHtml(name)}</span>
-        <span class="ph-score">${count}×</span>
-        <button class="btn btn-sm" onclick="openFallacyLibrary('${name.replace(/'/g, "\\'")}')">Learn</button>
-      </div>`).join("");
-
-  const personaRows = Object.entries(data.personaGroups || {}).map(([key, scores]) => {
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    const label = JUDGE_PERSONAS[key] ? JUDGE_PERSONAS[key].name : "No persona selected";
-    return `<div class="ph-row">
-      <span class="ph-n">${escapeHtml(label)}</span>
-      <span class="ph-score">avg ${avg.toFixed(1)} pts</span>
-      <span class="ph-stats">${scores.length} round${scores.length === 1 ? "" : "s"}</span>
-    </div>`;
-  }).join("");
-
-  const recentRows = (data.recent || []).map(r => `
-    <div class="ph-row">
-      <span class="ph-n">${escapeHtml(r.studentName)}</span>
-      <span class="ph-score">${r.scoreA}${r.practiceMode ? "" : " – " + r.scoreB} pts</span>
-      <span class="ph-stats">${escapeHtml(r.topic || "(untitled)")}</span>
-      <span class="ph-date">${new Date(r.ts).toLocaleDateString()}</span>
-    </div>`).join("");
-
-  resEl.innerHTML = `
-    <div class="verdict-card">
-      <div class="verdict-head"><div class="verdict-badge">League</div><h3>${data.totalRounds} rounds · ${data.uniqueStudents} students</h3></div>
-    </div>
-    <div class="verdict-card">
-      <div class="verdict-head"><div class="verdict-badge">League</div><h3>Most common fallacies</h3></div>
-      <div class="ph-list">${fallacyRows || '<div class="fc-empty">No fallacies logged yet.</div>'}</div>
-    </div>
-    <div class="verdict-card">
-      <div class="verdict-head"><div class="verdict-badge">League</div><h3>Scores by judge persona</h3></div>
-      <div class="ph-list">${personaRows || '<div class="fc-empty">No AI-judged rounds yet.</div>'}</div>
-    </div>
-    <div class="verdict-card">
-      <div class="verdict-head"><div class="verdict-badge">League</div><h3>Recent rounds</h3></div>
-      <div class="ph-list">${recentRows}</div>
-    </div>`;
-}
-
 /* =========================================================================
    SPEECH RECOGNITION
    ========================================================================= */
@@ -14312,5 +15073,6 @@ init();
 <script src="study.js"></script>
 <script src="mocktrial.js"></script>
 <script src="voice.js"></script>
+<script src="league.js"></script>
 </body>
 </html>

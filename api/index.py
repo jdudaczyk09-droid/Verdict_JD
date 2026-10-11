@@ -26,6 +26,10 @@ plus the new profile route):
   POST /api/track                 - anonymous usage counts (no names, no speech, no IP stored)
   POST /api/suggestion            - the suggestion box
   GET  /api/stats                 - usage dashboard data (needs ADMIN_TOKEN)
+  POST /api/league-create         - a coach registers a league and gets a coach key (shown once)
+  POST /api/league-assignment     - a coach posts a practice assignment (needs the coach key)
+  GET  /api/league-assignments    - the assignments for a league code (students read these)
+  POST /api/league-remove-student - a coach deletes one student's rounds (needs the coach key)
   POST /api/league-submit         - record a debate against a league code
   GET  /api/league-stats          - aggregate stats for a league code
   POST /api/auth-signup           - create an account (bcrypt-hashed password)
@@ -41,6 +45,7 @@ import json
 import os
 import random
 import re
+import secrets
 import time
 
 import bcrypt
@@ -387,47 +392,75 @@ def league_stats():
     try:
         with conn.cursor() as cur:
             cur.execute(LEAGUE_DEBATES_TABLE)
+            ensure_table(cur, "leagues", LEAGUES_TABLE)
+            cur.execute("SELECT name FROM leagues WHERE code = UPPER(%s);", (league_code,))
+            reg = cur.fetchone()
+            cur.execute("SELECT COUNT(*), COUNT(DISTINCT LOWER(student_name)) FROM league_debates WHERE UPPER(league_code) = UPPER(%s);", (league_code,))
+            total_rounds, total_students = cur.fetchone()
             cur.execute("""
                 SELECT student_name, ts, mode, topic, practice_mode, judge_persona, score_a, score_b, fallacy_names
                 FROM league_debates
-                WHERE league_code = %s
+                WHERE UPPER(league_code) = UPPER(%s)
                 ORDER BY ts DESC
                 LIMIT 500;
             """, (league_code,))
             rows = cur.fetchall()
 
-        students = set()
         fallacy_counts = {}
         persona_groups = {}
+        per_student = {}
+        weekly = {}
+        rounds = []
+        today = datetime.date.today()
+        monday = today - datetime.timedelta(days=today.weekday())
         for row in rows:
-            student_name, judge_persona, score_a = row[0], row[5], row[6]
-            fallacy_names = row[8]
-            students.add(student_name)
+            student_name, ts, mode, topic, practice_mode, judge_persona, score_a, score_b, fallacy_names = row
             names = fallacy_names if isinstance(fallacy_names, list) else []
             for n in names:
                 fallacy_counts[n] = fallacy_counts.get(n, 0) + 1
             key = judge_persona if judge_persona and judge_persona != "none" else "none"
             persona_groups.setdefault(key, []).append(float(score_a or 0))
 
-        recent = []
-        for row in rows[:50]:
-            student_name, ts, mode, topic, practice_mode, judge_persona, score_a, score_b, fallacy_names = row
-            recent.append({
-                "studentName": student_name,
-                "ts": ts.isoformat() if ts else None,
-                "topic": topic,
-                "practiceMode": practice_mode,
-                "scoreA": float(score_a or 0),
-                "scoreB": float(score_b or 0),
+            st = per_student.setdefault(student_name.strip().lower(), {"name": student_name, "rounds": 0, "scoreSum": 0.0, "last": None, "fallacies": {}})
+            st["rounds"] += 1
+            st["scoreSum"] += float(score_a or 0)
+            if ts and (st["last"] is None or ts > st["last"]):
+                st["last"] = ts
+            for n in names:
+                st["fallacies"][n] = st["fallacies"].get(n, 0) + 1
+
+            if ts:
+                d = ts.date() if hasattr(ts, "date") else ts
+                week = d - datetime.timedelta(days=d.weekday())
+                weeks_ago = (monday - week).days // 7
+                if 0 <= weeks_ago < 8:
+                    weekly[weeks_ago] = weekly.get(weeks_ago, 0) + 1
+            rounds.append({
+                "studentName": student_name, "ts": ts.isoformat() if ts else None, "mode": mode, "topic": topic,
+                "practiceMode": practice_mode, "scoreA": float(score_a or 0), "scoreB": float(score_b or 0), "fallacyNames": names,
             })
+
+        students = []
+        for st in per_student.values():
+            top = max(st["fallacies"].items(), key=lambda kv: kv[1])[0] if st["fallacies"] else ""
+            students.append({
+                "name": st["name"], "rounds": st["rounds"], "avgScore": round(st["scoreSum"] / st["rounds"], 1),
+                "lastTs": st["last"].isoformat() if st["last"] else None, "topFallacy": top,
+            })
+        students.sort(key=lambda s: (-s["rounds"], s["name"].lower()))
 
         return jsonify({
             "leagueCode": league_code,
-            "totalRounds": len(rows),
-            "uniqueStudents": len(students),
+            "leagueName": reg[0] if reg else "",
+            "registered": bool(reg),
+            "totalRounds": int(total_rounds or 0),
+            "uniqueStudents": int(total_students or 0),
             "fallacyCounts": fallacy_counts,
             "personaGroups": persona_groups,
-            "recent": recent,
+            "students": students,
+            "weekly": [weekly.get(i, 0) for i in range(7, -1, -1)],  # oldest week first, this week last
+            "recent": rounds[:50],
+            "rounds": rounds,
         })
     except Exception as e:
         return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
@@ -1061,7 +1094,7 @@ def room_action():
             if action in ("next_turn", "end"):
                 ensure_table(cur, "room_extras", ROOM_EXTRA_TABLES)
                 cur.execute("DELETE FROM room_live WHERE room_code = %s;", (room_code,))  # live text only lives while someone is speaking
-                if action == "end":
+                if action == "end" or bool(body.get("ended")):
                     cur.execute("DELETE FROM room_signals WHERE room_code = %s;", (room_code,))
 
             if action == "start_turn":
@@ -1342,6 +1375,250 @@ def stats():
             recent = [{"ts": r[0].isoformat(), "category": r[1], "message": r[2], "contact": r[3]} for r in cur.fetchall()]
             out["suggestions"] = {"total": total_sug, "recent": recent}
         return jsonify(out)
+    except Exception as e:
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
+    finally:
+        conn.close()
+
+
+# =============================================================================
+# Coach tools: register a league, post practice assignments, remove a student's rounds.
+# A league still works with just a shared code (no registration needed to submit or to read
+# the dashboard). Registering adds a private coach key that unlocks the coach-only actions.
+# The key is stored only as a bcrypt hash, so it can't be shown again.
+# =============================================================================
+LEAGUES_TABLE = """
+    CREATE TABLE IF NOT EXISTS leagues (
+        code TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        coach_key_hash TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS league_assignments (
+        id SERIAL PRIMARY KEY,
+        league_code TEXT NOT NULL,
+        title TEXT NOT NULL,
+        topic TEXT NOT NULL,
+        mode TEXT NOT NULL DEFAULT 'casual',
+        note TEXT NOT NULL DEFAULT '',
+        due DATE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_league_assign_code ON league_assignments (league_code);
+"""
+CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+_create_hits = {}
+
+
+def make_league_code(name):
+    words = re.findall(r"[A-Za-z0-9]+", str(name).upper())
+    if len(words) > 1:
+        prefix = "".join(w[0] for w in words)[:6]
+    elif words:
+        prefix = words[0][:6]
+    else:
+        prefix = ""
+    if len(prefix) < 3:
+        prefix = (prefix + "LEAGUE")[:6]
+    return prefix + "-" + "".join(secrets.choice(CODE_CHARS) for _ in range(4))
+
+
+def make_coach_key():
+    chars = CODE_CHARS.lower()
+    return "ck-" + "-".join("".join(secrets.choice(chars) for _ in range(4)) for _ in range(4))
+
+
+def coach_ok(cur, code, key):
+    cur.execute("SELECT coach_key_hash FROM leagues WHERE code = UPPER(%s);", (code,))
+    row = cur.fetchone()
+    if not row or not key:
+        return False
+    try:
+        return bcrypt.checkpw(str(key).strip().encode("utf-8"), row[0].encode("utf-8"))
+    except Exception:
+        return False
+
+
+@app.route("/api/league-create", methods=["POST", "OPTIONS"])
+def league_create():
+    if request.method == "OPTIONS":
+        return "", 204
+    body = request.get_json(silent=True) or {}
+    name = str(body.get("name") or "").strip()[:60]
+    if len(name) < 3:
+        return jsonify({"error": "Give your league a name (at least 3 characters)."}), 400
+    vid = str(body.get("vid") or "anon")[:64]
+    now = time.time()
+    hits = [t for t in _create_hits.get(vid, []) if now - t < 3600]
+    if len(hits) >= 5:
+        return jsonify({"error": "That's a lot of leagues in a short time. Please try again later."}), 429
+    _create_hits[vid] = hits + [now]
+
+    conn = get_conn()
+    if not conn:
+        return jsonify(DB_ERROR), 500
+    try:
+        with conn.cursor() as cur:
+            ensure_table(cur, "leagues", LEAGUES_TABLE)
+            code = None
+            for _ in range(8):
+                candidate = make_league_code(name)
+                cur.execute("SELECT 1 FROM leagues WHERE code = %s;", (candidate,))
+                if not cur.fetchone():
+                    code = candidate
+                    break
+            if not code:
+                return jsonify({"error": "Couldn't make a unique code. Please try again."}), 500
+            key = make_coach_key()
+            key_hash = bcrypt.hashpw(key.encode("utf-8"), bcrypt.gensalt(rounds=10)).decode("utf-8")
+            cur.execute("INSERT INTO leagues (code, name, coach_key_hash) VALUES (%s, %s, %s);", (code, name, key_hash))
+        return jsonify({"code": code, "name": name, "coachKey": key})
+    except Exception as e:
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route("/api/league-coach-check", methods=["POST", "OPTIONS"])
+def league_coach_check():
+    if request.method == "OPTIONS":
+        return "", 204
+    body = request.get_json(silent=True) or {}
+    code = str(body.get("code") or "").strip()[:40]
+    key = str(body.get("coachKey") or "")[:80]
+    conn = get_conn()
+    if not conn:
+        return jsonify(DB_ERROR), 500
+    try:
+        with conn.cursor() as cur:
+            ensure_table(cur, "leagues", LEAGUES_TABLE)
+            if not coach_ok(cur, code, key):
+                return jsonify({"error": "That coach key doesn't match this league."}), 403
+            cur.execute("SELECT name FROM leagues WHERE code = UPPER(%s);", (code,))
+            name = cur.fetchone()[0]
+        return jsonify({"ok": True, "name": name})
+    except Exception as e:
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
+    finally:
+        conn.close()
+
+
+def assignment_rows(cur, code):
+    cur.execute("""
+        SELECT id, title, topic, mode, note, due, created_at
+        FROM league_assignments WHERE league_code = UPPER(%s)
+        ORDER BY created_at DESC LIMIT 20;
+    """, (code,))
+    rows = cur.fetchall()
+    today = datetime.date.today()
+    out = []
+    for r in rows:
+        aid, title, topic, mode, note, due, created = r
+        cur.execute("""
+            SELECT COUNT(DISTINCT LOWER(student_name)) FROM league_debates
+            WHERE UPPER(league_code) = UPPER(%s) AND topic = %s AND ts >= %s;
+        """, (code, topic, created))
+        done = cur.fetchone()[0]
+        out.append({
+            "id": aid, "title": title, "topic": topic, "mode": mode, "note": note,
+            "due": due.isoformat() if due else None, "createdAt": created.isoformat() if created else None,
+            "active": (due is None) or (due >= today - datetime.timedelta(days=1)),
+            "completed": int(done or 0),
+        })
+    return out
+
+
+@app.route("/api/league-assignments", methods=["GET", "OPTIONS"])
+def league_assignments():
+    if request.method == "OPTIONS":
+        return "", 204
+    code = (request.args.get("code") or "").strip()[:40]
+    if not code:
+        return jsonify({"error": "Missing ?code="}), 400
+    conn = get_conn()
+    if not conn:
+        return jsonify({"assignments": []})  # students shouldn't see an error just because assignments are unavailable
+    try:
+        with conn.cursor() as cur:
+            ensure_table(cur, "leagues", LEAGUES_TABLE)
+            cur.execute(LEAGUE_DEBATES_TABLE)
+            return jsonify({"assignments": assignment_rows(cur, code)})
+    except Exception:
+        return jsonify({"assignments": []})
+    finally:
+        conn.close()
+
+
+@app.route("/api/league-assignment", methods=["POST", "OPTIONS"])
+def league_assignment():
+    if request.method == "OPTIONS":
+        return "", 204
+    body = request.get_json(silent=True) or {}
+    code = str(body.get("code") or "").strip()[:40]
+    key = str(body.get("coachKey") or "")[:80]
+    action = str(body.get("action") or "create")
+    conn = get_conn()
+    if not conn:
+        return jsonify(DB_ERROR), 500
+    try:
+        with conn.cursor() as cur:
+            ensure_table(cur, "leagues", LEAGUES_TABLE)
+            cur.execute(LEAGUE_DEBATES_TABLE)
+            if not coach_ok(cur, code, key):
+                return jsonify({"error": "That coach key doesn't match this league."}), 403
+            if action == "delete":
+                try:
+                    aid = int(body.get("id"))
+                except (TypeError, ValueError):
+                    return jsonify({"error": "Missing assignment."}), 400
+                cur.execute("DELETE FROM league_assignments WHERE id = %s AND league_code = UPPER(%s);", (aid, code))
+            else:
+                title = str(body.get("title") or "").strip()[:80]
+                topic = str(body.get("topic") or "").strip()[:500]
+                note = str(body.get("note") or "").strip()[:400]
+                mode = re.sub(r"[^A-Za-z0-9]", "", str(body.get("mode") or "casual"))[:40] or "casual"
+                due_raw = str(body.get("due") or "").strip()
+                due = None
+                if due_raw:
+                    try:
+                        due = datetime.date.fromisoformat(due_raw)
+                    except ValueError:
+                        return jsonify({"error": "That due date doesn't look right."}), 400
+                if not title or not topic:
+                    return jsonify({"error": "Give the assignment a title and a topic."}), 400
+                cur.execute("""
+                    INSERT INTO league_assignments (league_code, title, topic, mode, note, due)
+                    VALUES (UPPER(%s), %s, %s, %s, %s, %s);
+                """, (code, title, topic, mode, note, due))
+            return jsonify({"assignments": assignment_rows(cur, code)})
+    except Exception as e:
+        return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route("/api/league-remove-student", methods=["POST", "OPTIONS"])
+def league_remove_student():
+    if request.method == "OPTIONS":
+        return "", 204
+    body = request.get_json(silent=True) or {}
+    code = str(body.get("code") or "").strip()[:40]
+    key = str(body.get("coachKey") or "")[:80]
+    student = str(body.get("studentName") or "").strip()[:80]
+    if not student:
+        return jsonify({"error": "Which student?"}), 400
+    conn = get_conn()
+    if not conn:
+        return jsonify(DB_ERROR), 500
+    try:
+        with conn.cursor() as cur:
+            ensure_table(cur, "leagues", LEAGUES_TABLE)
+            cur.execute(LEAGUE_DEBATES_TABLE)
+            if not coach_ok(cur, code, key):
+                return jsonify({"error": "That coach key doesn't match this league."}), 403
+            cur.execute("DELETE FROM league_debates WHERE UPPER(league_code) = UPPER(%s) AND LOWER(student_name) = LOWER(%s);", (code, student))
+            removed = cur.rowcount
+        return jsonify({"ok": True, "removed": int(removed or 0)})
     except Exception as e:
         return jsonify({"error": "Something went wrong saving or loading that. Please try again.", "detail": "Database error: " + str(e)}), 500
     finally:
