@@ -1116,6 +1116,65 @@
   .quiet-note.warn { border-left-color: var(--hl-orange); }
   @keyframes qin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
+
+  /* ---------- Ranked play ---------- */
+  .rank-chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px 2px 6px; background: #fff; border: 2px solid var(--ink); font: 800 13px var(--font-body); color: var(--ink); cursor: pointer; box-shadow: 2px 2px 0 var(--ink); }
+  .rank-chip:hover { background: var(--paper-pale); }
+  .rank-chip:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; }
+  .rank-badge { display: block; flex: none; }
+  .rank-top { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+  .rank-tier { font: 900 34px/1 var(--font-body); }
+  .rank-rating { font: 800 15px var(--font-body); margin-top: 4px; }
+  .rank-record { font-size: 13.5px; color: var(--ink-2); margin-top: 2px; }
+  .rank-sub { font-size: 13.5px; color: var(--ink-2); margin: 6px 0; }
+  .rank-bar { height: 14px; border: 2px solid var(--ink); background: #fff; }
+  .rank-bar i { display: block; height: 100%; background: var(--hl-green); }
+  .rank-dots { display: flex; gap: 6px; }
+  .rank-dots i { width: 26px; height: 14px; border: 2px solid var(--ink); background: #fff; }
+  .rank-dots i.on { background: var(--hl-green); }
+  .rank-how { margin: 10px 0 4px; font-size: 14px; }
+  .rank-how summary { cursor: pointer; font-weight: 800; }
+  .rank-how p { margin: 6px 0 0; line-height: 1.5; }
+  .rank-h { margin: 14px 0 6px; font-size: 15px; }
+  .rank-list, .rank-board { list-style: none; border: 2px solid var(--ink); background: #fff; }
+  .rank-list li, .rank-board li { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-bottom: 1px solid var(--rule); font-size: 14px; }
+  .rank-list li:last-child, .rank-board li:last-child { border-bottom: 0; }
+  .rank-list li span, .rank-board li span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank-list li b { min-width: 52px; }
+  .rank-list li.win b { color: var(--green); }
+  .rank-list li.loss b { color: var(--red-pen); }
+  .rank-list li em, .rank-board li em { font-style: normal; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .rank-list li small { color: var(--ink-3); min-width: 44px; text-align: right; }
+  .rank-board li b { min-width: 22px; font-variant-numeric: tabular-nums; }
+  .rank-opt { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .queue-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .queue-opt { display: block; position: relative; padding: 10px 12px 10px 38px; border: 2px solid var(--ink); background: #fff; cursor: pointer; }
+  .queue-opt input { position: absolute; left: 12px; top: 13px; }
+  .queue-opt b { display: block; font-size: 16px; }
+  .queue-opt span { display: block; font-size: 13px; color: var(--ink-2); margin-top: 2px; line-height: 1.4; }
+  .queue-opt.on { background: var(--paper-pale); box-shadow: 3px 3px 0 var(--ink); }
+  .queue-opt:focus-within { outline: 3px solid var(--pen); outline-offset: 2px; }
+  .rank-flag { display: inline-block; margin: 4px 0 2px; padding: 1px 8px; border: 2px solid var(--ink); background: #fff; font: 800 12px var(--font-body); }
+  .rank-flag.ranked { background: #FFE14D; }
+  .rank-flag[hidden] { display: none; }
+  #online-rank-result { margin: 0 0 16px; }
+  #online-rank-result[hidden] { display: none; }
+  .rank-result { padding: 14px 16px; background: #fff; border: 2px solid var(--ink); border-left-width: 10px; }
+  .rank-result.win { border-left-color: var(--hl-green); }
+  .rank-result.loss { border-left-color: var(--margin); }
+  .rank-result.draw, .rank-result.void, .rank-result.pending, .rank-result.casual { border-left-color: var(--hl-orange); }
+  .rank-result.casual { border-left-color: var(--hl-grey); }
+  .rank-result.pending { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .rank-result p { margin: 6px 0 0; line-height: 1.5; }
+  .rank-result-head { display: flex; align-items: center; gap: 12px; }
+  .rank-result-head b { display: block; font: 900 28px/1.1 var(--font-body); }
+  .rank-result-head span { display: block; font-size: 14px; color: var(--ink-2); font-weight: 700; }
+  .rank-result-delta { margin-top: 8px; font: 800 20px var(--font-body); font-variant-numeric: tabular-nums; }
+  .rank-result-delta em { font-style: normal; margin-left: 6px; color: var(--green); }
+  .rank-result.loss .rank-result-delta em { color: var(--red-pen); }
+  .rank-result-note { font-weight: 800; }
+  .rank-result-why { font-size: 14px; color: var(--ink-2); }
+
   /* ---------- League and coach tools ---------- */
   .coach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-bottom: 18px; }
   .league-note { margin: 0 0 10px; font-size: 14.5px; }
@@ -2232,6 +2291,10 @@
         </div>
 
         <div id="online-lobby" style="display:none;">
+          <div class="card upload-card rank-panel">
+            <h3 data-i18n="rank.title">Your rank</h3>
+            <div id="rank-card"></div>
+          </div>
           <div class="card upload-card">
             <h3 data-i18n="online.host">Host a room</h3>
             <div class="form-grid two-col">
@@ -2242,6 +2305,13 @@
               <div class="field">
                 <label data-i18n="online.secondsperturn">Seconds per turn (Casual only)</label>
                 <input type="number" id="online-turn-seconds" value="120" min="15" max="600" step="15" />
+              </div>
+              <div class="field" style="grid-column: 1 / -1;">
+                <label data-i18n="rank.host.label">Match type</label>
+                <div class="queue-pick" role="radiogroup" aria-label="Match type">
+                  <label class="queue-opt on"><input type="radio" name="online-queue" value="casual" checked autocomplete="off"><b data-i18n="rank.host.casual">Casual</b><span data-i18n="rank.host.casualdesc">No rating change. Just practice.</span></label>
+                  <label class="queue-opt"><input type="radio" name="online-queue" value="ranked" autocomplete="off"><b data-i18n="rank.host.ranked">Ranked</b><span data-i18n="rank.host.rankeddesc">An AI judge picks the winner and your rating moves. Needs speech-to-text (Chrome or Edge).</span></label>
+                </div>
               </div>
               <div class="field" style="grid-column: 1 / -1;">
                 <label data-i18n="online.topic">Topic</label>
@@ -2264,6 +2334,7 @@
         <div id="online-room-wrap" style="display:none;">
           <div class="card upload-card" id="online-waiting" style="display:none;">
             <h3 data-i18n="online.waiting">Waiting for your opponent</h3>
+            <div class="rank-flag" id="online-waiting-flag" hidden></div>
             <p data-i18n="online.waitingdesc" style="font-size:13px; color:var(--text-dim);">Share this code — they enter it under "Join a room" on their own device:</p>
             <div class="online-room-code" id="online-room-code-display"></div>
             <button class="btn" onclick="leaveOnlineRoom()" data-i18n="online.cancel">Cancel</button>
@@ -2274,6 +2345,7 @@
               <div class="stage-head">
                 <div class="topic-display">
                   <div class="mode-badge" id="online-mode-badge">—</div>
+                  <div class="rank-flag" id="online-ranked-flag" hidden></div>
                   <div class="topic-label">Topic</div>
                   <h2 id="online-topic-display">—</h2>
                 </div>
@@ -2355,6 +2427,8 @@
               <div class="winner-banner" data-i18n="online.complete">Debate complete</div>
               <div class="winner-name" id="online-final-score">—</div>
             </div>
+
+            <div id="online-rank-result" hidden aria-live="polite"></div>
 
             <div class="card upload-card">
               <h3 data-i18n="online.aijudge">AI Judge</h3>
@@ -2726,6 +2800,7 @@
             Speech is turned into text first. By default your browser does that itself — in Chrome and Edge it's done by Google or Microsoft, not by us. In high-accuracy mode, and for uploaded files, short audio clips are sent to our transcription service, and we don't keep them. For fact-checks, only a few recent sentences and the topic go to our AI service — no audio and no names — and claims about recent events are looked up on Wikipedia. Turn reviews send that turn's text, the opponent's turn before it, and the topic, also without names. The AI judge and analysis also send the round's transcript and the names you entered. Nothing about a round is saved on our servers unless you sign in, enter a league code, or play an online room. We also keep anonymous usage counts — which features get used and how long debates run — with no names, speech, or topics, and you can turn that off in the Privacy Policy. If the AI service is busy, checks slow down or pause and you can keep scoring by hand. The Privacy Policy has every detail.
           </p>
           <p data-i18n="how.privacy.voice">In online debates, voice goes straight between the two debaters' browsers and we don't record it. Your mic is switched off except on your own turn.</p>
+          <p data-i18n="how.privacy.rank">In a ranked match, an AI judge reads the text of what both sides said (no audio) to pick a winner, and we save your rating and match history on your account.</p>
         </div>
 
         <div class="how-section">
@@ -2807,6 +2882,7 @@
       <p><b>Labels.</b> The Service sorts what is said into labels such as true, mostly true, misleading, false, inconclusive, opinion, value claim, prediction, hypothetical, case claim (Mock Trial), unverifiable, and to verify. These are an AI's best guess, not a finding. "Opinion," "unverifiable," and "inconclusive" mean the tool did not or could not decide — they are not a judgment that anything is right or wrong. The AI's knowledge ends before today's date, so it can mislabel recent events; for claims that look recent it may consult Wikipedia, which can itself be wrong, incomplete, or out of date.</p>
       <p><b>Automatic scoring.</b> While a turn is live, a confident true, mostly true, misleading, or false label can add or remove points for the speaker automatically (partial points for "mostly true" and "misleading"). Claims marked "to verify" are held back and checked when that person finishes speaking, so points can change — and the winner can change — right after a turn has ended. In Online Debate, fallacy flags that meet the confidence threshold are also scored automatically; in a local round they are suggestions that a person accepts or ignores. Opinions, predictions, hypotheticals, case claims, and unverifiable statements are never scored. Automatic scores are tagged and can be reversed ("Wrong call?" or the undo tray). A limit on automatic checks applies to each round.</p>
       <p><b>Availability.</b> The Service depends on outside AI services that limit how much they can be used. When they are busy, checks may slow down, be retried, switch to a backup AI (whose accuracy may differ), be skipped, or pause, and listening may switch to a different method. We do not guarantee that any check will run, or run on time.</p>
+      <p><b>Ranked matches and ratings.</b> Online Debate can be played Casual or Ranked. In a ranked match, an AI judge reads the transcript of what each side said and picks a winner or a draw, and both players' ratings change using an Elo formula. The judge is an AI: it can be wrong or biased, and it only sees the words your browser's speech recognition produced. Ranks (Bronze, Iron, Silver, Gold, Platinum, Diamond, Champion) and the leaderboard are for fun and practice. They are not an official ranking, carry no prize, and are not evidence of anyone's ability. A match does not count if either side says fewer than 40 words, if the same two accounts have already played three rated matches in 24 hours, or if the judge is unavailable. We may void matches, correct or reset ratings, hide someone from the leaderboard, or change how ratings work at any time, in particular if we believe someone is cheating (for example by arranging matches to inflate a rating, typing or pasting text instead of speaking, or writing instructions aimed at the judge). Ratings can be deleted on request.</p>
 
       <h4>4. Microphone access &amp; data collection consent</h4>
       <p>Live-transcription features request access to your device's microphone. By granting that permission and using those features, you consent to your speech being processed for the sole purpose of generating a transcript and running the fact-check, fallacy-detection, and judging features you've enabled. That processing is done by your browser's built-in speech recognition (which in many browsers, including Chrome and Edge, is run by the browser's maker and may send audio to its servers under its own policy) or — in High-accuracy mode, in Upload mode, and automatically if your browser's speech recognition is unavailable or stops working — by short audio clips sent through our server to Groq for transcription. The resulting text is then sent to Groq (and, where described in the Privacy Policy, looked up on Wikipedia) to produce fact-checks, labels, and judging. Details are in the Privacy Policy. You are responsible for what you say while the microphone is active and for obtaining any consent required from other people present or recorded. Don't use the Service to capture or process anyone's speech without their knowledge where that's required by law.</p>
@@ -2816,7 +2892,7 @@
       <p>You use the Service, including any AI-generated feedback, scoring, or judging, entirely at your own risk. To the fullest extent permitted by law, you assume all risk of loss, inaccuracy, or harm — including reputational, academic, competitive, or emotional harm — that may result from reliance on the Service.</p>
 
       <h4>6. Acceptable use</h4>
-      <p>Don't use Verdict Debate to harass, threaten, defame, or target anyone; to submit illegal content or content that infringes someone else's rights; to attempt to interfere with, reverse-engineer, or overload the Service; or to misuse an account, a League code, or another person's data. The Respect Filter is a coaching aid, not a moderation guarantee — it can miss things or get things wrong, and it never automatically penalizes anyone. A human is always the one who decides what happens next. We may suspend or terminate access for any use we reasonably believe violates these Terms.</p>
+      <p>Don't use Verdict Debate to harass, threaten, defame, or target anyone; to submit illegal content or content that infringes someone else's rights; to attempt to interfere with, reverse-engineer, or overload the Service; or to misuse an account, a League code, or another person's data; or to manipulate ranked results. The Respect Filter is a coaching aid, not a moderation guarantee — it can miss things or get things wrong, and it never automatically penalizes anyone. A human is always the one who decides what happens next. We may suspend or terminate access for any use we reasonably believe violates these Terms.</p>
 
       <h4>7. Accounts</h4>
       <p>Creating an account is entirely optional — every feature of Verdict Debate works fully without one. If you do create one, you're responsible for keeping your password confidential and for all activity under your account. Passwords are stored using one-way cryptographic hashing (bcrypt); we cannot see or recover your actual password. Notify us promptly if you believe your account has been compromised.</p>
@@ -2920,6 +2996,7 @@
       <p><b>Personal lessons.</b> If you press "Make my lesson" on the Progress screen, the names and counts of your most frequent flagged fallacies (for example "Ad Hominem, 4 times") are sent through our server to Groq. Nothing else is sent: no speech, topics, or debater names. The lesson it writes is saved in your browser's local storage so it is still there next time, and you can replace it.</p>
       <p><b>Which AI model.</b> Live fact-checks use one Groq model; turn reviews, the AI judge, argument analysis, Case Checker, Case Builder, and personal lessons use a second Groq model, so coaching can't use up the live-check allowance. If one is at its limit, the other is used as a backup.</p>
       <p><b>Online voice and live text.</b> In Online Debate the two debaters hear each other over a direct, browser-to-browser audio link (WebRTC). The voice does not pass through our servers and we do not record it. To set the link up, our server relays two short connection messages between the debaters (they contain network addresses and are deleted when the debate ends, and otherwise after about 15 minutes, with the cleanup running whenever a new connection message arrives), and Google's public STUN servers help the two browsers find a route, which means Google and the other debater can see your IP address. Your microphone is switched off by the app except on your own turn (and during crossfire), and you can also mute yourself. The other debater's device is able to record what it receives, so only debate people you trust. While someone is speaking, their live transcript text goes straight to the opponent over the same link; if that link isn't available, the text goes through our server as a backup, replacing the previous text every second or so and deleted when the turn ends. Some strict school or office networks block the direct link; the app then says voice isn't available and the live transcript still works.</p>
+      <p><b>Ranked matches.</b> When a ranked online debate ends, our server sends the debate topic and the text transcript of what each side said (words only: no audio, and no names or account details) to Groq, which acts as an AI judge and returns a winner (or a draw) and a short reason. The main Groq model is used, with the second one as a backup. The transcript text is what each debater's browser reported from speech recognition, so it can contain mistakes, and the judge can be wrong. Casual online matches are never sent to the judge. Ratings never use the live fact-check scores.</p>
       <p><b>Study sets and Mock Trial tools.</b> Flashcards, quizzes, matching games, and the objection and fallacy trainers run entirely in your browser; your progress is saved only in your browser's local storage. The Mock Trial case files are fictional practice material. The objection log is kept in your browser's memory for the round and shown on the results page; in Online Debate it is not shared.</p>
       <p><b>Held-back claims.</b> Claims that need a real lookup are kept in your browser's memory during the speech, verified when that person finishes speaking, and are not saved anywhere when you leave the page.</p>
       <p><b>AI judge, argument analysis, Case Checker, Case Builder, Respect Filter (when you turn it on), and the manual fact-check box.</b> The text you type, or the transcript of your round, plus the debater names and topic you entered where the feature uses them, is sent to Groq through our server. If in Setup you choose Anthropic or OpenAI and enter your own key for that account, those requests go from your browser straight to that company under its terms instead; your key is kept in your browser's memory for that session and is not saved by us.</p>
@@ -2932,9 +3009,10 @@
         <li><b>Account:</b> email address, a bcrypt-hashed password (never the plain password), display name, optional bio (up to 500 characters) and profile picture (a small image your browser resizes), and sign-up date. If you are signed in, each finished round's summary (date, mode, topic, scores, judge persona, fallacy names) is also stored.</li>
         <li><b>League code:</b> if you enter one in Setup (or open your coach's join link), each finished round sends the code, the first name you typed in Setup, mode, topic, practice flag, judge persona, scores, and fallacy names. Anyone who has the code can see that league's data, including the student list, averages, and recent rounds.</li>
         <li><b>Coaches who start a league:</b> the league's name, its code, and a coach key that is stored only as a one-way hash (so it can't be shown again), plus any assignments the coach posts (title, topic, format, optional due date and note), which anyone with the league code can read. The coach key lets a coach post or delete assignments and delete a student's rounds from that league. CSV downloads are created in the coach's browser and are not stored by us.</li>
-        <li><b>Online Debate</b> (requires an account): room code, mode, topic, the host's and guest's display names and account IDs, turn, timer and score state, the score log, and a text transcript of what each side said (up to 20,000 characters per turn). Only the host and the one person who joins with the room code can read it. Rooms are not currently deleted automatically.</li>
+        <li><b>Online Debate</b> (requires an account): room code, mode, topic, the host's and guest's display names and account IDs, turn, timer and score state, the score log, and a text transcript of what each side said (up to 20,000 characters per turn). Only the host and the one person who joins with the room code can read it. We also record whether the room is Casual or Ranked and, for ranked rooms, the judge's result (winner, reason, and each player's rating change). Rooms are not currently deleted automatically.</li>
+        <li><b>Ranked rating</b> (only for accounts that play ranked): your rating, games played, wins, losses, draws, highest rating, and whether you chose to show your name on the leaderboard (off by default); plus a record of each rated match (room code, both players' account IDs, the topic, the winner, and both ratings before and after). The leaderboard is visible to anyone who opens the app: it lists the top players' tier, rating, and number of games, and shows a name only for people who turned that option on (everyone else appears as "Anonymous debater"). Your opponent in a ranked match sees your display name, as in any online room. Ratings and match records are kept until we delete them; you can ask us to delete yours.</li>
       </ul>
-      <p><b>Anonymous usage counts.</b> To see how the app is used, the app sends our server small events: that a page was opened (landing page or app), that a debate started or finished (mode, whether it was practice, minutes of speaking, number of turns), which features were used (for example turn review, Case Checker, Case Builder, AI judge, argument analysis, personal lesson, manual fact-check, upload, online room, league tools, study sets, Mock Trial case files and the objection log, high-accuracy listening), and how many AI calls were made in each category. Each event carries only the random visitor ID from your browser, a timestamp, and those few values. It never carries your name, email, speech, topics, transcripts, or IP address. Our code does not store IP addresses; the hosting provider's standard logs may (section 5). We honor Do Not Track and Global Privacy Control, and you can switch this off with the checkbox at the top of this policy; turning it off also deletes the visitor ID from your browser. These counts are deleted automatically after about 13 months (the cleanup runs as new events arrive).</p>
+      <p><b>Anonymous usage counts.</b> To see how the app is used, the app sends our server small events: that a page was opened (landing page or app), that a debate started or finished (mode, whether it was practice, minutes of speaking, number of turns), which features were used (for example turn review, Case Checker, Case Builder, AI judge, argument analysis, personal lesson, manual fact-check, upload, online room, league tools, study sets, Mock Trial case files and the objection log, ranked matches, high-accuracy listening), and how many AI calls were made in each category. Each event carries only the random visitor ID from your browser, a timestamp, and those few values. It never carries your name, email, speech, topics, transcripts, or IP address. Our code does not store IP addresses; the hosting provider's standard logs may (section 5). We honor Do Not Track and Global Privacy Control, and you can switch this off with the checkbox at the top of this policy; turning it off also deletes the visitor ID from your browser. These counts are deleted automatically after about 13 months (the cleanup runs as new events arrive).</p>
       <p><b>Suggestion box.</b> If you send a suggestion, we store its category, your message, and the email address if you choose to add one, until we delete it. Your browser's anonymous visitor ID is sent along only so we can limit spam; it is not saved with the suggestion. Don't put sensitive personal information in a suggestion.</p>
       <p>We do not store audio, fact-check results, claim logs, or held-back claims on our servers. Our own code does not write request logs; our hosting provider keeps standard logs (see section 5).</p>
 
@@ -2944,7 +3022,7 @@
       <h4>5. Services that handle your data</h4>
       <p>Each of these handles data under its own terms and privacy policy, which we don't control — including how long it keeps data.</p>
       <ul>
-        <li><b>Groq</b> (AI and speech-to-text): receives the audio clips, text, topic, and (for the judge, analysis, and similar features) names and transcripts described in section 2. We use Groq through our own account; its access keys stay on our server and are never sent to your browser.</li>
+        <li><b>Groq</b> (AI and speech-to-text): receives the audio clips, text, topic, and (for the judge, analysis, ranked-match judging, and similar features) names and transcripts described in section 2. We use Groq through our own account; its access keys stay on our server and are never sent to your browser.</li>
         <li><b>Wikipedia / Wikimedia Foundation:</b> receives claim text and your IP address for the lookups in section 2.</li>
         <li><b>Your browser's speech service</b> (for example Google in Chrome, Microsoft in Edge): may receive microphone audio during default live subtitles.</li>
         <li><b>Anthropic or OpenAI:</b> only if you choose them in Setup and enter your own key.</li>
@@ -3510,6 +3588,51 @@ const FALLACIES = [
    ========================================================================= */
 const TRANSLATIONS = {
   en: {
+    "how.privacy.rank": "In a ranked match, an AI judge reads the text of what both sides said (no audio) to pick a winner, and we save your rating and match history on your account.",
+    "rank.notice.joined": "This is a ranked match. An AI judge will pick the winner when it ends.",
+    "rank.casual.note": "Casual match: no rating change.",
+    "rank.judge.reason": "Why:",
+    "rank.judge.again": "Try again",
+    "rank.judge.slow": "The judge is taking longer than usual.",
+    "rank.judging": "The judge is reading the round…",
+    "rank.void.unavailable": "The judge wasn't available, so nobody's rating changed.",
+    "rank.void.repeat": "You've already played this opponent three ranked matches today. Nobody's rating changed.",
+    "rank.void.short": "Each debater needs to speak at least 40 words for a ranked match to count. Nobody's rating changed.",
+    "rank.void.title": "This match didn't count",
+    "rank.result.demoted": "Dropped to {tier}.",
+    "rank.result.promoted": "Promoted to {tier}!",
+    "rank.result.placed": "Placements done. You start in {tier}.",
+    "rank.result.placement": "Placement match {n} of {total}.",
+    "rank.result.draw": "Draw",
+    "rank.result.lost": "You lost",
+    "rank.result.won": "You won",
+    "rank.board.showdesc": "Off by default. When it's off, your rating can still appear on the leaderboard, but as Anonymous debater.",
+    "rank.board.show": "Show my name on the leaderboard",
+    "rank.board.anon": "Anonymous debater",
+    "rank.board.empty": "Nobody has finished their placements yet.",
+    "rank.board": "Top debaters",
+    "rank.none": "No ranked matches yet. Host a room and pick Ranked to start.",
+    "rank.recent": "Recent ranked matches",
+    "rank.how.body": "Everyone starts at 1000. Your first 5 ranked matches are placements, and you show as Unranked until they are done. When a ranked match ends, an AI judge reads what both sides said and picks the winner (or a draw if it's too close). Beating a higher-rated opponent earns more points. Ranks go Bronze, Iron, Silver, Gold, Platinum, Diamond, Champion. Casual matches never change your rating.",
+    "rank.how.title": "How ranked works",
+    "rank.top": "Highest rank reached.",
+    "rank.next": "{n} points to {tier}",
+    "rank.record": "{w} wins · {l} losses · {d} draws",
+    "rank.peak": "Peak {n}",
+    "rank.rating": "Rating {n}",
+    "rank.placement.note": "Play {n} more ranked matches to get your first rank.",
+    "rank.placement": "{n} of {total} placement matches played.",
+    "rank.host.rankeddesc": "An AI judge picks the winner and your rating moves. Needs speech-to-text (Chrome or Edge).",
+    "rank.host.ranked": "Ranked",
+    "rank.host.casualdesc": "No rating change. Just practice.",
+    "rank.host.casual": "Casual",
+    "rank.host.label": "Match type",
+    "rank.loading": "Loading your rank…",
+    "rank.chip.title": "Your rank. Click to open Online Debate.",
+    "rank.ranked": "Ranked",
+    "rank.casual": "Casual",
+    "rank.unranked": "Unranked",
+    "rank.title": "Your rank",
     "how.privacy.voice": "In online debates, voice goes straight between the two debaters' browsers and we don't record it. Your mic is switched off except on your own turn.",
     "league.open.title": "Open a dashboard",
     "league.joined": "League code {code} added.",
@@ -3973,6 +4096,51 @@ const TRANSLATIONS = {
     "cookie.gotit": "Got it",
   },
   es: {
+    "how.privacy.rank": "En una partida clasificatoria, un juez de IA lee el texto de lo que dijeron ambos lados (sin audio) para elegir al ganador, y guardamos tu puntuación y tu historial de partidas en tu cuenta.",
+    "rank.notice.joined": "Esta es una partida clasificatoria. Un juez de IA elegirá al ganador cuando termine.",
+    "rank.casual.note": "Partida casual: sin cambio de puntuación.",
+    "rank.judge.reason": "Por qué:",
+    "rank.judge.again": "Reintentar",
+    "rank.judge.slow": "El juez está tardando más de lo normal.",
+    "rank.judging": "El juez está leyendo la ronda…",
+    "rank.void.unavailable": "El juez no estaba disponible, así que la puntuación de nadie cambió.",
+    "rank.void.repeat": "Ya jugaste tres partidas clasificatorias contra este rival hoy. La puntuación de nadie cambió.",
+    "rank.void.short": "Cada debatiente debe decir al menos 40 palabras para que una partida clasificatoria cuente. La puntuación de nadie cambió.",
+    "rank.void.title": "Esta partida no cuenta",
+    "rank.result.demoted": "Bajaste a {tier}.",
+    "rank.result.promoted": "¡Subiste a {tier}!",
+    "rank.result.placed": "Calibración terminada. Empiezas en {tier}.",
+    "rank.result.placement": "Partida de calibración {n} de {total}.",
+    "rank.result.draw": "Empate",
+    "rank.result.lost": "Perdiste",
+    "rank.result.won": "Ganaste",
+    "rank.board.showdesc": "Desactivado por defecto. Si está desactivado, tu puntuación puede aparecer igualmente en la clasificación, pero como Debatiente anónimo.",
+    "rank.board.show": "Mostrar mi nombre en la clasificación",
+    "rank.board.anon": "Debatiente anónimo",
+    "rank.board.empty": "Nadie ha terminado aún su calibración.",
+    "rank.board": "Mejores debatientes",
+    "rank.none": "Aún no hay partidas clasificatorias. Crea una sala y elige Clasificatoria para empezar.",
+    "rank.recent": "Partidas clasificatorias recientes",
+    "rank.how.body": "Todos empiezan con 1000. Tus primeras 5 partidas clasificatorias son de calibración y aparecerás como Sin clasificar hasta terminarlas. Cuando termina una partida clasificatoria, un juez de IA lee lo que dijo cada lado y elige al ganador (o un empate si está muy reñido). Ganar a un rival con más puntuación da más puntos. Los rangos son Bronze, Iron, Silver, Gold, Platinum, Diamond y Champion. Las partidas casuales nunca cambian tu puntuación.",
+    "rank.how.title": "Cómo funciona el modo clasificatorio",
+    "rank.top": "Rango más alto alcanzado.",
+    "rank.next": "{n} puntos para {tier}",
+    "rank.record": "{w} victorias · {l} derrotas · {d} empates",
+    "rank.peak": "Máx. {n}",
+    "rank.rating": "Puntuación {n}",
+    "rank.placement.note": "Juega {n} partidas clasificatorias más para obtener tu primer rango.",
+    "rank.placement": "{n} de {total} partidas de calibración jugadas.",
+    "rank.host.rankeddesc": "Un juez de IA elige al ganador y tu puntuación cambia. Requiere voz a texto (Chrome o Edge).",
+    "rank.host.ranked": "Clasificatoria",
+    "rank.host.casualdesc": "Sin cambio de puntuación. Solo práctica.",
+    "rank.host.casual": "Casual",
+    "rank.host.label": "Tipo de partida",
+    "rank.loading": "Cargando tu rango…",
+    "rank.chip.title": "Tu rango. Haz clic para abrir Debate en línea.",
+    "rank.ranked": "Clasificatoria",
+    "rank.casual": "Casual",
+    "rank.unranked": "Sin clasificar",
+    "rank.title": "Tu rango",
     "how.privacy.voice": "En los debates en línea, la voz va directamente entre los navegadores de los dos debatientes y no la grabamos. Tu micrófono está apagado salvo en tu turno.",
     "league.open.title": "Abrir un panel",
     "league.joined": "Código de liga {code} añadido.",
@@ -4436,6 +4604,51 @@ const TRANSLATIONS = {
     "cookie.gotit": "Entendido",
   },
   fr: {
+    "how.privacy.rank": "Dans une partie classée, un juge IA lit le texte de ce que les deux camps ont dit (sans audio) pour désigner le gagnant, et nous enregistrons votre score et votre historique de parties sur votre compte.",
+    "rank.notice.joined": "C'est une partie classée. Un juge IA désignera le gagnant à la fin.",
+    "rank.casual.note": "Partie amicale : aucun changement de score.",
+    "rank.judge.reason": "Pourquoi :",
+    "rank.judge.again": "Réessayer",
+    "rank.judge.slow": "Le juge met plus de temps que d'habitude.",
+    "rank.judging": "Le juge lit la manche…",
+    "rank.void.unavailable": "Le juge n'était pas disponible, donc le score de personne n'a changé.",
+    "rank.void.repeat": "Vous avez déjà joué trois parties classées contre cet adversaire aujourd'hui. Le score de personne n'a changé.",
+    "rank.void.short": "Chaque débatteur doit dire au moins 40 mots pour qu'une partie classée compte. Le score de personne n'a changé.",
+    "rank.void.title": "Cette partie n'a pas compté",
+    "rank.result.demoted": "Rétrogradé en {tier}.",
+    "rank.result.promoted": "Promotion en {tier} !",
+    "rank.result.placed": "Placement terminé. Vous commencez en {tier}.",
+    "rank.result.placement": "Partie de placement {n} sur {total}.",
+    "rank.result.draw": "Match nul",
+    "rank.result.lost": "Vous avez perdu",
+    "rank.result.won": "Vous avez gagné",
+    "rank.board.showdesc": "Désactivé par défaut. Quand c'est désactivé, votre score peut quand même apparaître dans le classement, mais sous le nom Débatteur anonyme.",
+    "rank.board.show": "Afficher mon nom dans le classement",
+    "rank.board.anon": "Débatteur anonyme",
+    "rank.board.empty": "Personne n'a encore terminé ses parties de placement.",
+    "rank.board": "Meilleurs débatteurs",
+    "rank.none": "Aucune partie classée pour l'instant. Créez une salle et choisissez Classé pour commencer.",
+    "rank.recent": "Parties classées récentes",
+    "rank.how.body": "Tout le monde commence à 1000. Vos 5 premières parties classées sont des parties de placement, et vous restez Non classé tant qu'elles ne sont pas terminées. À la fin d'une partie classée, un juge IA lit ce que chaque camp a dit et désigne le gagnant (ou un match nul si c'est trop serré). Battre un adversaire mieux classé rapporte plus de points. Les rangs sont Bronze, Iron, Silver, Gold, Platinum, Diamond et Champion. Les parties amicales ne changent jamais votre score.",
+    "rank.how.title": "Comment fonctionne le mode classé",
+    "rank.top": "Rang le plus élevé atteint.",
+    "rank.next": "{n} points avant {tier}",
+    "rank.record": "{w} victoires · {l} défaites · {d} nuls",
+    "rank.peak": "Record {n}",
+    "rank.rating": "Score {n}",
+    "rank.placement.note": "Jouez encore {n} parties classées pour obtenir votre premier rang.",
+    "rank.placement": "{n} sur {total} parties de placement jouées.",
+    "rank.host.rankeddesc": "Un juge IA désigne le gagnant et votre score évolue. Nécessite la reconnaissance vocale (Chrome ou Edge).",
+    "rank.host.ranked": "Classé",
+    "rank.host.casualdesc": "Aucun changement de score. Juste de l'entraînement.",
+    "rank.host.casual": "Amical",
+    "rank.host.label": "Type de partie",
+    "rank.loading": "Chargement de votre rang…",
+    "rank.chip.title": "Votre rang. Cliquez pour ouvrir Débat en ligne.",
+    "rank.ranked": "Classé",
+    "rank.casual": "Amical",
+    "rank.unranked": "Non classé",
+    "rank.title": "Votre rang",
     "how.privacy.voice": "Dans les débats en ligne, la voix passe directement entre les navigateurs des deux débatteurs et nous ne l'enregistrons pas. Votre micro est coupé sauf pendant votre tour.",
     "league.open.title": "Ouvrir un tableau de bord",
     "league.joined": "Code de ligue {code} ajouté.",
@@ -5014,6 +5227,51 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russe",
   },
   de: {
+    "how.privacy.rank": "Bei einer gewerteten Debatte liest eine KI-Jury den Text dessen, was beide Seiten gesagt haben (kein Audio), um den Sieger zu bestimmen, und wir speichern deine Wertung und deinen Spielverlauf in deinem Konto.",
+    "rank.notice.joined": "Das ist eine gewertete Debatte. Eine KI-Jury bestimmt am Ende den Sieger.",
+    "rank.casual.note": "Casual-Debatte: keine Wertungsänderung.",
+    "rank.judge.reason": "Warum:",
+    "rank.judge.again": "Erneut versuchen",
+    "rank.judge.slow": "Die Jury braucht länger als sonst.",
+    "rank.judging": "Die Jury liest die Runde…",
+    "rank.void.unavailable": "Die Jury war nicht erreichbar, daher hat sich niemandes Wertung geändert.",
+    "rank.void.repeat": "Du hast heute schon drei gewertete Debatten gegen diese Person gespielt. Niemandes Wertung hat sich geändert.",
+    "rank.void.short": "Jede Seite muss mindestens 40 Wörter sagen, damit eine gewertete Debatte zählt. Niemandes Wertung hat sich geändert.",
+    "rank.void.title": "Diese Debatte zählt nicht",
+    "rank.result.demoted": "Abgestiegen in {tier}.",
+    "rank.result.promoted": "Aufgestiegen in {tier}!",
+    "rank.result.placed": "Platzierung abgeschlossen. Du startest in {tier}.",
+    "rank.result.placement": "Platzierungsspiel {n} von {total}.",
+    "rank.result.draw": "Unentschieden",
+    "rank.result.lost": "Du hast verloren",
+    "rank.result.won": "Du hast gewonnen",
+    "rank.board.showdesc": "Standardmäßig aus. Ist die Option aus, kann deine Wertung trotzdem in der Bestenliste erscheinen, aber als Anonyme Person.",
+    "rank.board.show": "Meinen Namen in der Bestenliste zeigen",
+    "rank.board.anon": "Anonyme Person",
+    "rank.board.empty": "Noch niemand hat seine Platzierungsspiele beendet.",
+    "rank.board": "Beste Debattierende",
+    "rank.none": "Noch keine gewerteten Debatten. Erstelle einen Raum und wähle Gewertet.",
+    "rank.recent": "Letzte gewertete Debatten",
+    "rank.how.body": "Alle starten bei 1000. Deine ersten 5 gewerteten Debatten sind Platzierungsspiele, bis dahin giltst du als Ohne Rang. Wenn eine gewertete Debatte endet, liest eine KI-Jury, was beide Seiten gesagt haben, und bestimmt den Sieger (oder ein Unentschieden, wenn es zu knapp ist). Gegen einen höher gewerteten Gegner zu gewinnen bringt mehr Punkte. Die Ränge sind Bronze, Iron, Silver, Gold, Platinum, Diamond und Champion. Casual-Debatten ändern deine Wertung nie.",
+    "rank.how.title": "So funktionieren gewertete Debatten",
+    "rank.top": "Höchster Rang erreicht.",
+    "rank.next": "{n} Punkte bis {tier}",
+    "rank.record": "{w} Siege · {l} Niederlagen · {d} Unentschieden",
+    "rank.peak": "Höchstwert {n}",
+    "rank.rating": "Wertung {n}",
+    "rank.placement.note": "Spiele noch {n} gewertete Debatten, um deinen ersten Rang zu bekommen.",
+    "rank.placement": "{n} von {total} Platzierungsspielen gespielt.",
+    "rank.host.rankeddesc": "Eine KI-Jury bestimmt den Sieger und deine Wertung ändert sich. Benötigt Spracherkennung (Chrome oder Edge).",
+    "rank.host.ranked": "Gewertet",
+    "rank.host.casualdesc": "Keine Wertungsänderung. Nur Übung.",
+    "rank.host.casual": "Casual",
+    "rank.host.label": "Spielart",
+    "rank.loading": "Dein Rang wird geladen…",
+    "rank.chip.title": "Dein Rang. Klicken, um Online-Debatte zu öffnen.",
+    "rank.ranked": "Gewertet",
+    "rank.casual": "Casual",
+    "rank.unranked": "Ohne Rang",
+    "rank.title": "Dein Rang",
     "how.privacy.voice": "Bei Online-Debatten geht die Stimme direkt zwischen den Browsern der beiden Debattierenden, und wir nehmen sie nicht auf. Dein Mikrofon ist außer in deinem Beitrag ausgeschaltet.",
     "league.open.title": "Dashboard öffnen",
     "league.joined": "Ligacode {code} hinzugefügt.",
@@ -5592,6 +5850,51 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russisch",
   },
   it: {
+    "how.privacy.rank": "In una partita classificata, un giudice IA legge il testo di ciò che hanno detto entrambi i lati (senza audio) per scegliere il vincitore, e salviamo il tuo punteggio e la cronologia delle partite nel tuo account.",
+    "rank.notice.joined": "Questa è una partita classificata. Un giudice IA sceglierà il vincitore alla fine.",
+    "rank.casual.note": "Partita amichevole: nessuna variazione di punteggio.",
+    "rank.judge.reason": "Perché:",
+    "rank.judge.again": "Riprova",
+    "rank.judge.slow": "Il giudice ci sta mettendo più del solito.",
+    "rank.judging": "Il giudice sta leggendo il round…",
+    "rank.void.unavailable": "Il giudice non era disponibile, quindi il punteggio di nessuno è cambiato.",
+    "rank.void.repeat": "Oggi hai già giocato tre partite classificate contro questo avversario. Il punteggio di nessuno è cambiato.",
+    "rank.void.short": "Ogni dibattente deve dire almeno 40 parole perché una partita classificata conti. Il punteggio di nessuno è cambiato.",
+    "rank.void.title": "Questa partita non conta",
+    "rank.result.demoted": "Retrocesso a {tier}.",
+    "rank.result.promoted": "Promosso a {tier}!",
+    "rank.result.placed": "Piazzamento completato. Parti da {tier}.",
+    "rank.result.placement": "Partita di piazzamento {n} di {total}.",
+    "rank.result.draw": "Pareggio",
+    "rank.result.lost": "Hai perso",
+    "rank.result.won": "Hai vinto",
+    "rank.board.showdesc": "Disattivato per impostazione predefinita. Se è disattivato, il tuo punteggio può comunque comparire in classifica, ma come Dibattente anonimo.",
+    "rank.board.show": "Mostra il mio nome in classifica",
+    "rank.board.anon": "Dibattente anonimo",
+    "rank.board.empty": "Nessuno ha ancora finito le partite di piazzamento.",
+    "rank.board": "Migliori dibattenti",
+    "rank.none": "Ancora nessuna partita classificata. Crea una stanza e scegli Classificata per iniziare.",
+    "rank.recent": "Partite classificate recenti",
+    "rank.how.body": "Tutti partono da 1000. Le tue prime 5 partite classificate sono di piazzamento e resti Senza grado finché non finiscono. Quando una partita classificata termina, un giudice IA legge ciò che hanno detto i due lati e sceglie il vincitore (o un pareggio se è troppo equilibrata). Battere un avversario con punteggio più alto dà più punti. I gradi sono Bronze, Iron, Silver, Gold, Platinum, Diamond e Champion. Le partite amichevoli non cambiano mai il tuo punteggio.",
+    "rank.how.title": "Come funzionano le partite classificate",
+    "rank.top": "Grado più alto raggiunto.",
+    "rank.next": "{n} punti a {tier}",
+    "rank.record": "{w} vittorie · {l} sconfitte · {d} pareggi",
+    "rank.peak": "Massimo {n}",
+    "rank.rating": "Punteggio {n}",
+    "rank.placement.note": "Gioca altre {n} partite classificate per ottenere il tuo primo grado.",
+    "rank.placement": "{n} di {total} partite di piazzamento giocate.",
+    "rank.host.rankeddesc": "Un giudice IA sceglie il vincitore e il tuo punteggio cambia. Richiede il riconoscimento vocale (Chrome o Edge).",
+    "rank.host.ranked": "Classificata",
+    "rank.host.casualdesc": "Nessuna variazione di punteggio. Solo allenamento.",
+    "rank.host.casual": "Amichevole",
+    "rank.host.label": "Tipo di partita",
+    "rank.loading": "Caricamento del tuo grado…",
+    "rank.chip.title": "Il tuo grado. Clicca per aprire Dibattito online.",
+    "rank.ranked": "Classificata",
+    "rank.casual": "Amichevole",
+    "rank.unranked": "Senza grado",
+    "rank.title": "Il tuo grado",
     "how.privacy.voice": "Nei dibattiti online la voce passa direttamente tra i browser dei due dibattenti e non la registriamo. Il tuo microfono è spento tranne nel tuo turno.",
     "league.open.title": "Apri una dashboard",
     "league.joined": "Codice lega {code} aggiunto.",
@@ -6170,6 +6473,51 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pt: {
+    "how.privacy.rank": "Em uma partida ranqueada, um juiz de IA lê o texto do que os dois lados disseram (sem áudio) para escolher o vencedor, e guardamos sua pontuação e seu histórico de partidas na sua conta.",
+    "rank.notice.joined": "Esta é uma partida ranqueada. Um juiz de IA escolherá o vencedor quando terminar.",
+    "rank.casual.note": "Partida casual: sem mudança de pontuação.",
+    "rank.judge.reason": "Por quê:",
+    "rank.judge.again": "Tentar de novo",
+    "rank.judge.slow": "O juiz está demorando mais que o normal.",
+    "rank.judging": "O juiz está lendo a rodada…",
+    "rank.void.unavailable": "O juiz não estava disponível, então a pontuação de ninguém mudou.",
+    "rank.void.repeat": "Você já jogou três partidas ranqueadas contra este oponente hoje. A pontuação de ninguém mudou.",
+    "rank.void.short": "Cada debatedor precisa falar pelo menos 40 palavras para uma partida ranqueada valer. A pontuação de ninguém mudou.",
+    "rank.void.title": "Esta partida não valeu",
+    "rank.result.demoted": "Rebaixado para {tier}.",
+    "rank.result.promoted": "Promovido a {tier}!",
+    "rank.result.placed": "Posicionamento concluído. Você começa em {tier}.",
+    "rank.result.placement": "Partida de posicionamento {n} de {total}.",
+    "rank.result.draw": "Empate",
+    "rank.result.lost": "Você perdeu",
+    "rank.result.won": "Você ganhou",
+    "rank.board.showdesc": "Desativado por padrão. Quando está desativado, sua pontuação ainda pode aparecer no ranking, mas como Debatedor anônimo.",
+    "rank.board.show": "Mostrar meu nome no ranking",
+    "rank.board.anon": "Debatedor anônimo",
+    "rank.board.empty": "Ninguém terminou o posicionamento ainda.",
+    "rank.board": "Melhores debatedores",
+    "rank.none": "Ainda não há partidas ranqueadas. Crie uma sala e escolha Ranqueada para começar.",
+    "rank.recent": "Partidas ranqueadas recentes",
+    "rank.how.body": "Todo mundo começa com 1000. Suas 5 primeiras partidas ranqueadas são de posicionamento e você aparece como Sem rank até terminá-las. Quando uma partida ranqueada termina, um juiz de IA lê o que cada lado disse e escolhe o vencedor (ou um empate, se estiver muito parelho). Vencer um oponente com pontuação maior rende mais pontos. Os ranks são Bronze, Iron, Silver, Gold, Platinum, Diamond e Champion. Partidas casuais nunca mudam sua pontuação.",
+    "rank.how.title": "Como funcionam as partidas ranqueadas",
+    "rank.top": "Maior rank alcançado.",
+    "rank.next": "{n} pontos para {tier}",
+    "rank.record": "{w} vitórias · {l} derrotas · {d} empates",
+    "rank.peak": "Pico {n}",
+    "rank.rating": "Pontuação {n}",
+    "rank.placement.note": "Jogue mais {n} partidas ranqueadas para receber seu primeiro rank.",
+    "rank.placement": "{n} de {total} partidas de posicionamento jogadas.",
+    "rank.host.rankeddesc": "Um juiz de IA escolhe o vencedor e sua pontuação muda. Precisa de fala para texto (Chrome ou Edge).",
+    "rank.host.ranked": "Ranqueada",
+    "rank.host.casualdesc": "Sem mudança de pontuação. Só treino.",
+    "rank.host.casual": "Casual",
+    "rank.host.label": "Tipo de partida",
+    "rank.loading": "Carregando seu rank…",
+    "rank.chip.title": "Seu rank. Clique para abrir Debate online.",
+    "rank.ranked": "Ranqueada",
+    "rank.casual": "Casual",
+    "rank.unranked": "Sem rank",
+    "rank.title": "Seu rank",
     "how.privacy.voice": "Nos debates online, a voz vai direto entre os navegadores dos dois debatedores e não a gravamos. Seu microfone fica desligado, exceto na sua vez.",
     "league.open.title": "Abrir um painel",
     "league.joined": "Código de liga {code} adicionado.",
@@ -6748,6 +7096,51 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pl: {
+    "how.privacy.rank": "W meczu rankingowym sędzia AI czyta tekst wypowiedzi obu stron (bez dźwięku), aby wybrać zwycięzcę, a Twój ranking i historię meczów zapisujemy na Twoim koncie.",
+    "rank.notice.joined": "To mecz rankingowy. Sędzia AI wybierze zwycięzcę po jego zakończeniu.",
+    "rank.casual.note": "Mecz towarzyski: bez zmiany rankingu.",
+    "rank.judge.reason": "Dlaczego:",
+    "rank.judge.again": "Spróbuj ponownie",
+    "rank.judge.slow": "Sędzia potrzebuje więcej czasu niż zwykle.",
+    "rank.judging": "Sędzia czyta rundę…",
+    "rank.void.unavailable": "Sędzia był niedostępny, więc niczyj ranking się nie zmienił.",
+    "rank.void.repeat": "Dziś rozegrano już trzy mecze rankingowe z tym przeciwnikiem. Niczyj ranking się nie zmienił.",
+    "rank.void.short": "Każdy debatant musi wypowiedzieć co najmniej 40 słów, aby mecz rankingowy się liczył. Niczyj ranking się nie zmienił.",
+    "rank.void.title": "Ten mecz się nie liczy",
+    "rank.result.demoted": "Spadek do {tier}.",
+    "rank.result.promoted": "Awans do {tier}!",
+    "rank.result.placed": "Kwalifikacje zakończone. Zaczynasz w randze {tier}.",
+    "rank.result.placement": "Mecz kwalifikacyjny {n} z {total}.",
+    "rank.result.draw": "Remis",
+    "rank.result.lost": "Porażka",
+    "rank.result.won": "Wygrana",
+    "rank.board.showdesc": "Domyślnie wyłączone. Gdy jest wyłączone, Twój ranking może nadal pojawić się w tabeli, ale jako Anonimowy debatant.",
+    "rank.board.show": "Pokaż moje imię w tabeli wyników",
+    "rank.board.anon": "Anonimowy debatant",
+    "rank.board.empty": "Nikt jeszcze nie ukończył meczów kwalifikacyjnych.",
+    "rank.board": "Najlepsi debatanci",
+    "rank.none": "Jeszcze nie ma meczów rankingowych. Utwórz pokój i wybierz Rankingowa.",
+    "rank.recent": "Ostatnie mecze rankingowe",
+    "rank.how.body": "Wszyscy zaczynają od 1000. Twoje pierwsze 5 meczów rankingowych to mecze kwalifikacyjne i do ich ukończenia jesteś Bez rangi. Gdy mecz rankingowy się kończy, sędzia AI czyta, co powiedziały obie strony, i wybiera zwycięzcę (lub remis, jeśli było bardzo wyrównane). Pokonanie przeciwnika z wyższym rankingiem daje więcej punktów. Rangi to Bronze, Iron, Silver, Gold, Platinum, Diamond i Champion. Mecze towarzyskie nigdy nie zmieniają rankingu.",
+    "rank.how.title": "Jak działają mecze rankingowe",
+    "rank.top": "Osiągnięto najwyższą rangę.",
+    "rank.next": "{n} pkt do {tier}",
+    "rank.record": "{w} wygranych · {l} porażek · {d} remisów",
+    "rank.peak": "Szczyt {n}",
+    "rank.rating": "Ranking {n}",
+    "rank.placement.note": "Zagraj jeszcze {n} meczów rankingowych, aby dostać pierwszą rangę.",
+    "rank.placement": "Rozegrano {n} z {total} meczów kwalifikacyjnych.",
+    "rank.host.rankeddesc": "Sędzia AI wybiera zwycięzcę, a Twój ranking się zmienia. Wymaga zamiany mowy na tekst (Chrome lub Edge).",
+    "rank.host.ranked": "Rankingowa",
+    "rank.host.casualdesc": "Bez zmiany rankingu. Tylko ćwiczenia.",
+    "rank.host.casual": "Towarzyska",
+    "rank.host.label": "Rodzaj meczu",
+    "rank.loading": "Wczytywanie rangi…",
+    "rank.chip.title": "Twoja ranga. Kliknij, aby otworzyć Debatę online.",
+    "rank.ranked": "Rankingowa",
+    "rank.casual": "Towarzyska",
+    "rank.unranked": "Bez rangi",
+    "rank.title": "Twoja ranga",
     "how.privacy.voice": "W debatach online głos idzie bezpośrednio między przeglądarkami dwóch debatantów i go nie nagrywamy. Twój mikrofon jest wyłączony poza Twoją turą.",
     "league.open.title": "Otwórz panel",
     "league.joined": "Dodano kod ligi {code}.",
@@ -7326,6 +7719,51 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Rosyjski",
   },
   ja: {
+    "how.privacy.rank": "ランク戦では、AI審査員が双方の発言のテキスト（音声は含みません）を読んで勝者を決め、レーティングと試合履歴はあなたのアカウントに保存されます。",
+    "rank.notice.joined": "これはランク戦です。終了時にAI審査員が勝者を決めます。",
+    "rank.casual.note": "カジュアル戦：レーティングは変わりません。",
+    "rank.judge.reason": "理由：",
+    "rank.judge.again": "もう一度試す",
+    "rank.judge.slow": "審査に通常より時間がかかっています。",
+    "rank.judging": "審査員がラウンドを読んでいます…",
+    "rank.void.unavailable": "審査員を利用できなかったため、誰のレーティングも変わりませんでした。",
+    "rank.void.repeat": "今日はこの相手とすでに3回ランク戦をしています。誰のレーティングも変わりませんでした。",
+    "rank.void.short": "ランク戦が有効になるには、双方が40語以上話す必要があります。誰のレーティングも変わりませんでした。",
+    "rank.void.title": "この試合はカウントされません",
+    "rank.result.demoted": "{tier} に降格しました。",
+    "rank.result.promoted": "{tier} に昇格しました！",
+    "rank.result.placed": "配置試合が終わりました。{tier} からスタートです。",
+    "rank.result.placement": "配置試合 {n}/{total}。",
+    "rank.result.draw": "引き分け",
+    "rank.result.lost": "負け",
+    "rank.result.won": "勝ち",
+    "rank.board.showdesc": "初期設定ではオフです。オフでも、レーティングは「匿名のディベーター」としてランキングに載ることがあります。",
+    "rank.board.show": "ランキングに自分の名前を表示する",
+    "rank.board.anon": "匿名のディベーター",
+    "rank.board.empty": "配置試合を終えた人はまだいません。",
+    "rank.board": "トップディベーター",
+    "rank.none": "まだランク戦がありません。ルームを作って「ランク戦」を選んで始めましょう。",
+    "rank.recent": "最近のランク戦",
+    "rank.how.body": "全員が1000から始まります。最初の5試合は配置試合で、終わるまで「ランクなし」と表示されます。ランク戦が終わると、AI審査員が双方の発言を読んで勝者を決めます（接戦なら引き分け）。レーティングが高い相手に勝つほど、獲得ポイントが増えます。ランクはBronze、Iron、Silver、Gold、Platinum、Diamond、Championです。カジュアルの試合でレーティングが変わることはありません。",
+    "rank.how.title": "ランク戦のしくみ",
+    "rank.top": "最高ランクに到達しました。",
+    "rank.next": "{tier}まであと {n} ポイント",
+    "rank.record": "{w}勝 · {l}敗 · {d}分",
+    "rank.peak": "最高 {n}",
+    "rank.rating": "レーティング {n}",
+    "rank.placement.note": "最初のランクを得るには、あと {n} 回ランク戦をプレイしてください。",
+    "rank.placement": "配置試合 {total} 回中 {n} 回プレイ済み。",
+    "rank.host.rankeddesc": "AI審査員が勝者を決め、レーティングが変動します。音声認識（ChromeまたはEdge）が必要です。",
+    "rank.host.ranked": "ランク戦",
+    "rank.host.casualdesc": "レーティングは変わりません。練習用です。",
+    "rank.host.casual": "カジュアル",
+    "rank.host.label": "マッチの種類",
+    "rank.loading": "ランクを読み込み中…",
+    "rank.chip.title": "あなたのランク。クリックでオンラインディベートを開きます。",
+    "rank.ranked": "ランク戦",
+    "rank.casual": "カジュアル",
+    "rank.unranked": "ランクなし",
+    "rank.title": "あなたのランク",
     "how.privacy.voice": "オンラインディベートでは、音声は2人のブラウザの間で直接やり取りされ、当社は録音しません。マイクは自分のターン以外はオフになります。",
     "league.open.title": "ダッシュボードを開く",
     "league.joined": "リーグコード {code} を追加しました。",
@@ -7904,6 +8342,51 @@ const TRANSLATIONS = {
     "upload.lang.ru": "ロシア語",
   },
   zh: {
+    "how.privacy.rank": "在排位赛中，AI 裁判会阅读双方发言的文字（不含音频）来决出胜者，我们会把你的积分和比赛记录保存在你的账户中。",
+    "rank.notice.joined": "这是一场排位赛。比赛结束时将由 AI 裁判决出胜者。",
+    "rank.casual.note": "休闲对局：不改变积分。",
+    "rank.judge.reason": "原因：",
+    "rank.judge.again": "重试",
+    "rank.judge.slow": "裁判花的时间比平时长。",
+    "rank.judging": "裁判正在阅读本轮内容…",
+    "rank.void.unavailable": "裁判暂时无法使用，所以没有人的积分发生变化。",
+    "rank.void.repeat": "你今天已经和这位对手打过三场排位赛了。没有人的积分发生变化。",
+    "rank.void.short": "排位赛要计分，双方各自至少要说 40 个词。没有人的积分发生变化。",
+    "rank.void.title": "本场比赛不计分",
+    "rank.result.demoted": "掉到了 {tier}。",
+    "rank.result.promoted": "晋级到 {tier}！",
+    "rank.result.placed": "定级完成。你从 {tier} 开始。",
+    "rank.result.placement": "定级赛第 {n}/{total} 场。",
+    "rank.result.draw": "平局",
+    "rank.result.lost": "你输了",
+    "rank.result.won": "你赢了",
+    "rank.board.showdesc": "默认关闭。关闭时，你的积分仍可能出现在排行榜上，但显示为“匿名辩手”。",
+    "rank.board.show": "在排行榜上显示我的名字",
+    "rank.board.anon": "匿名辩手",
+    "rank.board.empty": "还没有人完成定级赛。",
+    "rank.board": "顶尖辩手",
+    "rank.none": "还没有排位赛。创建房间并选择“排位”即可开始。",
+    "rank.recent": "最近的排位赛",
+    "rank.how.body": "所有人从 1000 分起步。你的前 5 场排位赛是定级赛，完成之前显示为“未定级”。排位赛结束后，AI 裁判会阅读双方的发言并决出胜者（过于接近则判平局）。战胜积分更高的对手会得到更多分数。段位依次为 Bronze、Iron、Silver、Gold、Platinum、Diamond 和 Champion。休闲对局不会改变你的积分。",
+    "rank.how.title": "排位赛如何运作",
+    "rank.top": "已达到最高段位。",
+    "rank.next": "距离 {tier} 还差 {n} 分",
+    "rank.record": "{w} 胜 · {l} 负 · {d} 平",
+    "rank.peak": "最高 {n}",
+    "rank.rating": "积分 {n}",
+    "rank.placement.note": "再打 {n} 场排位赛即可获得你的第一个段位。",
+    "rank.placement": "已完成 {n}/{total} 场定级赛。",
+    "rank.host.rankeddesc": "由 AI 裁判决出胜者，你的积分会变化。需要语音转文字（Chrome 或 Edge）。",
+    "rank.host.ranked": "排位",
+    "rank.host.casualdesc": "不改变积分，只是练习。",
+    "rank.host.casual": "休闲",
+    "rank.host.label": "比赛类型",
+    "rank.loading": "正在加载你的段位…",
+    "rank.chip.title": "你的段位。点击打开在线辩论。",
+    "rank.ranked": "排位",
+    "rank.casual": "休闲",
+    "rank.unranked": "未定级",
+    "rank.title": "你的段位",
     "how.privacy.voice": "在线辩论中，语音直接在两位辩手的浏览器之间传输，我们不会录音。除你自己的回合外，麦克风保持关闭。",
     "league.open.title": "打开面板",
     "league.joined": "已添加联赛代码 {code}。",
@@ -8482,6 +8965,51 @@ const TRANSLATIONS = {
     "upload.lang.ru": "俄语",
   },
   ru: {
+    "how.privacy.rank": "В рейтинговой игре ИИ-судья читает текст сказанного обеими сторонами (без аудио), чтобы выбрать победителя, а ваш рейтинг и историю игр мы сохраняем в вашем аккаунте.",
+    "rank.notice.joined": "Это рейтинговая игра. По окончании ИИ-судья выберет победителя.",
+    "rank.casual.note": "Обычная игра: рейтинг не меняется.",
+    "rank.judge.reason": "Почему:",
+    "rank.judge.again": "Повторить",
+    "rank.judge.slow": "Судья отвечает дольше обычного.",
+    "rank.judging": "Судья читает раунд…",
+    "rank.void.unavailable": "Судья был недоступен, поэтому ничей рейтинг не изменился.",
+    "rank.void.repeat": "Сегодня вы уже сыграли три рейтинговые игры с этим соперником. Ничей рейтинг не изменился.",
+    "rank.void.short": "Чтобы рейтинговая игра засчиталась, каждый дебатёр должен сказать не меньше 40 слов. Ничей рейтинг не изменился.",
+    "rank.void.title": "Эта игра не засчитана",
+    "rank.result.demoted": "Понижение до {tier}.",
+    "rank.result.promoted": "Повышение до {tier}!",
+    "rank.result.placed": "Калибровка завершена. Вы начинаете с ранга {tier}.",
+    "rank.result.placement": "Калибровочная игра {n} из {total}.",
+    "rank.result.draw": "Ничья",
+    "rank.result.lost": "Поражение",
+    "rank.result.won": "Победа",
+    "rank.board.showdesc": "По умолчанию выключено. Когда выключено, ваш рейтинг всё равно может появляться в таблице, но под именем «Анонимный дебатёр».",
+    "rank.board.show": "Показывать моё имя в таблице лидеров",
+    "rank.board.anon": "Анонимный дебатёр",
+    "rank.board.empty": "Пока никто не закончил калибровочные игры.",
+    "rank.board": "Лучшие дебатёры",
+    "rank.none": "Рейтинговых игр пока нет. Создайте комнату и выберите «Рейтинговая».",
+    "rank.recent": "Недавние рейтинговые игры",
+    "rank.how.body": "Все начинают с 1000. Первые 5 рейтинговых игр — калибровочные, и пока они не сыграны, вы отображаетесь как «Без ранга». Когда рейтинговая игра заканчивается, ИИ-судья читает, что сказала каждая сторона, и выбирает победителя (или ничью, если всё слишком близко). Победа над соперником с более высоким рейтингом даёт больше очков. Ранги: Bronze, Iron, Silver, Gold, Platinum, Diamond и Champion. Обычные игры никогда не меняют ваш рейтинг.",
+    "rank.how.title": "Как работают рейтинговые игры",
+    "rank.top": "Достигнут высший ранг.",
+    "rank.next": "{n} очков до {tier}",
+    "rank.record": "{w} побед · {l} поражений · {d} ничьих",
+    "rank.peak": "Максимум {n}",
+    "rank.rating": "Рейтинг {n}",
+    "rank.placement.note": "Сыграйте ещё {n} рейтинговых игр, чтобы получить первый ранг.",
+    "rank.placement": "Сыграно {n} из {total} калибровочных игр.",
+    "rank.host.rankeddesc": "ИИ-судья выбирает победителя, и ваш рейтинг меняется. Нужно распознавание речи (Chrome или Edge).",
+    "rank.host.ranked": "Рейтинговая",
+    "rank.host.casualdesc": "Рейтинг не меняется. Просто практика.",
+    "rank.host.casual": "Обычная",
+    "rank.host.label": "Тип игры",
+    "rank.loading": "Загружаем ваш ранг…",
+    "rank.chip.title": "Ваш ранг. Нажмите, чтобы открыть онлайн-дебаты.",
+    "rank.ranked": "Рейтинговая",
+    "rank.casual": "Обычная",
+    "rank.unranked": "Без ранга",
+    "rank.title": "Ваш ранг",
     "how.privacy.voice": "В онлайн-дебатах голос идёт напрямую между браузерами двух дебатёров, и мы его не записываем. Ваш микрофон выключен, кроме вашего хода.",
     "league.open.title": "Открыть панель",
     "league.joined": "Код лиги {code} добавлен.",
@@ -9091,7 +9619,7 @@ function applyTranslations(lang) {
   setPolicyDates();
 }
 
-const POLICY_DATE = "October 9, 2026";
+const POLICY_DATE = "October 10, 2026";
 function setPolicyDates() {
   ["tos-date", "privacy-date"].forEach(id => {
     const el = document.getElementById(id);
@@ -10691,7 +11219,7 @@ async function hostOnlineRoom() {
     const resp = await fetch("/api/room-create", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + state.authToken },
-      body: JSON.stringify({ mode, topic, turnSeconds, displayName: state.authUser.displayName }),
+      body: JSON.stringify({ mode, topic, turnSeconds, displayName: state.authUser.displayName, ranked: !!(window.Rank && Rank.wantsRanked()) }),
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data?.error || "Couldn't create room.");
@@ -15073,6 +15601,7 @@ init();
 <script src="study.js"></script>
 <script src="mocktrial.js"></script>
 <script src="voice.js"></script>
+<script src="rank.js"></script>
 <script src="league.js"></script>
 </body>
 </html>
